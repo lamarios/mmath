@@ -1,0 +1,181 @@
+.better-than {
+  padding: 30px 10px;
+  background-color: #2196F3;
+  position: relative;
+  color: white;
+}
+.better-than .fighter1 {
+  text-align: right;
+}
+.better-than .fighter2 {
+  text-align: left;
+}
+.better-than .vs {
+  text-align: center;
+  font-size: 35px;
+}
+.better-than .fight-button {
+  text-align: center;
+  margin-top: 10px;
+}
+.better-than .fighter-search {
+  position: relative;
+}
+.better-than .fighter-search input {
+  display: inline-block;
+}
+.better-than .fighter-search .fighters {
+  margin: 0;
+  position: absolute;
+  top: 37px;
+  left: 0;
+  right: 0;
+  padding: 0;
+  list-style: none;
+  background-color: white;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  color: #222;
+  z-index: 2;
+}
+.better-than .fighter-search .fighters li {
+  padding: 5px 20px;
+  text-align: left;
+  position: relative;
+  padding-left: 55px;
+  height: 50px;
+}
+.better-than .fighter-search .fighters li .icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  background-image: url('../images/fighterPlaceHolder.gif');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.better-than::after {
+  content: "";
+  background-size: cover;
+  background-position: center bottom;
+  opacity: 0.5;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+.fighter-chip {
+  position: relative;
+  text-align: left;
+  background-color: white;
+  color: #222;
+  height: 40px;
+  transition: all 0.5s;
+  border-radius: 20px;
+}
+.fighter-chip .picture {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  background-image: url('../images/fighterPlaceHolder.gif');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.fighter-chip .name {
+  display: block;
+  height: 100%;
+  font-size: 20px;
+  margin-left: 45px;
+  padding-top: 5px;
+  transition: all 0.5s;
+}
+.fighter-chip .record {
+  transition: all 0.5s;
+  position: absolute;
+  font-size: 20px;
+  top: 5px;
+  left: 45px;
+  opacity: 0;
+  transform: scale(0.5);
+  transform-origin: center center;
+  color: white;
+}
+.fighter-chip .remove {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 45px;
+  cursor: pointer;
+  font-size: 20px;
+  padding-top: 10px;
+  text-align: center;
+}
+.fighter-chip:hover {
+  background-color: #0c7cd5;
+}
+.fighter-chip:hover .name {
+  opacity: 0;
+}
+.fighter-chip:hover .record {
+  opacity: 1;
+  transform: scale(1);
+}
+.results .column {
+  padding: 20px;
+}
+.results .column .result-step {
+  text-align: center;
+}
+.results .column .result-step .fighter-chip {
+  width: 50%;
+  display: inline-block;
+}
+.results .column .result-step .separator {
+  color: #2196F3;
+  margin: 10px;
+  font-size: 20px;
+}
+.results .nope {
+  text-align: center;
+}
+.loader {
+  margin: auto;
+  width: 15px;
+  height: 15px;
+  border: 2px solid #2196F3;
+  border-radius: 50%;
+  animation: load 1.2s infinite ease-in-out;
+  -webkit-animation-direction: alternate;
+  /* Chrome, Safari, Opera */
+  animation-direction: alternate;
+}
+@keyframes load {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+    -ms-transform: scale(1.2);
+    /* IE 9 */
+    -webkit-transform: scale(1.2);
+    /* Safari */
+    transform: scale(1.2);
+  }
+}
+body {
+  background-color: #fff;
+  color: #222;
+  font-weight: 300;
+}
+body .title h1 {
+  font-weight: 300;
+  font-size: 50px;
+}

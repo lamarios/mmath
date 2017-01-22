@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mmath</artifactId>
+        <groupId>com.ftpix</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>domain-dao</artifactId>
+    <packaging>jar</packaging>
+
+    <name>domain-dao</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>build-mongodb</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>build-spring</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>mmath-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>domain-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>build-logs</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>build-gson</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>build-sherdog</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

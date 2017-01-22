@@ -1,0 +1,81 @@
+@import "variables";
+
+.better-than {
+  padding: 30px 10px;
+  background-color: @fightBackgroundColor;
+  position:relative;
+  color: white;
+
+  .fighter1 {
+    text-align: right;
+  }
+
+  .fighter2 {
+    text-align: left;
+  }
+
+  .vs {
+    text-align: center;
+    font-size: 35px;
+  }
+
+  .fight-button {
+    text-align: center;
+    margin-top:10px;
+  }
+
+  .fighter-search {
+    position: relative;
+    input {
+      display: inline-block;
+    }
+
+    .fighters {
+      margin: 0;
+      position: absolute;
+      top: 37px;
+      left: 0;
+      right: 0;
+      padding: 0;
+      list-style: none;
+      background-color: white;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      color: @textColor;
+      z-index: 2;
+      li {
+
+        padding: 5px 20px;
+        text-align: left;
+        position: relative;
+        padding-left: 55px;
+        height: 50px;
+        .icon {
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: 50px;
+
+          background-image: url('../images/fighterPlaceHolder.gif');
+          background-repeat: no-repeat;
+          background-size: cover;
+        }
+      }
+    }
+  }
+}
+
+.better-than::after {
+  content: "";
+  //background-image: url("../images/octagon.png");
+  background-size: cover;
+  background-position: center bottom;  opacity: 0.5;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
