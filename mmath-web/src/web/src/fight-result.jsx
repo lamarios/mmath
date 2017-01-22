@@ -19,8 +19,7 @@ var FightResult = React.createClass({
                                                                         { i < arr.length - 1 ?
                                                                           <div
                                                                               className="separator">
-                                                                              <i className="fa fa-chevron-down"
-                                                                                 aria-hidden="true"></i>
+                                                                              Beat
                                                                           </div>
                                                                             : ''}
                                                                     </div>

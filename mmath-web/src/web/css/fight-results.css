@@ -1,18 +1,1 @@
-.results .column {
-  padding: 20px;
-}
-.results .column .result-step {
-  text-align: center;
-}
-.results .column .result-step .fighter-chip {
-  width: 50%;
-  display: inline-block;
-}
-.results .column .result-step .separator {
-  color: #2196F3;
-  margin: 10px;
-  font-size: 20px;
-}
-.results .nope {
-  text-align: center;
-}
+.results .column .result-step,.results .nope{text-align:center}.results .column{padding:20px}.results .column .result-step .fighter-chip{width:50%;display:inline-block}.results .column .result-step .separator{color:#2196F3;margin:10px;font-size:20px}

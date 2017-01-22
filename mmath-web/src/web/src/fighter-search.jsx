@@ -2,10 +2,12 @@ var React = require('react');
 
 var FighterTypeAhead = require('./fighter-type-ahead');
 var FighterChip = require('./fighter-chip');
-
+var Loader = require('./loader');
 var FighterSearch = React.createClass({
                                           //loads fighters based on the text search
                                           loadFighters: function (name) {
+
+                                              this.setState({loading: true});
 
                                               $.ajax({
                                                          method: 'POST',
@@ -15,13 +17,19 @@ var FighterSearch = React.createClass({
                                                          cache: false,
                                                          success: function (data) {
                                                              console.log(data);
-                                                             this.setState({fighters: data});
+                                                             this.setState(
+                                                                 {loading: false, fighters: data});
                                                          }.bind(this)
                                                      });
                                           },
                                           //initial state
                                           getInitialState: function () {
-                                              return {fighters: [], query: '', selected: null};
+                                              return {
+                                                  fighters: [],
+                                                  query: '',
+                                                  selected: null,
+                                                  loading: false
+                                              };
                                           },
                                           //Triggers the search
                                           handleSearch: function (e) {
@@ -54,7 +62,13 @@ var FighterSearch = React.createClass({
                                               if (this.state.selected === null) {
                                                   return (
                                                       <div className="fighter-search">
-                                                          <input className="form-control" type="text"
+                                                          {this.state.loading ? <div
+                                                                                  className="search-loader">
+                                                                                  <Loader />
+                                                                              </div> : ''
+                                                          }
+                                                          <input className="form-control"
+                                                                 type="text"
                                                                  onKeyUp={this.handleSearch}
                                                                  placeholder="Search for fighter"
                                                           />

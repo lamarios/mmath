@@ -4,7 +4,7 @@ var Loader = require('./loader');
 
 var Mmath = React.createClass({
                                   getInitialState: function () {
-                                      return {fighter1VsFighter2: null, loading: true};
+                                      return {fighter1VsFighter2: null, loading: false};
                                   },
                                   triggerSearch: function (fighter1, fighter2) {
                                       console.log(fighter1);
