@@ -9,6 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <web.src.folder>src/web</web.src.folder>
+        <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
+    </properties>
+
     <artifactId>mmath-web</artifactId>
     <dependencies>
         <dependency>
@@ -73,7 +78,7 @@
                 <configuration>
                     <!-- Specifies the configuration file of the assembly plugin -->
                     <descriptors>
-                        <descriptor>../assembly.xml</descriptor>
+                        <descriptor>assembly.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>

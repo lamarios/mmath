@@ -32,10 +32,12 @@ public class WebConfiguration {
     @Value("${web.crawler.cache}")
     private String crawlerCacheFolder;
 
+    @Value("${web.files}")
+    private String webAssets;
 
     @Bean
     WebServer server(FighterDao fighterDao, CalculatorClient calculatorClient) {
-        WebServer server = new WebServer(port, webCacheFolder, crawlerCacheFolder, calculatorClient, fighterDao);
+        WebServer server = new WebServer(port, webAssets, webCacheFolder, crawlerCacheFolder, calculatorClient, fighterDao);
 
         server.startServer();
 

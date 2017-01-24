@@ -39,13 +39,15 @@ public class WebServer {
     private final String crawlerCacheFolder;
     private final String webCacheFolder;
 
+    private final String webAssets;
+
     private final static String CACHE_WEB_PATH = "cache/pictures";
 
-    public WebServer(int port, String webCacheFolder, String crawlerCacheFolder, CalculatorClient client, FighterDao fighterDao) {
+    public WebServer(int port, String webAssets, String webCacheFolder, String crawlerCacheFolder, CalculatorClient client, FighterDao fighterDao) {
         this.port = port;
         this.client = client;
         this.fighterDao = fighterDao;
-
+        this.webAssets = webAssets;
         this.webCacheFolder = webCacheFolder;
         this.crawlerCacheFolder = crawlerCacheFolder;
     }
@@ -53,10 +55,12 @@ public class WebServer {
     public void startServer() {
         Spark.port(port);
 
-        Spark.staticFiles.externalLocation("C:\\Users\\gz\\Dev\\ideaProjects\\mmath\\mmath-web\\src\\web");
+        logger.info("Static resource folder {}", webAssets);
+
+        Spark.staticFiles.externalLocation(webAssets);
 
         Spark.before("*", this::logRequest);
-        Spark.before("/api/*",this::jsonRequest);
+        Spark.before("/api/*", this::jsonRequest);
         Spark.get("/api/better-than/:fighter1/:fighter2", "application/json", this::betterThan, gson::toJson);
         Spark.post("/api/fighters/query", "application/json", this::searchFighter, gson::toJson);
         Spark.get("/api/fighters/:id", "application/json", this::getFighter, gson::toJson);
@@ -65,14 +69,10 @@ public class WebServer {
 
     /**
      * Get an image from the cache path
-     * @param request
-     * @param response
-     * @return
-     * @throws IOException
      */
     private Object getFighterPicture(Request request, Response response) throws IOException {
 
-        String localPath = webCacheFolder+ File.separator+request.splat()[0];
+        String localPath = webCacheFolder + File.separator + request.splat()[0];
 
 
         File file = new File(localPath);
@@ -110,11 +110,11 @@ public class WebServer {
         try {
             Query query = gson.fromJson(request.body(), Query.class);
 
-            List<MmathFighter> fighters =  fighterDao.findByName(query.getName(), 10);
+            List<MmathFighter> fighters = fighterDao.findByName(query.getName(), 10);
             fighters.parallelStream().forEach(this::updateCachePath);
 
             return fighters;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error(e);
             return null;
         }
@@ -127,12 +127,12 @@ public class WebServer {
 
             logger.info("{} vs {}", fighter1, fighter2);
 
-            List<MmathFighter> result =  client.betterThan(fighter1, fighter2).execute().body();
+            List<MmathFighter> result = client.betterThan(fighter1, fighter2).execute().body();
             result.parallelStream().forEach(this::updateCachePath);
-            logger.info("Result size: {}",result.size());
+            logger.info("Result size: {}", result.size());
             return result;
-        }catch(Exception e){
-            logger.error("error: ",e);
+        } catch (Exception e) {
+            logger.error("error: ", e);
             return new ArrayList<>();
         }
     }
@@ -144,9 +144,8 @@ public class WebServer {
 
     /**
      * Updates the path of the picture relative to the webserver
-     * @param fighter
      */
-    private void updateCachePath(MmathFighter fighter){
+    private void updateCachePath(MmathFighter fighter) {
         fighter.setPicture(fighter.getPicture().replace(crawlerCacheFolder, Matcher.quoteReplacement(CACHE_WEB_PATH)));
     }
 }

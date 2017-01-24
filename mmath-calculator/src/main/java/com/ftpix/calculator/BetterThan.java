@@ -1,21 +1,22 @@
 package com.ftpix.calculator;
 
+import com.ftpix.mmath.dao.FighterDao;
 import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
-import com.ftpix.sherdogparser.models.Fighter;
-import com.ftpix.sherdogparser.models.SherdogBaseObject;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created by gz on 18-Sep-16.
@@ -24,9 +25,11 @@ public class BetterThan {
     private Logger logger = LogManager.getLogger();
     private Map<String, MmathFighter> fighterCache;
 
+private final FighterDao fighterDao;
 
-    public BetterThan(Map<String, MmathFighter> fighterCache) {
+    public BetterThan(Map<String, MmathFighter> fighterCache, FighterDao fighterDao) {
         this.fighterCache = fighterCache;
+        this.fighterDao = fighterDao;
     }
 
     public List<MmathFighter> find(String fighter1, String fighter2) {
@@ -53,15 +56,94 @@ public class BetterThan {
         }
 
         public List<MmathFighter> process() {
-            List<String> chain = new ArrayList<String>();
+            logger.info("Is [{}] better than [{}] ?", fighter1, fighter2);
 
-            chain.add(fighter1);
 
-            return innerProcess2(chain);
+            List<MmathFighter> result = new ArrayList<>();
+
+            //if the target as no losses then no point stressing my little server
+            MmathFighter target = fighterCache.get(fighter2);
+            if(target.getLosses() == 0){
+                return result;
+            }
+
+            Queue<TreeNode> queue = new LinkedList<>();
+
+            queue.add(new TreeNode(fighterCache.get(fighter1)));
+
+            Optional<TreeNode> search = Optional.empty();
+
+
+            while (!queue.isEmpty() && !search.isPresent()) {
+                TreeNode current = queue.remove();
+
+                if (current != null && current.getFighter() != null && !checked.contains(current.getFighter().getSherdogUrl())) {
+                    logger.info("Current:{}, target: {}", current.getFighter().getSherdogUrl(), fighter2);
+
+                    checked.add(current.getFighter().getSherdogUrl());
+
+                    //let's try to exit As soon as possible
+                    if (current.getFighter().getSherdogUrl().equalsIgnoreCase(fighter2)) {
+                        logger.info("We found our fighter !");
+                        search = Optional.of(current);
+                    } else {
+
+                        current.getFighter().getFights().stream()
+                                .filter(f -> f.getResult().equals(FightResult.FIGHTER_1_WIN) && !checked.contains(f.getFighter2().getSherdogUrl()))
+                                //sorting by most recent fights, might be faster as people most likely to search by recent fighters
+                                .sorted(Comparator.comparing(Fight::getDate).reversed())
+                                .forEach(f -> {
+                                    Optional.ofNullable(fighterCache.get(f.getFighter2().getSherdogUrl())).ifPresent(fighter ->{
+                                        queue.add(new TreeNode(fighter, current));
+                                    });
+                                });
+                        logger.info("Not found yet, queue size: {}", queue.size());
+                    }
+                }
+            }
+
+            logger.info("Done 1");
+
+            search.ifPresent(treeNode -> {
+                //building back the list
+                TreeNode node = treeNode;
+
+                do{
+                    result.add(0, node.getFighter());
+                    node = node.getParent();
+                }while(node.getParent() != null);
+                result.add(0, node.fighter);
+            });
+
+            logger.info("Done !");
+            result.stream().forEach(s -> logger.info("Result item: {}", s.getName()));
+
+            return result;
         }
 
+        private class TreeNode {
+            private MmathFighter fighter;
+            private TreeNode parent;
 
-        private List<MmathFighter> innerProcess2(List<String> chain) {
+            public TreeNode(MmathFighter fighter) {
+                this.fighter = fighter;
+            }
+
+            public TreeNode(MmathFighter fighter, TreeNode parent) {
+                this.fighter = fighter;
+                this.parent = parent;
+            }
+
+            public MmathFighter getFighter() {
+                return fighter;
+            }
+
+            public TreeNode getParent() {
+                return parent;
+            }
+        }
+
+        /* private List<MmathFighter> innerProcess2(List<String> chain) {
 
 
             chains = new ArrayList<>();
@@ -132,7 +214,7 @@ public class BetterThan {
             } else {
                 return new ArrayList<>();
             }
-        }
+        } */
 
     }
 }

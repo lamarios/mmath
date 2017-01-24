@@ -1,6 +1,6 @@
 #!/bin/bash
 # main class name
-BIN_NAME="com.ftpix.mmath.refresh.RefreshConfiguration"
+BIN_NAME="com.ftpix.mmath.web.WebConfiguration"
 
 LIB_PATH=lib
 BIN_PATH=bin
@@ -33,8 +33,4 @@ echo "****************"
 
 export CLASSPATH
 
-while :
-do
-    java $BIN_NAME
-    sleep 1
-done
+java $BIN_NAME
