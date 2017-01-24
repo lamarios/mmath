@@ -71,10 +71,10 @@ private final FighterDao fighterDao;
 
             queue.add(new TreeNode(fighterCache.get(fighter1)));
 
-            Optional<TreeNode> search = Optional.empty();
+            Optional<TreeNode> targetNode = Optional.empty();
 
 
-            while (!queue.isEmpty() && !search.isPresent()) {
+            while (!queue.isEmpty() && !targetNode.isPresent()) {
                 TreeNode current = queue.remove();
 
                 if (current != null && current.getFighter() != null && !checked.contains(current.getFighter().getSherdogUrl())) {
@@ -82,13 +82,14 @@ private final FighterDao fighterDao;
 
                     checked.add(current.getFighter().getSherdogUrl());
 
-                    //let's try to exit As soon as possible
+                    //let's try to exit as soon as possible
                     if (current.getFighter().getSherdogUrl().equalsIgnoreCase(fighter2)) {
                         logger.info("We found our fighter !");
-                        search = Optional.of(current);
+                        targetNode = Optional.of(current);
                     } else {
 
                         current.getFighter().getFights().stream()
+                                //skipping fighters that we already checked to avoid infinite loops.
                                 .filter(f -> f.getResult().equals(FightResult.FIGHTER_1_WIN) && !checked.contains(f.getFighter2().getSherdogUrl()))
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
                                 .sorted(Comparator.comparing(Fight::getDate).reversed())
@@ -102,9 +103,7 @@ private final FighterDao fighterDao;
                 }
             }
 
-            logger.info("Done 1");
-
-            search.ifPresent(treeNode -> {
+            targetNode.ifPresent(treeNode -> {
                 //building back the list
                 TreeNode node = treeNode;
 
@@ -114,9 +113,6 @@ private final FighterDao fighterDao;
                 }while(node.getParent() != null);
                 result.add(0, node.fighter);
             });
-
-            logger.info("Done !");
-            result.stream().forEach(s -> logger.info("Result item: {}", s.getName()));
 
             return result;
         }
@@ -142,79 +138,6 @@ private final FighterDao fighterDao;
                 return parent;
             }
         }
-
-        /* private List<MmathFighter> innerProcess2(List<String> chain) {
-
-
-            chains = new ArrayList<>();
-            chains.add(chain);
-
-            while (validChain == null && depth < maxDepth) {
-                logger.info("Checking depth {}", depth);
-                List<List<String>> tmpChains = new ArrayList<>();
-                chains.parallelStream().forEach(c -> {
-                    if (c.size() == depth) {
-                        String toCheck = c.get(c.size() - 1);
-
-                        Optional<Fighter> opt = Optional.ofNullable(fighterCache.get(toCheck));
-                        //Optional<Fighter> opt = dao.get(toCheck);
-
-                        if (opt.isPresent()) {
-                            Fighter fighter = opt.get();
-                            logger.info("Checking fighter {}", fighter.getName());
-
-
-                            Collections.reverse(fighter.getFights());
-                            //Getting all the eligible to continue fighters
-                            List<SherdogBaseObject> fighters = fighter.getFights().parallelStream()
-                                    .filter(f -> {
-                                        return f.getResult() == FightResult.FIGHTER_1_WIN && !checked.contains(f.getFighter2().getSherdogUrl()) && !c.contains(f.getFighter2().getSherdogUrl());
-                                    })
-                                    .map(f -> f.getFighter2())
-                                    .collect(Collectors.toList());
-
-
-                            //Checking if we have a winner
-                            Optional<SherdogBaseObject> optFighter = fighters.parallelStream()
-                                    .filter(f -> {
-                                        checked.add(f.getSherdogUrl());
-                                        logger.info("DEPTH: {} Checking {} against {}", depth, f.getSherdogUrl(), fighter2);
-                                        return f.getSherdogUrl().equalsIgnoreCase(fighter2);
-                                    })
-                                    .findFirst();
-
-                            //We have a winner
-                            if (optFighter.isPresent()) {
-                                logger.info("Fighter 2 found !");
-                                c.add(optFighter.get().getSherdogUrl());
-                                validChain = c;
-                            } else {
-
-                                //If no winner, we save all the chains and go a level deeper
-                                // we create create a new chain for each win, add it to the tmp list that will replace the one we're going to parse
-                                fighters.forEach(f -> {
-                                    List<String> newChain = new ArrayList<String>(c);
-                                    newChain.add(f.getSherdogUrl());
-                                    tmpChains.add(newChain);
-                                });
-                            }
-                        }
-
-                    }
-                });
-
-                logger.info("Checked everything on depth {}, we now have {} to check for depth {}", depth, tmpChains.size(), depth + 1);
-                depth++;
-                chains = tmpChains;
-
-            }
-
-            if (validChain != null) {
-                return validChain.stream().map(s -> new MmathFighter(fighterCache.get(s))).peek(f-> f.setFights(new ArrayList<>())).collect(Collectors.toList());
-            } else {
-                return new ArrayList<>();
-            }
-        } */
 
     }
 }
