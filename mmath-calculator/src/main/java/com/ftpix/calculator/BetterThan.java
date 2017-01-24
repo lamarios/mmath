@@ -1,6 +1,5 @@
 package com.ftpix.calculator;
 
-import com.ftpix.mmath.dao.FighterDao;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
@@ -25,11 +24,9 @@ public class BetterThan {
     private Logger logger = LogManager.getLogger();
     private Map<String, MmathFighter> fighterCache;
 
-private final FighterDao fighterDao;
 
-    public BetterThan(Map<String, MmathFighter> fighterCache, FighterDao fighterDao) {
+    public BetterThan(Map<String, MmathFighter> fighterCache) {
         this.fighterCache = fighterCache;
-        this.fighterDao = fighterDao;
     }
 
     public List<MmathFighter> find(String fighter1, String fighter2) {
@@ -63,7 +60,7 @@ private final FighterDao fighterDao;
 
             //if the target as no losses then no point stressing my little server
             MmathFighter target = fighterCache.get(fighter2);
-            if(target.getLosses() == 0){
+            if (target.getLosses() == 0) {
                 return result;
             }
 
@@ -94,7 +91,7 @@ private final FighterDao fighterDao;
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
                                 .sorted(Comparator.comparing(Fight::getDate).reversed())
                                 .forEach(f -> {
-                                    Optional.ofNullable(fighterCache.get(f.getFighter2().getSherdogUrl())).ifPresent(fighter ->{
+                                    Optional.ofNullable(fighterCache.get(f.getFighter2().getSherdogUrl())).ifPresent(fighter -> {
                                         queue.add(new TreeNode(fighter, current));
                                     });
                                 });
@@ -107,10 +104,10 @@ private final FighterDao fighterDao;
                 //building back the list
                 TreeNode node = treeNode;
 
-                do{
+                do {
                     result.add(0, node.getFighter());
                     node = node.getParent();
-                }while(node.getParent() != null);
+                } while (node.getParent() != null);
                 result.add(0, node.fighter);
             });
 

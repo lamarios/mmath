@@ -33,9 +33,9 @@ public class CalculatorConfiguration {
     private final Logger logger = LogManager.getLogger();
 
     @Bean
-    BetterThan betterThan(Map<String, MmathFighter> fighterCache, FighterDao fighterDao) {
+    BetterThan betterThan(Map<String, MmathFighter> fighterCache) {
 
-        return new BetterThan(fighterCache, fighterDao);
+        return new BetterThan(fighterCache);
     }
 
     @Bean
