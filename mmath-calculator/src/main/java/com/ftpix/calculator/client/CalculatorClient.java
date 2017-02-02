@@ -16,7 +16,7 @@ public interface CalculatorClient {
     @GET("/better-than/{fighter}/count")
     Call<Long> betterThanCount(@Path("fighter") String fighterId);
 
-    @GET("/weaker-than/:{fighter}/count")
+    @GET("/weaker-than/{fighter}/count")
     Call<Long> weakerThanCount(@Path("fighter") String fighterId);
 
 
