@@ -3,6 +3,7 @@ package com.ftpix.mmath;
 import com.ftpix.mmath.dao.EventDao;
 import com.ftpix.mmath.dao.FighterDao;
 import com.ftpix.mmath.dao.OrganizationDao;
+import com.ftpix.mmath.dao.stats.StatsDao;
 import com.ftpix.mmath.sherdog.SherdogConfiguration;
 import com.ftpix.sherdogparser.Sherdog;
 import com.mongodb.MongoClient;
@@ -84,6 +85,34 @@ public class DaoConfiguration {
     }
 
     @Bean
+    MongoCollection<Document> fighterStatsCollection(MongoClient mongoClient) {
+
+        MongoDatabase db = mongoClient.getDatabase(mongoDb);
+
+        try {
+            db.createCollection("fighterStats");
+        } catch (MongoCommandException e) {
+
+        }
+        return db.getCollection("fighterStats");
+    }
+    @Bean
+    MongoCollection<Document> fightStatsCollection(MongoClient mongoClient) {
+
+        MongoDatabase db = mongoClient.getDatabase(mongoDb);
+
+        try {
+            db.createCollection("fightStats");
+        } catch (MongoCommandException e) {
+
+        }
+        return db.getCollection("fightStats");
+    }
+
+
+
+
+    @Bean
     FighterDao fighterDao(MongoCollection<Document> fighterCollection, Sherdog sherdog){
         return new FighterDao(fighterCollection, sherdog);
     }
@@ -100,6 +129,14 @@ public class DaoConfiguration {
         return new OrganizationDao(orgCollection, sherdog);
     }
 
+    @Bean
+    StatsDao fighterStatsDao(MongoCollection<Document> fighterStatsCollection){
+        return new StatsDao(fighterStatsCollection);
+    }
+    @Bean
+    StatsDao fightStatsDao(MongoCollection<Document> fightStatsCollection){
+        return new StatsDao(fightStatsCollection);
+    }
 
     public static void main(String[] args) {
         ApplicationContext context =

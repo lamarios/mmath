@@ -1,10 +1,9 @@
 package com.ftpix.calculator;
 
-import com.ftpix.calculator.cache.CacheHandler;
 import com.ftpix.calculator.web.WebServer;
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.dao.FighterDao;
-import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.mmath.caching.CachingConfiguration;
+import com.ftpix.mmath.caching.FighterCache;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,14 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * Created by gz on 18-Sep-16.
  */
 @Configuration
-@Import(DaoConfiguration.class)
+@Import({DaoConfiguration.class, CachingConfiguration.class})
 @PropertySource("classpath:config.properties")
 public class CalculatorConfiguration {
 
@@ -33,35 +29,24 @@ public class CalculatorConfiguration {
     private final Logger logger = LogManager.getLogger();
 
     @Bean
-    BetterThan betterThan(Map<String, MmathFighter> fighterCache) {
-
+    BetterThan betterThan(FighterCache fighterCache) {
         return new BetterThan(fighterCache);
     }
 
     @Bean
-    BetterWeakerThanCount betterWeakerThanCount(Map<String, MmathFighter> fighterCache) {
-        return new BetterWeakerThanCount(fighterCache);
-    }
-
-    @Bean
-    Map<String, MmathFighter> fighterCache() {
-        return new ConcurrentHashMap<>();
-    }
-
-    @Bean
-    WebServer webServer(BetterWeakerThanCount betterWeakerThanCount, BetterThan betterThan, FighterDao fighterDao) {
-        WebServer server = new WebServer(betterThan, betterWeakerThanCount, fighterDao, port);
+    WebServer webServer(BetterThan betterThan, FighterCache fighterCache) {
+        WebServer server = new WebServer(betterThan, fighterCache, port);
         server.setupServer();
 
         return server;
     }
 
-    @Bean
+    /*@Bean
     CacheHandler cacheHandler(FighterDao fighterDao, Map<String, MmathFighter> fighterCache ) {
         CacheHandler cacheHandler = new CacheHandler(fighterDao, fighterCache);
         cacheHandler.refreshCache();
         return cacheHandler;
-    }
+    }*/
 
 
     public static void main(String[] args) {

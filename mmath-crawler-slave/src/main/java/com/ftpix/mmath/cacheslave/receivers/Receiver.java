@@ -1,10 +1,14 @@
 package com.ftpix.mmath.cacheslave.receivers;
 
+import com.google.gson.Gson;
+
 import com.ftpix.mmath.cacheslave.ShutdownTimer;
 import com.ftpix.mmath.dao.EventDao;
 import com.ftpix.mmath.dao.FighterDao;
 import com.ftpix.mmath.dao.OrganizationDao;
+import com.ftpix.mmath.model.MmathModel;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.utils.GsonUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,10 +20,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 /**
  * Created by gz on 16-Sep-16.
  */
-public abstract class Receiver<T> {
+public abstract class Receiver<T extends MmathModel> {
 
     protected Logger logger = LogManager.getLogger();
     protected final RabbitTemplate fighterTemplate, orgTemplate, eventTemplate;
@@ -27,9 +34,10 @@ public abstract class Receiver<T> {
     protected final EventDao eventDao;
     protected final OrganizationDao orgDao;
     protected final Sherdog sherdog;
+    protected JedisPool jedisPool;
+    private Gson gson = GsonUtils.getGson();
 
-
-    public Receiver(RabbitTemplate fighterTemplate, RabbitTemplate orgTemplate, RabbitTemplate eventTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog) {
+    public Receiver(RabbitTemplate fighterTemplate, RabbitTemplate orgTemplate, RabbitTemplate eventTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
         this.fighterTemplate = fighterTemplate;
         this.orgTemplate = orgTemplate;
         this.eventTemplate = eventTemplate;
@@ -37,6 +45,7 @@ public abstract class Receiver<T> {
         this.eventDao = eventDao;
         this.orgDao = orgDao;
         this.sherdog = sherdog;
+        this.jedisPool = jedisPool;
     }
 
     public void receiveMessageAsBytes(byte[] message) {
@@ -70,14 +79,15 @@ public abstract class Receiver<T> {
 
                 long daysbetween = ChronoUnit.DAYS.between(getLastUpdate(optResult), now);
 
-                if (daysbetween >= 5) {
+                if (daysbetween >= 3) {
                     logger.info("[{}] Info is too old, need to update", message);
                     T updated = getFromSherdog(message);
-                    
+
 
                     updateToDao(optResult, updated);
 
                     toParse = Optional.ofNullable(updated);
+
                 }
 
             } else {
@@ -90,7 +100,11 @@ public abstract class Receiver<T> {
 
 
             toParse.ifPresent(obj -> {
-               propagate(obj);
+                try (Jedis jedis = jedisPool.getResource()) {
+                    jedis.set(obj.getId(), gson.toJson(obj));
+                }
+                propagate(obj);
+
             });
 
 

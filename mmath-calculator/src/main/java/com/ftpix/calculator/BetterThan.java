@@ -1,8 +1,10 @@
 package com.ftpix.calculator;
 
+import com.ftpix.mmath.caching.FighterCache;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
+import com.ftpix.utils.HashUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +14,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -22,14 +23,14 @@ import java.util.Set;
  */
 public class BetterThan {
     private Logger logger = LogManager.getLogger();
-    private Map<String, MmathFighter> fighterCache;
+    private FighterCache fighterCache;
 
 
-    public BetterThan(Map<String, MmathFighter> fighterCache) {
+    public BetterThan(FighterCache fighterCache) {
         this.fighterCache = fighterCache;
     }
 
-    public List<MmathFighter> find(String fighter1, String fighter2) {
+    public List<MmathFighter> find(MmathFighter fighter1, MmathFighter fighter2) {
         Calculator calc = new Calculator(fighter1, fighter2);
         return calc.process();
     }
@@ -37,7 +38,7 @@ public class BetterThan {
 
     private final class Calculator {
 
-        private String fighter1, fighter2;
+        private MmathFighter fighter1, fighter2;
         private int maxDepth = 100;
 
         private List<List<String>> chains;
@@ -47,7 +48,7 @@ public class BetterThan {
         private int depth = 1;
         private List<String> validChain = null;
 
-        public Calculator(String fighter1, String fighter2) {
+        public Calculator(MmathFighter fighter1, MmathFighter fighter2) {
             this.fighter1 = fighter1;
             this.fighter2 = fighter2;
         }
@@ -59,14 +60,14 @@ public class BetterThan {
             List<MmathFighter> result = new ArrayList<>();
 
             //if the target as no losses then no point stressing my little server
-            MmathFighter target = fighterCache.get(fighter2);
-            if (target.getLosses() == 0) {
+
+            if (fighter2.getLosses() == 0) {
                 return result;
             }
 
             Queue<TreeNode> queue = new LinkedList<>();
 
-            queue.add(new TreeNode(fighterCache.get(fighter1)));
+            queue.add(new TreeNode(fighter1));
 
             Optional<TreeNode> targetNode = Optional.empty();
 
@@ -75,12 +76,12 @@ public class BetterThan {
                 TreeNode current = queue.remove();
 
                 if (current != null && current.getFighter() != null && !checked.contains(current.getFighter().getSherdogUrl())) {
-                    logger.info("Current:{}, target: {}", current.getFighter().getSherdogUrl(), fighter2);
+                    logger.info("Current:{}, target: {}", current.getFighter().getSherdogUrl(), fighter2.getId());
 
                     checked.add(current.getFighter().getSherdogUrl());
 
                     //let's try to exit as soon as possible
-                    if (current.getFighter().getSherdogUrl().equalsIgnoreCase(fighter2)) {
+                    if (current.getFighter().getId().equalsIgnoreCase(fighter2.getId())) {
                         logger.info("We found our fighter !");
                         targetNode = Optional.of(current);
                     } else {
@@ -91,7 +92,7 @@ public class BetterThan {
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
                                 .sorted(Comparator.comparing(Fight::getDate).reversed())
                                 .forEach(f -> {
-                                    Optional.ofNullable(fighterCache.get(f.getFighter2().getSherdogUrl())).ifPresent(fighter -> {
+                                    fighterCache.get(HashUtils.hash(f.getFighter2().getSherdogUrl())).ifPresent(fighter -> {
                                         queue.add(new TreeNode(fighter, current));
                                     });
                                 });

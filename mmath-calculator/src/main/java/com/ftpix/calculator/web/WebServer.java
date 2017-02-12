@@ -3,8 +3,7 @@ package com.ftpix.calculator.web;
 import com.google.gson.Gson;
 
 import com.ftpix.calculator.BetterThan;
-import com.ftpix.calculator.BetterWeakerThanCount;
-import com.ftpix.mmath.dao.FighterDao;
+import com.ftpix.mmath.caching.FighterCache;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.utils.GsonUtils;
 
@@ -28,25 +27,21 @@ import spark.Spark;
  */
 public class WebServer {
     private final BetterThan betterThan;
-    private final BetterWeakerThanCount betterWeakerThanCount;
     private final int port;
-    private final FighterDao dao;
+    private final FighterCache cache;
     private final Logger logger = LogManager.getLogger();
 
     private final static Gson gson = GsonUtils.getGson();
 
-    public WebServer(BetterThan betterThan, BetterWeakerThanCount betterWeakerThanCount, FighterDao dao, int port) {
+    public WebServer(BetterThan betterThan, FighterCache fighterCache, int port) {
         this.betterThan = betterThan;
-        this.betterWeakerThanCount = betterWeakerThanCount;
         this.port = port;
-        this.dao = dao;
+        this.cache = fighterCache;
     }
 
     public void setupServer() {
         Spark.port(this.port);
         Spark.get("/", "application/json", this::hello, gson::toJson);
-        Spark.get("/better-than/:fighter/count", "application/json", this::betterThanCountEndPoint, gson::toJson);
-        Spark.get("/weaker-than/:fighter/count", "application/json", this::weakerThanCountEndPoint, gson::toJson);
         Spark.get("/better-than/:fighter1/:fighter2", "application/json", this::betterThanEndpoint, gson::toJson);
 
 
@@ -73,34 +68,14 @@ public class WebServer {
     }
 
     public List<MmathFighter> betterThanEndpoint(Request req, Response res) {
-        Optional<MmathFighter> fighter1 = dao.get(req.params(":fighter1"));
-        Optional<MmathFighter> fighter2 = dao.get(req.params(":fighter2"));
+        Optional<MmathFighter> fighter1 = cache.get(req.params(":fighter1"));
+        Optional<MmathFighter> fighter2 = cache.get(req.params(":fighter2"));
 
         if (fighter1.isPresent() && fighter2.isPresent()) {
-            return betterThan.find(fighter1.get().getSherdogUrl(), fighter2.get().getSherdogUrl());
+            return betterThan.find(fighter1.get(), fighter2.get());
         } else {
             Spark.halt(404, "Fighter don't exist in DB");
             return null;
-        }
-    }
-
-    public long betterThanCountEndPoint(Request req, Response res) {
-        return count(req, BetterWeakerThanCount.Type.BETTER_THAN);
-    }
-
-    public Object weakerThanCountEndPoint(Request req, Response res) {
-        return count(req, BetterWeakerThanCount.Type.WEAKER_THAN);
-    }
-
-
-    private Long count(Request req, BetterWeakerThanCount.Type type) {
-        Optional<MmathFighter> fighter = dao.get(req.params(":fighter"));
-
-        if (fighter.isPresent()) {
-            return betterWeakerThanCount.count(fighter.get().getSherdogUrl(), type);
-        } else {
-            Spark.halt(404, "Fighter don't exist in DB");
-            return -1L;
         }
     }
 }

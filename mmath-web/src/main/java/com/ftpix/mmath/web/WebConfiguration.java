@@ -4,6 +4,7 @@ import com.ftpix.calculator.client.CalculatorClient;
 import com.ftpix.calculator.client.CalculatorClientConfiguration;
 import com.ftpix.mmath.DaoConfiguration;
 import com.ftpix.mmath.dao.FighterDao;
+import com.ftpix.mmath.dao.stats.StatsDao;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -36,8 +37,8 @@ public class WebConfiguration {
     private String webAssets;
 
     @Bean
-    WebServer server(FighterDao fighterDao, CalculatorClient calculatorClient) {
-        WebServer server = new WebServer(port, webAssets, webCacheFolder, crawlerCacheFolder, calculatorClient, fighterDao);
+    WebServer server(FighterDao fighterDao, CalculatorClient calculatorClient, StatsDao fightStatsDao, StatsDao fighterStatsDao) {
+        WebServer server = new WebServer(port, webAssets, webCacheFolder, crawlerCacheFolder, calculatorClient, fighterDao, fighterStatsDao, fightStatsDao);
 
         server.startServer();
 

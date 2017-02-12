@@ -14,14 +14,16 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import redis.clients.jedis.JedisPool;
+
 /**
  * Created by gz on 16-Sep-16.
  */
 public class EventReceiver extends Receiver<MmathEvent> {
 
 
-    public EventReceiver(RabbitTemplate fighterTemplate, RabbitTemplate orgTemplate, RabbitTemplate eventTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog) {
-        super(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog);
+    public EventReceiver(RabbitTemplate fighterTemplate, RabbitTemplate orgTemplate, RabbitTemplate eventTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
+        super(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog, jedisPool);
     }
 
     /*public void receiveMessage(String message) {

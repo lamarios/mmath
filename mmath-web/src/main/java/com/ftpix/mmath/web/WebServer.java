@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 
 import com.ftpix.calculator.client.CalculatorClient;
 import com.ftpix.mmath.dao.FighterDao;
+import com.ftpix.mmath.dao.stats.StatsDao;
 import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.mmath.model.stats.Stats;
 import com.ftpix.mmath.web.models.Query;
 import com.ftpix.utils.GsonUtils;
 
@@ -33,23 +35,25 @@ public class WebServer {
     private final FighterDao fighterDao;
 
     private Logger logger = LogManager.getLogger();
-
     private final Gson gson = GsonUtils.getGson();
 
     private final String crawlerCacheFolder;
     private final String webCacheFolder;
-
     private final String webAssets;
+    private final StatsDao fightStatsDao, fighterStatsDao;
+
 
     private final static String CACHE_WEB_PATH = "cache/pictures";
 
-    public WebServer(int port, String webAssets, String webCacheFolder, String crawlerCacheFolder, CalculatorClient client, FighterDao fighterDao) {
+    public WebServer(int port, String webAssets, String webCacheFolder, String crawlerCacheFolder, CalculatorClient client, FighterDao fighterDao, StatsDao fighterStatsDao, StatsDao fightStatsDao) {
         this.port = port;
         this.client = client;
         this.fighterDao = fighterDao;
         this.webAssets = webAssets;
         this.webCacheFolder = webCacheFolder;
         this.crawlerCacheFolder = crawlerCacheFolder;
+        this.fighterStatsDao = fighterStatsDao;
+        this.fightStatsDao = fightStatsDao;
     }
 
     public void startServer() {
@@ -125,11 +129,17 @@ public class WebServer {
             String fighter1 = request.params(":fighter1");
             String fighter2 = request.params(":fighter2");
 
+            //inserting stats
+            fighterStatsDao.incrementCount(fighter1);
+            fighterStatsDao.incrementCount(fighter2);
+            fightStatsDao.incrementCount(Stats.generateFightId(fighter1, fighter2));
+
             logger.info("{} vs {}", fighter1, fighter2);
 
             List<MmathFighter> result = client.betterThan(fighter1, fighter2).execute().body();
             result.parallelStream().forEach(this::updateCachePath);
             logger.info("Result size: {}", result.size());
+
             return result;
         } catch (Exception e) {
             logger.error("error: ", e);
