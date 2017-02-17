@@ -21,7 +21,7 @@ import redis.clients.jedis.JedisPool;
  * Created by gz on 17-Feb-17.
  */
 public class Receiver {
-    private final static int CORE_POOL_SIZE = 1, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 15, THREAD_TIMEOUT = 60;
+    private final static int CORE_POOL_SIZE = 10, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 40, THREAD_TIMEOUT = 60;
     private final ThreadPoolExecutor fightPool, eventPool, orgPool;
     private final Processor fightProcessor, eventProcessor, orgProcessor;
 
