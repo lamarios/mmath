@@ -1,7 +1,6 @@
 package com.ftpix.mmath.model;
 
 import com.ftpix.sherdogparser.models.Organization;
-import com.ftpix.utils.HashUtils;
 
 import java.time.LocalDate;
 
@@ -25,7 +24,7 @@ public class MmathOrganization extends Organization implements MmathModel {
 
     @ExposeMethodResult("id")
     public String getId() {
-        return HashUtils.hash(this.getSherdogUrl());
+        return MmathModel.generateId(this);
     }
 
     public LocalDate getLastUpdate() {

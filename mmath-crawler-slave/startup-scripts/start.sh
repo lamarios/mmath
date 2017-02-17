@@ -33,8 +33,5 @@ echo "****************"
 
 export CLASSPATH
 
-while :
-do
-    java $BIN_NAME
-    sleep 1
-done
+java $BIN_NAME
+sleep 1

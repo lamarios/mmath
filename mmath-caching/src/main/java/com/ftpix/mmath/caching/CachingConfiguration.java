@@ -20,7 +20,7 @@ import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import({DaoConfiguration.class, RabbitmqConfiguration.class})
+@Import({DaoConfiguration.class})
 public class CachingConfiguration {
 
     @Value("${redis.url}")
@@ -42,8 +42,8 @@ public class CachingConfiguration {
     ///////
     // Caching Beans
     @Bean
-    FighterCache fighterCache(JedisPool jedisPool, FighterDao fighterDao, RabbitTemplate fighterTemplate) {
-        return new FighterCache(jedisPool, fighterDao, fighterTemplate);
+    FighterCache fighterCache(JedisPool jedisPool, FighterDao fighterDao) {
+        return new FighterCache(jedisPool, fighterDao);
     }
 
 }

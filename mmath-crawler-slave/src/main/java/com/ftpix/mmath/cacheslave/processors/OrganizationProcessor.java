@@ -1,12 +1,11 @@
-package com.ftpix.mmath.cacheslave.receivers;
+package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.dao.EventDao;
-import com.ftpix.mmath.dao.FighterDao;
+import com.ftpix.mmath.cacheslave.Receiver;
+import com.ftpix.mmath.cacheslave.models.ProcessItem;
+import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.OrganizationDao;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
-
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -18,17 +17,19 @@ import redis.clients.jedis.JedisPool;
 /**
  * Created by gz on 16-Sep-16.
  */
-public class OrganizationReceiver extends Receiver<MmathOrganization> {
+public class OrganizationProcessor extends Processor<MmathOrganization> {
 
-
-    public OrganizationReceiver(RabbitTemplate fighterTemplate, RabbitTemplate orgTemplate, RabbitTemplate eventTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
-        super(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog, jedisPool);
+private final OrganizationDao orgDao;
+    public OrganizationProcessor(Receiver receiver, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
+        super(receiver, sherdog, jedisPool);
+        this.orgDao = orgDao;
     }
 
     @Override
     protected void propagate(MmathOrganization obj) {
         obj.getEvents().forEach(e -> {
-            eventTemplate.convertAndSend(e.getSherdogUrl());
+            //eventPool.convertAndSend(e.getSherdogUrl());
+            receiver.process(new ProcessItem(e.getSherdogUrl(), ProcessType.EVENT));
         });
     }
 

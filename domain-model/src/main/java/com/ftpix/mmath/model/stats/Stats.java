@@ -37,6 +37,6 @@ public class Stats {
         TreeSet<String> set = new TreeSet<>();
         set.add(id1.toLowerCase());
         set.add(id2.toLowerCase());
-        return set.stream().collect(Collectors.joining("-"));
+        return set.stream().collect(Collectors.joining("&&"));
     }
 }

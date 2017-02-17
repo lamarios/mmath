@@ -1,11 +1,11 @@
-package com.ftpix.mmath.refresh;
+package com.ftpix.mmath.cacheslave;
 
-import com.ftpix.calculator.client.CalculatorClient;
+import com.ftpix.mmath.cacheslave.models.ProcessItem;
+import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.FighterDao;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.time.LocalDate;
 
@@ -16,15 +16,12 @@ import static java.time.temporal.ChronoUnit.DAYS;
  */
 public class Refresh {
     private Logger logger = LogManager.getLogger();
-    private final RabbitTemplate fighterTemplate;
     private final FighterDao fighterDao;
-    private final CalculatorClient calculatorClient;
+    private final Receiver receiver;
 
-
-    public Refresh(RabbitTemplate fighterTemplate, FighterDao fighterDao, CalculatorClient calculatorClient) {
-        this.fighterTemplate = fighterTemplate;
+    public Refresh(Receiver receiver, FighterDao fighterDao) {
         this.fighterDao = fighterDao;
-        this.calculatorClient = calculatorClient;
+        this.receiver = receiver;
     }
 
 
@@ -32,6 +29,8 @@ public class Refresh {
         logger.info("Starting job");
 
         final LocalDate today = LocalDate.now();
+
+        receiver.process(new ProcessItem("http://www.sherdog.com/fighter/Alistair-Overeem-461", ProcessType.FIGHTER));
 
         fighterDao.getAll().parallelStream()
                 .forEach(f -> {
@@ -54,7 +53,7 @@ public class Refresh {
 
                     if (DAYS.between(f.getLastUpdate(), today) > 5) {
                         logger.info("Sending {} for refresh", f.getName());
-                        fighterTemplate.convertAndSend(f.getSherdogUrl());
+                        receiver.process(new ProcessItem(f.getSherdogUrl(), ProcessType.FIGHTER));
                     }
 
 

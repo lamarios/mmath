@@ -1,117 +1,122 @@
 package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.cacheslave.receivers.EventReceiver;
-import com.ftpix.mmath.cacheslave.receivers.FighterReceiver;
-import com.ftpix.mmath.cacheslave.receivers.OrganizationReceiver;
-import com.ftpix.mmath.cacheslave.receivers.Receiver;
 import com.ftpix.mmath.caching.CachingConfiguration;
 import com.ftpix.mmath.dao.EventDao;
 import com.ftpix.mmath.dao.FighterDao;
 import com.ftpix.mmath.dao.OrganizationDao;
-import com.ftpix.mmath.rabbitmq.RabbitmqConfiguration;
 import com.ftpix.sherdogparser.Sherdog;
 
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.Trigger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
+import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
+
+import java.text.ParseException;
 
 import redis.clients.jedis.JedisPool;
-
-import static com.ftpix.mmath.rabbitmq.RabbitmqConfiguration.FIGHTER_QUEUE;
-import static com.ftpix.mmath.rabbitmq.RabbitmqConfiguration.ORGANIZATION_QUEUE;
 
 /**
  * Created by gz on 16-Sep-16.
  */
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import({DaoConfiguration.class, RabbitmqConfiguration.class, CachingConfiguration.class})
+@Import({DaoConfiguration.class, CachingConfiguration.class})
 public class Application {
+    private final static int CORE_POOL_SIZE = 1, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 15, THREAD_TIMEOUT = 60;
 
 
+    //Thread pools
 
 
+    //Receiver
     @Bean
-    Receiver fighterReceiver(RabbitTemplate fighterTemplate, RabbitTemplate eventTemplate, RabbitTemplate orgTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
-        return new FighterReceiver(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog, jedisPool);
-    }
-
-    @Bean
-    MessageListenerAdapter fighterListenerAdapter(Receiver fighterReceiver) {
-        return new MessageListenerAdapter(fighterReceiver, "receiveMessageAsBytes");
+    Receiver receiver(FighterDao fighterDao, EventDao eventDao, OrganizationDao organizationDao, JedisPool jedisPool, Sherdog sherdog) {
+        return new Receiver(fighterDao, eventDao, organizationDao, jedisPool, sherdog);
     }
 
 
     @Bean
-    Receiver eventReceiver(RabbitTemplate fighterTemplate, RabbitTemplate eventTemplate, RabbitTemplate orgTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
-        return new EventReceiver(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog, jedisPool);
+    Refresh refresh(Receiver receiver, FighterDao fighterDao) {
+        return new Refresh(receiver, fighterDao);
+    }
+
+
+    ///////////////////////////
+    ///// Quartz
+    //////////////
+    @Bean
+    JobDetail jobDetail(Refresh refresh) throws Exception {
+        MethodInvokingJobDetailFactoryBean job = new MethodInvokingJobDetailFactoryBean();
+        job.setTargetObject(refresh);
+        job.setTargetMethod("process");
+        job.setName("refresh_db");
+        job.setConcurrent(false);
+
+        job.afterPropertiesSet();
+
+
+        return job.getObject();
     }
 
     @Bean
-    MessageListenerAdapter eventListenerAdapter(Receiver eventReceiver) {
-        return new MessageListenerAdapter(eventReceiver, "receiveMessageAsBytes");
-    }
+    Trigger cronTrigger(JobDetail jobDetail) throws ParseException {
 
+        CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
+        trigger.setJobDetail(jobDetail);
+        trigger.setCronExpression("00 30 00 * * ?");
+        // trigger.setCronExpression("00 * * * * ?");
+        trigger.setName("daily");
 
+        trigger.afterPropertiesSet();
 
-    @Bean
-    Receiver orgReceiver(RabbitTemplate fighterTemplate, RabbitTemplate eventTemplate, RabbitTemplate orgTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
-        return new OrganizationReceiver(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog, jedisPool);
-    }
-
-    @Bean
-    MessageListenerAdapter orgListenerAdapter(Receiver orgReceiver) {
-        return new MessageListenerAdapter(orgReceiver, "receiveMessageAsBytes");
+        return trigger.getObject();
     }
 
     @Bean
-    SimpleMessageListenerContainer eventContainer(ConnectionFactory connectionFactory,
-                                                  MessageListenerAdapter eventListenerAdapter) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(RabbitmqConfiguration.EVENT_QUEUE);
-        container.setMessageListener(eventListenerAdapter);
-        container.setAcknowledgeMode(AcknowledgeMode.NONE);
+    Trigger simpleTrigger(JobDetail jobDetail) throws ParseException {
 
-        return container;
+        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
+        trigger.setJobDetail(jobDetail);
+        trigger.setStartDelay(0);
+        trigger.setName("On start");
+        trigger.setRepeatCount(0);
+        trigger.setRepeatInterval(1);
+        trigger.afterPropertiesSet();
+
+        return trigger.getObject();
     }
+
 
     @Bean
-    SimpleMessageListenerContainer fighterContainer(ConnectionFactory connectionFactory,
-                                                    MessageListenerAdapter fighterListenerAdapter) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(FIGHTER_QUEUE);
-        container.setMessageListener(fighterListenerAdapter);
-        container.setAcknowledgeMode(AcknowledgeMode.NONE);
-        return container;
+    Scheduler schedulerFactory(Trigger cronTrigger, Trigger simpleTrigger, JobDetail jobDetail) throws Exception {
+
+        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
+        scheduler.setJobDetails(jobDetail);
+        scheduler.setTriggers(cronTrigger, simpleTrigger);
+        scheduler.setAutoStartup(true);
+
+
+        scheduler.afterPropertiesSet();
+
+        Scheduler result = scheduler.getObject();
+        result.start();
+        return result;
     }
 
-    @Bean
-    SimpleMessageListenerContainer orgContainer(ConnectionFactory connectionFactory,
-                                                MessageListenerAdapter orgListenerAdapter) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(ORGANIZATION_QUEUE);
-        container.setMessageListener(orgListenerAdapter);
-        container.setAcknowledgeMode(AcknowledgeMode.NONE);
-
-        return container;
-    }
 
     public static void main(String[] args) {
         ApplicationContext context =
                 new AnnotationConfigApplicationContext(Application.class);
 
-        ShutdownTimer.start();
     }
 }

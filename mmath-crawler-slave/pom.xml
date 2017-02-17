@@ -40,6 +40,13 @@
 
         <dependency>
             <groupId>com.ftpix</groupId>
+            <artifactId>build-quartz</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ftpix</groupId>
             <artifactId>mmath-config</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -8,7 +8,6 @@ import com.ftpix.utils.GsonUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -25,13 +24,11 @@ public class FighterCache {
     private final Gson gson = GsonUtils.getGson();
     private final JedisPool pool;
     private final FighterDao dao;
-    private final RabbitTemplate fighterTemplate;
     private final Logger logger = LogManager.getLogger();
 
-    public FighterCache(JedisPool pool, FighterDao fighterDao, RabbitTemplate fighterTemplate) {
+    public FighterCache(JedisPool pool, FighterDao fighterDao) {
         this.pool = pool;
         this.dao = fighterDao;
-        this.fighterTemplate = fighterTemplate;
     }
 
     public Optional<MmathFighter> get(String id) {
@@ -50,7 +47,6 @@ public class FighterCache {
             fighter.ifPresent(f -> {
                 if (ChronoUnit.DAYS.between(f.getLastUpdate(), LocalDate.now()) > 3) {
                     logger.info("Fighter [{}] data too old, sending to MQ for a refresh", id);
-                    fighterTemplate.convertAndSend(f.getSherdogUrl());
                 }
             });
 

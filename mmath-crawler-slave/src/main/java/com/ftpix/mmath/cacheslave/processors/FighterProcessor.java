@@ -1,13 +1,12 @@
-package com.ftpix.mmath.cacheslave.receivers;
+package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.dao.EventDao;
+import com.ftpix.mmath.cacheslave.Receiver;
+import com.ftpix.mmath.cacheslave.models.ProcessItem;
+import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.FighterDao;
-import com.ftpix.mmath.dao.OrganizationDao;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Fighter;
-
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -19,17 +18,21 @@ import redis.clients.jedis.JedisPool;
 /**
  * Created by gz on 16-Sep-16.
  */
-public class FighterReceiver extends Receiver<MmathFighter> {
+public class FighterProcessor extends Processor<MmathFighter> {
+    private final FighterDao fighterDao;
 
-    public FighterReceiver(RabbitTemplate fighterTemplate, RabbitTemplate orgTemplate, RabbitTemplate eventTemplate, FighterDao fighterDao, EventDao eventDao, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
-        super(fighterTemplate, orgTemplate, eventTemplate, fighterDao, eventDao, orgDao, sherdog, jedisPool);
+    public FighterProcessor(Receiver receiver, FighterDao fighterDao, Sherdog sherdog, JedisPool jedisPool) {
+        super(receiver, sherdog, jedisPool);
+        this.fighterDao = fighterDao;
     }
 
     @Override
     protected void propagate(MmathFighter obj) {
         obj.getFights().forEach(f -> {
-            fighterTemplate.convertAndSend(f.getFighter2().getSherdogUrl());
-            eventTemplate.convertAndSend(f.getEvent().getSherdogUrl());
+//            fighterPool.convertAndSend(f.getFighter2().getSherdogUrl());
+//            eventPool.convertAndSend(f.getEvent().getSherdogUrl());
+            receiver.process(new ProcessItem(f.getFighter2().getSherdogUrl(), ProcessType.FIGHTER));
+            receiver.process(new ProcessItem(f.getEvent().getSherdogUrl(), ProcessType.EVENT));
         });
     }
 
@@ -88,8 +91,8 @@ public class FighterReceiver extends Receiver<MmathFighter> {
 
             toParse.ifPresent(mmathFighter -> {
                 mmathFighter.getFights().forEach(f -> {
-                    fighterTemplate.convertAndSend(f.getFighter2().getSherdogUrl());
-                    eventTemplate.convertAndSend(f.getEvent().getSherdogUrl());
+                    fighterPool.convertAndSend(f.getFighter2().getSherdogUrl());
+                    eventPool.convertAndSend(f.getEvent().getSherdogUrl());
                 });
             });
 

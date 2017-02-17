@@ -2,9 +2,9 @@ package com.ftpix.calculator;
 
 import com.ftpix.mmath.caching.FighterCache;
 import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.mmath.model.MmathModel;
 import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
-import com.ftpix.utils.HashUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -92,7 +92,7 @@ public class BetterThan {
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
                                 .sorted(Comparator.comparing(Fight::getDate).reversed())
                                 .forEach(f -> {
-                                    fighterCache.get(HashUtils.hash(f.getFighter2().getSherdogUrl())).ifPresent(fighter -> {
+                                    fighterCache.get(MmathModel.generateId(f.getFighter2())).ifPresent(fighter -> {
                                         queue.add(new TreeNode(fighter, current));
                                     });
                                 });

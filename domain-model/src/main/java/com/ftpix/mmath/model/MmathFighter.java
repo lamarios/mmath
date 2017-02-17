@@ -1,7 +1,6 @@
 package com.ftpix.mmath.model;
 
 import com.ftpix.sherdogparser.models.Fighter;
-import com.ftpix.utils.HashUtils;
 
 import java.time.LocalDate;
 
@@ -36,7 +35,7 @@ public class MmathFighter extends Fighter implements MmathModel {
 
     @ExposeMethodResult("id")
     public String getId() {
-        return HashUtils.hash(this.getSherdogUrl());
+        return MmathModel.generateId(this);
     }
 
 

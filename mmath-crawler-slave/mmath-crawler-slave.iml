@@ -48,6 +48,10 @@
     <orderEntry type="module" module-name="domain-model" />
     <orderEntry type="module" module-name="build-utils" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
+    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:2.2.3" level="project" />
+    <orderEntry type="library" name="Maven: c3p0:c3p0:0.9.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.7" level="project" />
+    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz-jobs:2.2.3" level="project" />
     <orderEntry type="module" module-name="mmath-config" />
     <orderEntry type="module" module-name="mmath-caching" />
     <orderEntry type="library" name="Maven: redis.clients:jedis:2.9.0" level="project" />
@@ -55,7 +59,6 @@
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.5" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-simple:1.7.21" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
-    <orderEntry type="module" module-name="mmath-rabbitmq" />
+    <orderEntry type="library" name="Maven: com.ftpix:mmath-rabbitmq:1.0-SNAPSHOT" level="project" />
   </component>
 </module>

@@ -2,9 +2,9 @@ package com.ftpix.mmath.parsers;
 
 import com.google.gson.Gson;
 
+import com.ftpix.mmath.model.MmathModel;
 import com.ftpix.sherdogparser.models.SherdogBaseObject;
 import com.ftpix.utils.GsonUtils;
-import com.ftpix.utils.HashUtils;
 
 import org.bson.Document;
 
@@ -16,7 +16,7 @@ public class SherdogObjectParser {
     private final static Gson gson = GsonUtils.getGson();
 
     public static Document serialize(SherdogBaseObject object){
-        return new Document(NAME, object.getName()).append(SHERDOG_URL, object.getSherdogUrl()).append("_id", HashUtils.hash(object.getSherdogUrl()));
+        return new Document(NAME, object.getName()).append(SHERDOG_URL, object.getSherdogUrl()).append("_id", MmathModel.generateId(object));
     }
 
     public static SherdogBaseObject parse(Document doc){
