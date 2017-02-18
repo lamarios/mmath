@@ -2,14 +2,12 @@ package com.ftpix.calculator;
 
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.MmathModel;
-import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +46,7 @@ public class BetterThan {
         private int depth = 1;
         private List<String> validChain = null;
 
+        Optional<TreeNode> targetNode = Optional.empty();
 
         public Calculator(MmathFighter fighter1, MmathFighter fighter2) {
             this.fighter1 = fighter1;
@@ -71,8 +70,6 @@ public class BetterThan {
 
             queue.add(new TreeNode(fighter1));
 
-            Optional<TreeNode> targetNode = Optional.empty();
-
 
             while (!queue.isEmpty() && !targetNode.isPresent()) {
                 TreeNode current = queue.remove();
@@ -92,10 +89,16 @@ public class BetterThan {
                                 //skipping fighters that we already checked to avoid infinite loops.
                                 .filter(f -> f.getResult().equals(FightResult.FIGHTER_1_WIN) && !checked.contains(f.getFighter2().getSherdogUrl()))
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
-                                .sorted(Comparator.comparing(Fight::getDate).reversed())
+                                //.sorted(Comparator.comparing(Fight::getDate).reversed())
                                 .forEach(f -> {
                                     Optional.ofNullable(fighterCache.get(MmathModel.generateId(f.getFighter2()))).ifPresent(fighter -> {
-                                        queue.add(new TreeNode(fighter, current));
+                                        TreeNode fighterNode = new TreeNode(fighter, current);
+                                        //Let's try to get out ASAP, it'll save some processing
+                                        if (fighter.getId().equalsIgnoreCase(fighter2.getId())) {
+                                            targetNode = Optional.of(fighterNode);
+                                        } else {
+                                            queue.add(fighterNode);
+                                        }
                                     });
                                 });
                         logger.info("Not found yet, queue size: {}", queue.size());
@@ -114,7 +117,7 @@ public class BetterThan {
                 result.add(0, node.fighter);
             });
 
-            logger.info("Request completed in {}ms", System.currentTimeMillis()-now);
+            logger.info("Request completed in {}ms", System.currentTimeMillis() - now);
             return result;
         }
 
