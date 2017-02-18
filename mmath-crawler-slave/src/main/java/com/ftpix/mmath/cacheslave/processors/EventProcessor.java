@@ -13,16 +13,14 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import redis.clients.jedis.JedisPool;
-
 /**
  * Created by gz on 16-Sep-16.
  */
 public class EventProcessor extends Processor<MmathEvent> {
     private final EventDao eventDao;
 
-    public EventProcessor(Receiver receiver, EventDao eventDao, Sherdog sherdog, JedisPool jedisPool) {
-        super(receiver, sherdog, jedisPool);
+    public EventProcessor(Receiver receiver, EventDao eventDao, Sherdog sherdog) {
+        super(receiver, sherdog);
         this.eventDao = eventDao;
     }
 

@@ -44,7 +44,6 @@
     <orderEntry type="module" module-name="build-utils" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="module" module-name="mmath-calculator" />
-    <orderEntry type="library" name="Maven: com.ftpix:mmath-rabbitmq:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.sparkjava:spark-core:2.5.4" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-server:9.3.6.v20151106" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:javax.servlet-api:3.1.0" level="project" />
@@ -64,9 +63,9 @@
     <orderEntry type="library" name="Maven: com.squareup.retrofit2:converter-gson:2.1.0" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.4.1" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.9.0" level="project" />
-    <orderEntry type="module" module-name="mmath-caching" />
-    <orderEntry type="library" name="Maven: redis.clients:jedis:2.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-pool2:2.4.2" level="project" />
+    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz:2.2.3" level="project" />
+    <orderEntry type="library" name="Maven: c3p0:c3p0:0.9.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.quartz-scheduler:quartz-jobs:2.2.3" level="project" />
     <orderEntry type="module" module-name="mmath-config" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-core:2.5" level="project" />

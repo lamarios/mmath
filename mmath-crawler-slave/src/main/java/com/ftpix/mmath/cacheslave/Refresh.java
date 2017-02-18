@@ -19,6 +19,8 @@ public class Refresh {
     private final FighterDao fighterDao;
     private final Receiver receiver;
 
+    public static int RATE = 3;
+
     public Refresh(Receiver receiver, FighterDao fighterDao) {
         this.fighterDao = fighterDao;
         this.receiver = receiver;
@@ -36,22 +38,8 @@ public class Refresh {
                 .forEach(f -> {
                     //refreshing the count for each fighter
 
-                   /*  Optional.ofNullable(calculatorClient.betterThanCount(f.getId()).execute().body()).ifPresent(count ->{
-                         f.setBetterThan(count);
-                     });
 
-                    Optional.ofNullable(calculatorClient.betterThanCount(f.getId()).execute().body()).ifPresent(count ->{
-                        f.setWeakerThan(count);
-                    });
-
-
-                    f.setLastCountUpdate(today);
-
-                    logger.info("Updating fighter {} with better than {} weaker than {}", f.getName(), f.getBetterThan(), f.getWeakerThan());
-                    fighterDao.update(f);
-                    */
-
-                    if (DAYS.between(f.getLastUpdate(), today) > 5) {
+                    if (DAYS.between(f.getLastUpdate(), today) >= RATE) {
                         logger.info("Sending {} for refresh", f.getName());
                         receiver.process(new ProcessItem(f.getSherdogUrl(), ProcessType.FIGHTER));
                     }

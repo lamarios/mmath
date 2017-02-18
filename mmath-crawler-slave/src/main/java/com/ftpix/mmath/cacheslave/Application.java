@@ -1,7 +1,6 @@
 package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.caching.CachingConfiguration;
 import com.ftpix.mmath.dao.EventDao;
 import com.ftpix.mmath.dao.FighterDao;
 import com.ftpix.mmath.dao.OrganizationDao;
@@ -23,14 +22,12 @@ import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
 import java.text.ParseException;
 
-import redis.clients.jedis.JedisPool;
-
 /**
  * Created by gz on 16-Sep-16.
  */
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import({DaoConfiguration.class, CachingConfiguration.class})
+@Import({DaoConfiguration.class})
 public class Application {
     private final static int CORE_POOL_SIZE = 1, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 15, THREAD_TIMEOUT = 60;
 
@@ -40,8 +37,8 @@ public class Application {
 
     //Receiver
     @Bean
-    Receiver receiver(FighterDao fighterDao, EventDao eventDao, OrganizationDao organizationDao, JedisPool jedisPool, Sherdog sherdog) {
-        return new Receiver(fighterDao, eventDao, organizationDao, jedisPool, sherdog);
+    Receiver receiver(FighterDao fighterDao, EventDao eventDao, OrganizationDao organizationDao, Sherdog sherdog) {
+        return new Receiver(fighterDao, eventDao, organizationDao, sherdog);
     }
 
 

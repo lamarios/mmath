@@ -96,7 +96,7 @@ public class FighterDao implements MmathDao<MmathFighter> {
 
         Block<Document> block = d -> {
             MmathFighter f = FighterParser.parse(d);
-            fighters.put(f.getSherdogUrl(), f);
+            fighters.put(f.getId(), f);
         };
 
         fighterCollection.find().forEach(block);

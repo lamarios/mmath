@@ -3,6 +3,7 @@ package com.ftpix.mmath.cacheslave.processors;
 import com.google.gson.Gson;
 
 import com.ftpix.mmath.cacheslave.Receiver;
+import com.ftpix.mmath.cacheslave.Refresh;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.model.MmathModel;
 import com.ftpix.sherdogparser.Sherdog;
@@ -17,9 +18,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-
 /**
  * Created by gz on 16-Sep-16.
  */
@@ -29,15 +27,13 @@ public abstract class Processor<T extends MmathModel> {
     protected final Receiver receiver;
 
     protected final Sherdog sherdog;
-    protected JedisPool jedisPool;
 
 
     private Gson gson = GsonUtils.getGson();
 
 
-    public Processor(Receiver receiver, Sherdog sherdog, JedisPool jedisPool) {
+    public Processor(Receiver receiver, Sherdog sherdog) {
         this.sherdog = sherdog;
-        this.jedisPool = jedisPool;
         this.receiver = receiver;
     }
 
@@ -61,7 +57,7 @@ public abstract class Processor<T extends MmathModel> {
 
                 long daysbetween = ChronoUnit.DAYS.between(getLastUpdate(optResult), now);
 
-                if (daysbetween >= 3) {
+                if (daysbetween >= Refresh.RATE) {
                     logger.info("[{}] Info is too old, need to update", item.getUrl());
                     T updated = getFromSherdog(item.getUrl());
 
@@ -82,11 +78,7 @@ public abstract class Processor<T extends MmathModel> {
 
 
             toParse.ifPresent(obj -> {
-                try (Jedis jedis = jedisPool.getResource()) {
-                    jedis.set(obj.getId(), gson.toJson(obj));
-                }
                 propagate(obj);
-
             });
 
 

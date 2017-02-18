@@ -1,6 +1,5 @@
 package com.ftpix.calculator;
 
-import com.ftpix.mmath.caching.FighterCache;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.MmathModel;
 import com.ftpix.sherdogparser.models.Fight;
@@ -14,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -23,10 +23,10 @@ import java.util.Set;
  */
 public class BetterThan {
     private Logger logger = LogManager.getLogger();
-    private FighterCache fighterCache;
+    private Map<String, MmathFighter> fighterCache;
 
 
-    public BetterThan(FighterCache fighterCache) {
+    public BetterThan(Map<String, MmathFighter> fighterCache) {
         this.fighterCache = fighterCache;
     }
 
@@ -48,6 +48,7 @@ public class BetterThan {
         private int depth = 1;
         private List<String> validChain = null;
 
+
         public Calculator(MmathFighter fighter1, MmathFighter fighter2) {
             this.fighter1 = fighter1;
             this.fighter2 = fighter2;
@@ -56,6 +57,7 @@ public class BetterThan {
         public List<MmathFighter> process() {
             logger.info("Is [{}] better than [{}] ?", fighter1, fighter2);
 
+            long now = System.currentTimeMillis();
 
             List<MmathFighter> result = new ArrayList<>();
 
@@ -92,7 +94,7 @@ public class BetterThan {
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
                                 .sorted(Comparator.comparing(Fight::getDate).reversed())
                                 .forEach(f -> {
-                                    fighterCache.get(MmathModel.generateId(f.getFighter2())).ifPresent(fighter -> {
+                                    Optional.ofNullable(fighterCache.get(MmathModel.generateId(f.getFighter2()))).ifPresent(fighter -> {
                                         queue.add(new TreeNode(fighter, current));
                                     });
                                 });
@@ -112,6 +114,7 @@ public class BetterThan {
                 result.add(0, node.fighter);
             });
 
+            logger.info("Request completed in {}ms", System.currentTimeMillis()-now);
             return result;
         }
 

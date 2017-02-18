@@ -3,7 +3,6 @@ package com.ftpix.calculator.web;
 import com.google.gson.Gson;
 
 import com.ftpix.calculator.BetterThan;
-import com.ftpix.mmath.caching.FighterCache;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.utils.GsonUtils;
 
@@ -28,12 +27,12 @@ import spark.Spark;
 public class WebServer {
     private final BetterThan betterThan;
     private final int port;
-    private final FighterCache cache;
+    private final Map<String, MmathFighter> cache;
     private final Logger logger = LogManager.getLogger();
 
     private final static Gson gson = GsonUtils.getGson();
 
-    public WebServer(BetterThan betterThan, FighterCache fighterCache, int port) {
+    public WebServer(BetterThan betterThan, Map<String, MmathFighter> fighterCache, int port) {
         this.betterThan = betterThan;
         this.port = port;
         this.cache = fighterCache;
@@ -68,8 +67,12 @@ public class WebServer {
     }
 
     public List<MmathFighter> betterThanEndpoint(Request req, Response res) {
-        Optional<MmathFighter> fighter1 = cache.get(req.params(":fighter1"));
-        Optional<MmathFighter> fighter2 = cache.get(req.params(":fighter2"));
+
+
+        cache.keySet().stream().filter(s-> s.contains("Alistair") || s.contains("Cruz")).forEach(System.out::println);
+
+        Optional<MmathFighter> fighter1 = Optional.ofNullable(cache.get(req.params(":fighter1")));
+        Optional<MmathFighter> fighter2 = Optional.ofNullable(cache.get(req.params(":fighter2")));
 
         if (fighter1.isPresent() && fighter2.isPresent()) {
             return betterThan.find(fighter1.get(), fighter2.get());

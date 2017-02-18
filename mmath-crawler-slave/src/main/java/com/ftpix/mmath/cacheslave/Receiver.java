@@ -15,8 +15,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import redis.clients.jedis.JedisPool;
-
 /**
  * Created by gz on 17-Feb-17.
  */
@@ -26,14 +24,14 @@ public class Receiver {
     private final Processor fightProcessor, eventProcessor, orgProcessor;
 
 
-    public Receiver(FighterDao fighterDao, EventDao eventDao, OrganizationDao organizationDao, JedisPool jedisPool, Sherdog sherdog) {
+    public Receiver(FighterDao fighterDao, EventDao eventDao, OrganizationDao organizationDao, Sherdog sherdog) {
         this.fightPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
         this.eventPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
         this.orgPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
 
-        this.fightProcessor = new FighterProcessor(this, fighterDao, sherdog, jedisPool);
-        this.eventProcessor = new EventProcessor(this, eventDao, sherdog, jedisPool);
-        this.orgProcessor = new OrganizationProcessor(this, organizationDao, sherdog, jedisPool);
+        this.fightProcessor = new FighterProcessor(this, fighterDao, sherdog);
+        this.eventProcessor = new EventProcessor(this, eventDao, sherdog);
+        this.orgProcessor = new OrganizationProcessor(this, organizationDao, sherdog);
     }
 
     public void process(ProcessItem item) {

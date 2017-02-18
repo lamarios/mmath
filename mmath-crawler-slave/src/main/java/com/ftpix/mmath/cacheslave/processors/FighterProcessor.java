@@ -13,16 +13,14 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import redis.clients.jedis.JedisPool;
-
 /**
  * Created by gz on 16-Sep-16.
  */
 public class FighterProcessor extends Processor<MmathFighter> {
     private final FighterDao fighterDao;
 
-    public FighterProcessor(Receiver receiver, FighterDao fighterDao, Sherdog sherdog, JedisPool jedisPool) {
-        super(receiver, sherdog, jedisPool);
+    public FighterProcessor(Receiver receiver, FighterDao fighterDao, Sherdog sherdog) {
+        super(receiver, sherdog);
         this.fighterDao = fighterDao;
     }
 

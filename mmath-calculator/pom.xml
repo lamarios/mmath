@@ -37,12 +37,6 @@
 
         <dependency>
             <groupId>com.ftpix</groupId>
-            <artifactId>mmath-rabbitmq</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.ftpix</groupId>
             <artifactId>build-spark</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
@@ -54,11 +48,11 @@
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
-
         <dependency>
             <groupId>com.ftpix</groupId>
-            <artifactId>mmath-caching</artifactId>
+            <artifactId>build-quartz</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
     </dependencies>
 

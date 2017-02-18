@@ -23,8 +23,6 @@
         <module>build-retrofit</module>
         <module>build-quartz</module>
         <module>mmath-web</module>
-        <module>build-redis</module>
-        <module>mmath-caching</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -33,7 +31,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-
 
 
 </project>

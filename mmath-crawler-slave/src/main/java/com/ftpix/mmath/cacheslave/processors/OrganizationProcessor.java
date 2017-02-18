@@ -12,16 +12,14 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import redis.clients.jedis.JedisPool;
-
 /**
  * Created by gz on 16-Sep-16.
  */
 public class OrganizationProcessor extends Processor<MmathOrganization> {
 
 private final OrganizationDao orgDao;
-    public OrganizationProcessor(Receiver receiver, OrganizationDao orgDao, Sherdog sherdog, JedisPool jedisPool) {
-        super(receiver, sherdog, jedisPool);
+    public OrganizationProcessor(Receiver receiver, OrganizationDao orgDao, Sherdog sherdog) {
+        super(receiver, sherdog);
         this.orgDao = orgDao;
     }
 
