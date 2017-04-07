@@ -16,22 +16,16 @@ var BetterThan = React.createClass({
                                            return (
                                                <div className="better-than">
                                                    <div className="row">
-                                                       <div className="col-md-1 vs">
-                                                           Is
-                                                       </div>
-                                                       <div className="col-sm-4 fighter1">
+                                                       <div className="col-md-5 fighter1">
                                                            <FighterSearch
                                                                fighterSelected={this.fighter1Selected}/>
                                                        </div>
-                                                       <div className="col-sm-2 vs">
-                                                           better than
+                                                       <div className="col-md-2 vs">
+                                                           VS.
                                                        </div>
-                                                       <div className="col-sm-4 fighter2">
+                                                       <div className="col-md-5 fighter2">
                                                            <FighterSearch
                                                                fighterSelected={this.fighter2Selected}/>
-                                                       </div>
-                                                       <div className="col-md-1 vs">
-                                                           ?
                                                        </div>
                                                    </div>
                                                    <div className="row">
@@ -42,7 +36,7 @@ var BetterThan = React.createClass({
                                                                      onClick={this.props.triggerSearch.bind(
                                                                          null, this.state.fighter1,
                                                                          this.state.fighter2)}>
-                                                                 Find out !
+                                                                 Fight !
                                                              </button>
                                                                :
                                                              ''

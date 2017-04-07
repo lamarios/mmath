@@ -53,6 +53,7 @@
                 <include>index.html</include>
                 <include>lib/main.js</include>
                 <include>css/main.css</include>
+                <include>images/*</include>
             </includes>
         </fileSet>
         <!-- adds jar package to the root directory of zip package -->

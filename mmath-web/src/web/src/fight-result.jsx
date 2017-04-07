@@ -19,7 +19,7 @@ var FightResult = React.createClass({
                                                                         { i < arr.length - 1 ?
                                                                           <div
                                                                               className="separator">
-                                                                              Beat
+
                                                                           </div>
                                                                             : ''}
                                                                     </div>

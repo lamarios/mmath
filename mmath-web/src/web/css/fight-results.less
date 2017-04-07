@@ -3,7 +3,7 @@
 .results {
   .column {
 
-    padding:20px;
+    padding: 20px;
     .result-step {
       text-align: center;
 
@@ -12,15 +12,30 @@
         display: inline-block;
       }
 
-      .separator{
-        color: @fightBackgroundColor;
+      .separator {
+        background-size: cover;
+        background: url("../images/explosion.svg") no-repeat center;
+        height: 50px;
         margin: 10px;
-        font-size: 20px;
       }
     }
   }
 
-  .nope{
+  .nope {
     text-align: center;
   }
+}
+
+@media only screen and (max-width: @mobileBreakPoint) {
+
+  .results {
+    .column {
+      .result-step {
+        .fighter-chip {
+          width: 100%;
+        }
+      }
+    }
+  }
+
 }

@@ -1,19 +1,33 @@
 @import "variables";
-
 @import "fight";
 @import "fighter-chip";
 @import "fight-results";
 @import "spinner";
+
 body {
-  background-color: @backgroundColor;
   color: @textColor;
   font-weight: 300;
+  background-size: cover;
+  font-family: 'Maven Pro', sans-serif;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("../images/diaz.jpg");
 
-  .title{
-    h1{
-      font-weight: 300;
+  .title {
+    h1 {
+      font-weight: 700;
       font-size: 50px;
+      margin: 0;
+      .color {
+        color: @accentColor;
+      }
     }
+
+    .sub-title {
+      font-size: 30px;
+      line-height: 10px;
+    }
+
   }
 }
 
