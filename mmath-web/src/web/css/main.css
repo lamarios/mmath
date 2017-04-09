@@ -76,6 +76,8 @@
   text-align: left;
   background-color: white;
   color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 .fighter-chip .picture {
   width: 100%;
@@ -109,6 +111,39 @@
   padding: 10px;
   text-align: center;
 }
+.fighter-chip:hover {
+  transform: scale(1.05);
+  background-color: #ddd;
+}
+.fighter-chip.small {
+  height: 50px;
+}
+.fighter-chip.small .picture {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  display: inline-block;
+  height: auto;
+}
+.fighter-chip.small .info {
+  width: 100%;
+  display: inline-block;
+  padding-right: 30px;
+}
+.fighter-chip.small .info .name {
+  font-size: 17px;
+  padding-top: 12px;
+}
+.fighter-chip.small .info .record {
+  display: none;
+}
+.fighter-chip.small .remove {
+  color: black;
+  font-size: 20px;
+  padding-top: 15px;
+}
 @media only screen and (max-width: 425px) {
   .fighter-chip {
     height: 50px;
@@ -128,8 +163,8 @@
     padding-right: 30px;
   }
   .fighter-chip .info .name {
-    font-size: 28px;
-    padding-top: 3px;
+    font-size: 17px;
+    padding-top: 12px;
   }
   .fighter-chip .info .record {
     display: none;
@@ -149,28 +184,42 @@
     padding-top: 13px;
   }
 }
-.results .column {
+.results {
   padding: 20px;
 }
-.results .column .result-step {
+.results .result-step {
   text-align: center;
 }
-.results .column .result-step .fighter-chip {
-  width: 50%;
+.results .result-step .fighter-chip {
+  width: 100%;
   display: inline-block;
 }
-.results .column .result-step .separator {
+.results .result-step .separator {
   background-size: cover;
   background: url("../images/explosion.svg") no-repeat center;
-  height: 50px;
+  height: 30px;
   margin: 10px;
+}
+.results .switch {
+  display: none;
 }
 .results .nope {
   text-align: center;
 }
 @media only screen and (max-width: 425px) {
-  .results .column .result-step .fighter-chip {
+  .results .result-step .fighter-chip {
     width: 100%;
+  }
+  .results .column {
+    display: none;
+  }
+  .results .column.active {
+    display: block;
+  }
+  .results .switch {
+    display: block;
+    text-align: center;
+    margin: 5px;
   }
 }
 .loader {
@@ -195,6 +244,96 @@
     -webkit-transform: scale(1.2);
     /* Safari */
     transform: scale(1.2);
+  }
+}
+.fighter-details {
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10;
+  text-align: left;
+  overflow: auto;
+  animation-name: fadeIn;
+  animation-duration: 0.25s;
+}
+.fighter-details .remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+}
+.fighter-details .picture {
+  width: 200px;
+  height: 300px;
+  float: left;
+  border-radius: 5px;
+  margin: 10px;
+}
+.fighter-details .title p {
+  font-size: 30px;
+  font-style: italic;
+}
+.fighter-details .info {
+  margin-bottom: 20px;
+}
+.fighter-details .info p {
+  margin-bottom: 0;
+}
+.fighter-details .info p label {
+  font-weight: bold;
+  margin-bottom: 0;
+}
+.fighter-details .info:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+.fighter-details .fights tr td {
+  padding: 2px 7px;
+}
+.fighter-details .fights .win {
+  background-color: rgba(67, 160, 71, 0.5);
+}
+.fighter-details .fights .loss {
+  background-color: rgba(239, 83, 80, 0.5);
+}
+.fighter-details .fights .draw {
+  background-color: rgba(33, 150, 243, 0.5);
+}
+@media only screen and (max-width: 425px) {
+  .fighter-details {
+    padding-top: 0;
+  }
+  .fighter-details .remove {
+    position: relative;
+    text-align: right;
+  }
+  .fighter-details .picture {
+    display: none;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    -webkit-transform: scale(0.9);
+    -moz-transform: scale(0.9);
+    -ms-transform: scale(0.9);
+    -o-transform: scale(0.9);
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
   }
 }
 body {

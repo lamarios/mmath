@@ -1,40 +1,55 @@
 @import "variables";
 
 .results {
-  .column {
 
-    padding: 20px;
-    .result-step {
-      text-align: center;
+  padding: 20px;
+  .result-step {
+    text-align: center;
 
-      .fighter-chip {
-        width: 50%;
-        display: inline-block;
-      }
-
-      .separator {
-        background-size: cover;
-        background: url("../images/explosion.svg") no-repeat center;
-        height: 50px;
-        margin: 10px;
-      }
+    .fighter-chip {
+      width: 100%;
+      display: inline-block;
     }
+
+    .separator {
+      background-size: cover;
+      background: url("../images/explosion.svg") no-repeat center;
+      height: 30px;
+      margin: 10px;
+    }
+  }
+
+  .switch {
+    display: none;
   }
 
   .nope {
     text-align: center;
   }
+
 }
 
 @media only screen and (max-width: @mobileBreakPoint) {
 
   .results {
-    .column {
-      .result-step {
-        .fighter-chip {
-          width: 100%;
-        }
+    .result-step {
+      .fighter-chip {
+        width: 100%;
       }
+    }
+
+    .column {
+      display: none;
+    }
+
+    .column.active {
+      display: block;
+    }
+
+    .switch {
+      display: block;
+      text-align: center;
+      margin: 5px;
     }
   }
 

@@ -3,6 +3,8 @@
   text-align: left;
   background-color: white;
   color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 .fighter-chip .picture {
   width: 100%;
@@ -36,6 +38,39 @@
   padding: 10px;
   text-align: center;
 }
+.fighter-chip:hover {
+  transform: scale(1.05);
+  background-color: #ddd;
+}
+.fighter-chip.small {
+  height: 50px;
+}
+.fighter-chip.small .picture {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  display: inline-block;
+  height: auto;
+}
+.fighter-chip.small .info {
+  width: 100%;
+  display: inline-block;
+  padding-right: 30px;
+}
+.fighter-chip.small .info .name {
+  font-size: 17px;
+  padding-top: 12px;
+}
+.fighter-chip.small .info .record {
+  display: none;
+}
+.fighter-chip.small .remove {
+  color: black;
+  font-size: 20px;
+  padding-top: 15px;
+}
 @media only screen and (max-width: 425px) {
   .fighter-chip {
     height: 50px;
@@ -55,8 +90,8 @@
     padding-right: 30px;
   }
   .fighter-chip .info .name {
-    font-size: 28px;
-    padding-top: 3px;
+    font-size: 17px;
+    padding-top: 12px;
   }
   .fighter-chip .info .record {
     display: none;

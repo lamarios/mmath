@@ -1,24 +1,38 @@
-.results .column {
+.results {
   padding: 20px;
 }
-.results .column .result-step {
+.results .result-step {
   text-align: center;
 }
-.results .column .result-step .fighter-chip {
-  width: 50%;
+.results .result-step .fighter-chip {
+  width: 100%;
   display: inline-block;
 }
-.results .column .result-step .separator {
+.results .result-step .separator {
   background-size: cover;
   background: url("../images/explosion.svg") no-repeat center;
-  height: 50px;
+  height: 30px;
   margin: 10px;
+}
+.results .switch {
+  display: none;
 }
 .results .nope {
   text-align: center;
 }
 @media only screen and (max-width: 425px) {
-  .results .column .result-step .fighter-chip {
+  .results .result-step .fighter-chip {
     width: 100%;
+  }
+  .results .column {
+    display: none;
+  }
+  .results .column.active {
+    display: block;
+  }
+  .results .switch {
+    display: block;
+    text-align: center;
+    margin: 5px;
   }
 }
