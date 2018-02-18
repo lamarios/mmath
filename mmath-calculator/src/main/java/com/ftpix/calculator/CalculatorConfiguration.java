@@ -1,32 +1,15 @@
 package com.ftpix.calculator;
 
-import com.ftpix.calculator.cache.CacheHandler;
 import com.ftpix.calculator.web.WebServer;
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.dao.FighterDao;
+import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
-
+import com.j256.ormlite.dao.Dao;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
-
-import java.text.ParseException;
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.context.annotation.*;
 
 /**
  * Created by gz on 18-Sep-16.
@@ -42,33 +25,23 @@ public class CalculatorConfiguration {
     private final Logger logger = LogManager.getLogger();
 
     @Bean
-    BetterThan betterThan(Map<String, MmathFighter> fighterCache) {
-        return new BetterThan(fighterCache);
+    BetterThan betterThan(Dao<MmathFight, Long> fightDao, Dao<MmathFighter, String> fighterDao) {
+        return new BetterThan(fightDao, fighterDao);
     }
 
     @Bean
-    WebServer webServer(BetterThan betterThan, Map<String, MmathFighter> fighterCache) {
-        WebServer server = new WebServer(betterThan, fighterCache, port);
+    WebServer webServer(BetterThan betterThan, Dao<MmathFighter, String> fighterDao) {
+        WebServer server = new WebServer(betterThan, port, fighterDao);
         server.setupServer();
 
         return server;
-    }
-
-    @Bean
-    Map<String, MmathFighter> fighterCache(){
-        return new ConcurrentHashMap<>();
-    }
-
-    @Bean
-    CacheHandler cacheHandler(FighterDao fighterDao, Map<String, MmathFighter> fighterCache ) {
-        CacheHandler cacheHandler = new CacheHandler(fighterDao, fighterCache);
-        return cacheHandler;
     }
 
 
     ///////////////////////////
     ///// Quartz
     //////////////
+    /*
     @Bean
     JobDetail jobDetail(CacheHandler cacheHandler) throws Exception {
         MethodInvokingJobDetailFactoryBean job = new MethodInvokingJobDetailFactoryBean();
@@ -113,7 +86,7 @@ public class CalculatorConfiguration {
         result.start();
         return result;
     }
-
+*/
 
     public static void main(String[] args) {
         ApplicationContext context =

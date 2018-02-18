@@ -3,23 +3,27 @@ package com.ftpix.mmath.cacheslave.processors;
 import com.ftpix.mmath.cacheslave.Receiver;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.cacheslave.models.ProcessType;
-import com.ftpix.mmath.dao.FighterDao;
+import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Fighter;
+import com.j256.ormlite.dao.Dao;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 
 /**
  * Created by gz on 16-Sep-16.
  */
 public class FighterProcessor extends Processor<MmathFighter> {
-    private final FighterDao fighterDao;
+    private final Dao<MmathFighter, String> fighterDao;
 
-    public FighterProcessor(Receiver receiver, FighterDao fighterDao, Sherdog sherdog) {
+    public FighterProcessor(Receiver receiver, Dao<MmathFighter, String> fighterDao, Sherdog sherdog) {
         super(receiver, sherdog);
         this.fighterDao = fighterDao;
     }
@@ -35,16 +39,13 @@ public class FighterProcessor extends Processor<MmathFighter> {
     }
 
     @Override
-    protected void insertToDao(MmathFighter obj) {
-        fighterDao.insert(obj);
+    protected void insertToDao(MmathFighter obj) throws SQLException {
+        fighterDao.createOrUpdate(obj);
     }
 
     @Override
-    protected void updateToDao(MmathFighter old, MmathFighter fromSherdog) {
-        fromSherdog.setLastUpdate(LocalDate.now());
-        fromSherdog.setLastCountUpdate(old.getLastCountUpdate());
-        fromSherdog.setBetterThan(old.getBetterThan());
-        fromSherdog.setWeakerThan(old.getWeakerThan());
+    protected void updateToDao(MmathFighter old, MmathFighter fromSherdog) throws SQLException {
+        fromSherdog.setLastUpdate(new Date());
 
         fighterDao.update(fromSherdog);
     }
@@ -103,16 +104,24 @@ public class FighterProcessor extends Processor<MmathFighter> {
     @Override
     protected MmathFighter getFromSherdog(String url) throws IOException, ParseException {
         Fighter fighter = sherdog.getFighter(url);
-        return new MmathFighter(fighter);
+        MmathFighter mmathFighter = MmathFighter.fromSherdong(fighter);
+
+        mmathFighter.setFights(new ArrayList<>());
+        fighter.getFights().forEach(f -> mmathFighter.getFights().add(MmathFight.fromSherdog(f))
+        );
+
+
+        return mmathFighter;
     }
 
     @Override
-    protected LocalDate getLastUpdate(MmathFighter obj) {
+    protected Date getLastUpdate(MmathFighter obj) {
         return obj.getLastUpdate();
     }
 
     @Override
-    protected Optional<MmathFighter> getFromDao(String url) {
-        return fighterDao.getByUrl(url);
+    protected Optional<MmathFighter> getFromDao(String url) throws SQLException {
+        MmathFighter mmathFighter = fighterDao.queryForId(url);
+        return Optional.ofNullable(mmathFighter);
     }
 }

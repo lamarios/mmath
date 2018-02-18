@@ -1,20 +1,17 @@
 package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.dao.EventDao;
-import com.ftpix.mmath.dao.FighterDao;
-import com.ftpix.mmath.dao.OrganizationDao;
+import com.ftpix.mmath.model.MmathEvent;
+import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
-
+import com.j256.ormlite.dao.Dao;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -37,13 +34,13 @@ public class Application {
 
     //Receiver
     @Bean
-    Receiver receiver(FighterDao fighterDao, EventDao eventDao, OrganizationDao organizationDao, Sherdog sherdog) {
-        return new Receiver(fighterDao, eventDao, organizationDao, sherdog);
+    Receiver receiver(Dao<MmathFighter, String> fighterDao, Dao<MmathEvent, String> eventDao, Dao<MmathOrganization, String> orgDao, Dao<MmathFight, Long> fightDao, Sherdog sherdog) {
+        return new Receiver(fighterDao, eventDao, orgDao, fightDao, sherdog);
     }
 
 
     @Bean
-    Refresh refresh(Receiver receiver, FighterDao fighterDao) {
+    Refresh refresh(Receiver receiver, Dao<MmathFighter,String> fighterDao) {
         return new Refresh(receiver, fighterDao);
     }
 

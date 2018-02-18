@@ -1,73 +1,178 @@
 package com.ftpix.mmath.model;
 
+import com.ftpix.mmath.model.persisters.LocalDatePersister;
 import com.ftpix.sherdogparser.models.Fighter;
 
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 
-import io.gsonfire.annotations.ExposeMethodResult;
+import com.j256.ormlite.field.DataType;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+import javax.naming.Name;
 
 /**
  * Created by gz on 24-Sep-16.
  */
-public class MmathFighter extends Fighter implements MmathModel {
-    private LocalDate lastUpdate = LocalDate.now(), lastCountUpdate = LocalDate.now();
-    private long betterThan = 0;
-    private long weakerThan = 0;
+@DatabaseTable(tableName = "fighters")
+public class MmathFighter {
 
-    public MmathFighter() {
-        super();
-    }
+    @DatabaseField(id = true, width = 1000)
+    private String sherdogUrl;
 
-    public MmathFighter(Fighter fighter){
-        this.setSherdogUrl(fighter.getSherdogUrl());
-        this.setFights(fighter.getFights());
-        this.setName(fighter.getName());
-        this.setPicture(fighter.getPicture());
-        this.setBirthday(fighter.getBirthday());
-        this.setDraws(fighter.getDraws());
-        this.setLosses(fighter.getLosses());
-        this.setWins(fighter.getWins());
-        this.setWeight(fighter.getWeight());
-        this.setHeight(fighter.getHeight());
-        this.setNickname(fighter.getNickname());
-        this.setNc(fighter.getNc());
-    }
-
-    @ExposeMethodResult("id")
-    public String getId() {
-        return MmathModel.generateId(this);
-    }
+    @DatabaseField()
+    private Date lastUpdate = new Date();
 
 
-    public LocalDate getLastUpdate() {
+    private List<MmathFight> fights;
+
+
+    @DatabaseField
+    private String name;
+    @DatabaseField
+    private String picture;
+    @DatabaseField
+    private Date birthday;
+    @DatabaseField
+    private int draws;
+    @DatabaseField
+    private int losses;
+    @DatabaseField
+    private int wins;
+    @DatabaseField
+    private String weight;
+    @DatabaseField
+    private String height;
+    @DatabaseField
+    private String nickname;
+    @DatabaseField
+    private int nc;
+
+    public Date getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(LocalDate lastUpdate) {
+    public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
-    public LocalDate getLastCountUpdate() {
-        return lastCountUpdate;
+    public int getLosses() {
+        return losses;
     }
 
-    public void setLastCountUpdate(LocalDate lastCountUpdate) {
-        this.lastCountUpdate = lastCountUpdate;
+    public int getWins() {
+        return wins;
     }
 
-    public long getBetterThan() {
-        return betterThan;
+    public void setSherdogUrl(String sherdogUrl) {
+        this.sherdogUrl = sherdogUrl;
     }
 
-    public void setBetterThan(long betterThan) {
-        this.betterThan = betterThan;
+    public String getSherdogUrl() {
+        return sherdogUrl;
     }
 
-    public long getWeakerThan() {
-        return weakerThan;
+
+
+    public String getPicture() {
+        return picture;
     }
 
-    public void setWeakerThan(long weakerThan) {
-        this.weakerThan = weakerThan;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setDraws(int draws) {
+        this.draws = draws;
+    }
+
+    public int getDraws() {
+        return draws;
+    }
+
+    public void setLosses(int losses) {
+        this.losses = losses;
+    }
+
+    public void setWins(int wins) {
+        this.wins = wins;
+    }
+
+    public List<MmathFight> getFights() {
+        return fights;
+    }
+
+    public void setFights(List<MmathFight> fights) {
+        this.fights = fights;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
+    public void setWeight(String weight) {
+        this.weight = weight;
+    }
+
+    public String getWeight() {
+        return weight;
+    }
+
+    public void setHeight(String height) {
+        this.height = height;
+    }
+
+    public String getHeight() {
+        return height;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNc(int nc) {
+        this.nc = nc;
+    }
+
+    public int getNc() {
+        return nc;
+    }
+
+
+    public static MmathFighter fromSherdong(Fighter f) {
+        MmathFighter fighter = new MmathFighter();
+
+        fighter.setSherdogUrl(f.getSherdogUrl());
+        fighter.setBirthday(f.getBirthday());
+        fighter.setDraws(f.getDraws());
+        fighter.setLosses(f.getLosses());
+        fighter.setWins(f.getWins());
+        fighter.setWeight(f.getWeight());
+        fighter.setHeight(f.getHeight());
+        fighter.setName(f.getName());
+        fighter.setNickname(f.getNickname());
+        fighter.setNc(f.getNc());
+        fighter.setPicture(f.getPicture());
+
+        return fighter;
+    }
+
 }

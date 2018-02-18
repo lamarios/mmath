@@ -1,24 +1,21 @@
 package com.ftpix.mmath;
 
-import com.ftpix.mmath.dao.EventDao;
-import com.ftpix.mmath.dao.FighterDao;
-import com.ftpix.mmath.dao.OrganizationDao;
-import com.ftpix.mmath.dao.stats.StatsDao;
+import com.ftpix.mmath.model.MmathEvent;
+import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.mmath.sherdog.SherdogConfiguration;
-import com.ftpix.sherdogparser.Sherdog;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCommandException;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import org.bson.Document;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.table.TableUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+
+import java.sql.SQLException;
 
 /**
  * Created by gz on 18-Sep-16.
@@ -28,127 +25,54 @@ import org.springframework.context.annotation.PropertySource;
 @Import(SherdogConfiguration.class)
 public class DaoConfiguration {
 
-    @Value("${mongo.host}")
-    private String mongoHost;
 
-    @Value("${mongo.port}")
-    private int mongoPort;
+    @Value("${db.url}")
+    private String dbUrl;
 
-    @Value("${mongo.db}")
-    private String mongoDb;
+    @Value("${db.username}")
+    private String username;
 
+    @Value("${db.password}")
+    private String password;
 
-    ////////////////////
-    /// Mongo DB
-    /////////
-
-    @Bean
-    MongoClient mongoClient() {
-        return new MongoClient(mongoHost, mongoPort);
+    public DaoConfiguration() {
     }
 
     @Bean
-    MongoCollection<Document> fighterCollection(MongoClient mongoClient) {
-
-        MongoDatabase db = mongoClient.getDatabase(mongoDb);
-
-        try {
-            db.createCollection("fighter");
-        } catch (MongoCommandException e) {
-
-        }
-        return db.getCollection("fighter");
+    public JdbcConnectionSource source() throws SQLException {
+        return new JdbcConnectionSource(dbUrl, username, password);
     }
 
     @Bean
-    MongoCollection<Document> orgCollection(MongoClient mongoClient) {
-        MongoDatabase db = mongoClient.getDatabase(mongoDb);
+    public Dao<MmathEvent, String> eventDao(JdbcConnectionSource source) throws SQLException {
+        Dao<MmathEvent, String> dao = DaoManager.createDao(source, MmathEvent.class);
+        TableUtils.createTableIfNotExists(source, MmathEvent.class);
 
-        try {
-            db.createCollection("organization");
-        } catch (MongoCommandException e) {
-
-        }
-        return db.getCollection("organization");
+        return dao;
     }
 
     @Bean
-    MongoCollection<Document> eventCollection(MongoClient mongoClient) {
-        MongoDatabase db = mongoClient.getDatabase(mongoDb);
+    public Dao<MmathFighter, String> fighterDao(JdbcConnectionSource source) throws SQLException {
+        Dao<MmathFighter, String> dao = DaoManager.createDao(source, MmathFighter.class);
+        TableUtils.createTableIfNotExists(source, MmathFighter.class);
 
-        try {
-            db.createCollection("event");
-        } catch (MongoCommandException e) {
 
-        }
-        return db.getCollection("event");
+        return dao;
     }
 
     @Bean
-    MongoCollection<Document> fighterStatsCollection(MongoClient mongoClient) {
+    public Dao<MmathFight, Long> fightDao(JdbcConnectionSource source) throws SQLException {
+        Dao<MmathFight, Long> dao = DaoManager.createDao(source, MmathFight.class);
+        TableUtils.createTableIfNotExists(source, MmathFight.class);
 
-        MongoDatabase db = mongoClient.getDatabase(mongoDb);
-
-        try {
-            db.createCollection("fighterStats");
-        } catch (MongoCommandException e) {
-
-        }
-        return db.getCollection("fighterStats");
-    }
-    @Bean
-    MongoCollection<Document> fightStatsCollection(MongoClient mongoClient) {
-
-        MongoDatabase db = mongoClient.getDatabase(mongoDb);
-
-        try {
-            db.createCollection("fightStats");
-        } catch (MongoCommandException e) {
-
-        }
-        return db.getCollection("fightStats");
-    }
-
-
-
-
-    @Bean
-    FighterDao fighterDao(MongoCollection<Document> fighterCollection, Sherdog sherdog){
-        return new FighterDao(fighterCollection, sherdog);
-    }
-
-
-    @Bean
-    EventDao eventDao(MongoCollection<Document> eventCollection, Sherdog sherdog){
-        return new EventDao(eventCollection, sherdog);
-    }
-
-
-    @Bean
-    OrganizationDao orgDao(MongoCollection<Document> orgCollection, Sherdog sherdog){
-        return new OrganizationDao(orgCollection, sherdog);
+        return dao;
     }
 
     @Bean
-    StatsDao fighterStatsDao(MongoCollection<Document> fighterStatsCollection){
-        return new StatsDao(fighterStatsCollection);
-    }
-    @Bean
-    StatsDao fightStatsDao(MongoCollection<Document> fightStatsCollection){
-        return new StatsDao(fightStatsCollection);
-    }
+    public Dao<MmathOrganization, String> orgDao(JdbcConnectionSource source) throws SQLException {
+        Dao<MmathOrganization, String> dao = DaoManager.createDao(source, MmathOrganization.class);
+        TableUtils.createTableIfNotExists(source, MmathOrganization.class);
 
-    public static void main(String[] args) {
-        ApplicationContext context =
-                new AnnotationConfigApplicationContext(DaoConfiguration.class);
-
-
-
-       FighterDao dao = (FighterDao) context.getBean("fighterDao");
-
-        dao.get("http://www.sherdog.com/fighter/Alistair-Overeem-461").ifPresent(f->{
-            System.out.println(f);
-        });
-
+        return dao;
     }
 }

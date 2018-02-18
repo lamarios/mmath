@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="build-sherdog" />
+        <module name="build-utils" />
+        <module name="builds3" />
+        <module name="domain-dao" />
+        <module name="domain-model" />
+        <module name="mmath-calculator" />
+        <module name="mmath-config" />
+        <module name="mmath-crawler-slave" />
+        <module name="mmath-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="build-gson" target="1.8" />
+      <module name="build-logs" target="1.8" />
+      <module name="build-mongodb" target="1.8" />
+      <module name="build-quartz" target="1.8" />
+      <module name="build-retrofit" target="1.8" />
+      <module name="build-s3" target="1.8" />
+      <module name="build-sherdog" target="1.8" />
+      <module name="build-spark" target="1.8" />
+      <module name="build-spring" target="1.8" />
+      <module name="build-utils" target="1.8" />
+      <module name="builds3" target="1.8" />
+      <module name="domain-dao" target="1.8" />
+      <module name="domain-model" target="1.8" />
+      <module name="mmath" target="1.8" />
+      <module name="mmath-calculator" target="1.8" />
+      <module name="mmath-config" target="1.8" />
+      <module name="mmath-crawler-slave" target="1.8" />
+      <module name="mmath-web" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

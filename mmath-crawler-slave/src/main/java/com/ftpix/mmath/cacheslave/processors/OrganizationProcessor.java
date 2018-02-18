@@ -3,13 +3,18 @@ package com.ftpix.mmath.cacheslave.processors;
 import com.ftpix.mmath.cacheslave.Receiver;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.cacheslave.models.ProcessType;
-import com.ftpix.mmath.dao.OrganizationDao;
+import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.models.Organization;
+import com.j256.ormlite.dao.Dao;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -17,8 +22,9 @@ import java.util.Optional;
  */
 public class OrganizationProcessor extends Processor<MmathOrganization> {
 
-private final OrganizationDao orgDao;
-    public OrganizationProcessor(Receiver receiver, OrganizationDao orgDao, Sherdog sherdog) {
+    private final Dao<MmathOrganization, String> orgDao;
+
+    public OrganizationProcessor(Receiver receiver, Dao<MmathOrganization, String> orgDao, Sherdog sherdog) {
         super(receiver, sherdog);
         this.orgDao = orgDao;
     }
@@ -26,34 +32,40 @@ private final OrganizationDao orgDao;
     @Override
     protected void propagate(MmathOrganization obj) {
         obj.getEvents().forEach(e -> {
-            //eventPool.convertAndSend(e.getSherdogUrl());
             receiver.process(new ProcessItem(e.getSherdogUrl(), ProcessType.EVENT));
         });
     }
 
     @Override
-    protected void insertToDao(MmathOrganization obj) {
-        orgDao.insert(obj);
+    protected void insertToDao(MmathOrganization obj) throws SQLException {
+        orgDao.createOrUpdate(obj);
     }
 
     @Override
     protected void updateToDao(MmathOrganization old, MmathOrganization fromSherdog) {
-        fromSherdog.setLastUpdate(LocalDate.now());
+        fromSherdog.setLastUpdate(new Date());
     }
 
     @Override
     protected MmathOrganization getFromSherdog(String url) throws IOException, ParseException {
-        return new MmathOrganization(sherdog.getOrganization(url));
+        Organization organization = sherdog.getOrganization(url);
+        MmathOrganization org = MmathOrganization.fromSherdog(organization);
+
+        org.setEvents(new ArrayList<>());
+        organization.getEvents().forEach(e -> org.getEvents().add(MmathEvent.fromSherdog(e)));
+
+
+        return org;
     }
 
     @Override
-    protected LocalDate getLastUpdate(MmathOrganization obj) {
+    protected Date getLastUpdate(MmathOrganization obj) {
         return obj.getLastUpdate();
     }
 
     @Override
-    protected Optional<MmathOrganization> getFromDao(String url) {
-        return orgDao.getByUrl(url);
+    protected Optional<MmathOrganization> getFromDao(String url) throws SQLException {
+        return Optional.ofNullable(orgDao.queryForId(url));
     }
 
     /*public void receiveMessage(String message) {
