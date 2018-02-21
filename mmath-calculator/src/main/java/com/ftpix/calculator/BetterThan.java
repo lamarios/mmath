@@ -1,5 +1,6 @@
 package com.ftpix.calculator;
 
+import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.Fight;
@@ -10,7 +11,10 @@ import com.j256.ormlite.stmt.Where;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,10 +26,12 @@ public class BetterThan {
 
     private final Dao<MmathFight, Long> fightDao;
     private final Dao<MmathFighter, String> fighterDao;
+    private final OrientDBDao orientDBDao;
 
-    public BetterThan(Dao<MmathFight, Long> fightDao, Dao<MmathFighter, String> fighterDao) {
+    public BetterThan(Dao<MmathFight, Long> fightDao, Dao<MmathFighter, String> fighterDao, OrientDBDao orientDBDao) {
         this.fightDao = fightDao;
         this.fighterDao = fighterDao;
+        this.orientDBDao = orientDBDao;
     }
 
     public List<MmathFighter> find(MmathFighter fighter1, MmathFighter fighter2) throws SQLException {
@@ -33,6 +39,22 @@ public class BetterThan {
         return calc.process();
     }
 
+
+    public List<String> findJDBC(MmathFighter fighter1, MmathFighter fighter2) throws SQLException {
+        List<String> results = new ArrayList<>();
+        try (
+                Connection con = orientDBDao.getJDBCConnection();
+                Statement statement = con.createStatement();
+                ResultSet rs = statement.executeQuery(String.format(OrientDBDao.BETTER_THAN_QUERY, fighter1.getSherdogUrl(), fighter2.getSherdogUrl()));
+        ) {
+            while (rs.next()) {
+                results.add(rs.getString("path"));
+            }
+        }
+
+
+        return results;
+    }
 
     private final class Calculator {
 
@@ -89,18 +111,18 @@ public class BetterThan {
                         getWinningFight(current.getFighter())
                                 .stream()
                                 //skipping fighters that we already checked to avoid infinite loops.
-                                .filter(f ->  !checked.contains(f.getFighter2().getSherdogUrl()))
+                                .filter(f -> !checked.contains(f.getFighter2().getSherdogUrl()))
                                 //sorting by most recent fights, might be faster as people most likely to search by recent fighters
                                 //.sorted(Comparator.comparing(Fight::getDate).reversed())
                                 .forEach(f -> {
-                                        MmathFighter fighter = f.getFighter2();
-                                            TreeNode fighterNode = new TreeNode(fighter, current);
-                                            //Let's try to get out ASAP, it'll save some processing
-                                            if (fighter.getSherdogUrl().equalsIgnoreCase(fighter2.getSherdogUrl())) {
-                                                targetNode = Optional.of(fighterNode);
-                                            } else {
-                                                queue.add(fighterNode);
-                                            }
+                                    MmathFighter fighter = f.getFighter2();
+                                    TreeNode fighterNode = new TreeNode(fighter, current);
+                                    //Let's try to get out ASAP, it'll save some processing
+                                    if (fighter.getSherdogUrl().equalsIgnoreCase(fighter2.getSherdogUrl())) {
+                                        targetNode = Optional.of(fighterNode);
+                                    } else {
+                                        queue.add(fighterNode);
+                                    }
                                 });
                         logger.info("Not found yet, queue size: {}", queue.size());
                     }
@@ -155,20 +177,20 @@ public class BetterThan {
             Where<MmathFight, Long> where = fightDao.queryBuilder().where();
             PreparedQuery<MmathFight> prepare = where.or(
                     where
-                        .eq("fighter1_id", fighter.getSherdogUrl())
-                        .and()
-                        .eq("result", FightResult.FIGHTER_1_WIN)
+                            .eq("fighter1_id", fighter.getSherdogUrl())
+                            .and()
+                            .eq("result", FightResult.FIGHTER_1_WIN)
                     ,
 
                     where
-                        .eq("fighter2_id", fighter.getSherdogUrl())
-                        .and()
-                        .eq("result", FightResult.FIGHTER_2_WIN)
+                            .eq("fighter2_id", fighter.getSherdogUrl())
+                            .and()
+                            .eq("result", FightResult.FIGHTER_2_WIN)
             ).prepare();
 
             //Rearaning fights before using it,
             // if the winning fighter is fighter 2 put it to fighter 1
-            List<MmathFight> results  = fightDao.query(prepare);
+            List<MmathFight> results = fightDao.query(prepare);
             return results
                     .stream()
                     .filter(f -> f.getFighter1() != null && f.getFighter2() != null)
@@ -181,7 +203,7 @@ public class BetterThan {
                                 f.setResult(FightResult.FIGHTER_1_WIN);
                             }
 
-                        }catch (NullPointerException e){
+                        } catch (NullPointerException e) {
                             throw e;
                         }
 

@@ -2,6 +2,7 @@ package com.ftpix.calculator;
 
 import com.ftpix.calculator.web.WebServer;
 import com.ftpix.mmath.DaoConfiguration;
+import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.j256.ormlite.dao.Dao;
@@ -25,8 +26,8 @@ public class CalculatorConfiguration {
     private final Logger logger = LogManager.getLogger();
 
     @Bean
-    BetterThan betterThan(Dao<MmathFight, Long> fightDao, Dao<MmathFighter, String> fighterDao) {
-        return new BetterThan(fightDao, fighterDao);
+    BetterThan betterThan(Dao<MmathFight, Long> fightDao, Dao<MmathFighter, String> fighterDao, OrientDBDao orientDBDao) {
+        return new BetterThan(fightDao, fighterDao, orientDBDao);
     }
 
     @Bean

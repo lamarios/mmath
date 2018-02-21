@@ -25,6 +25,7 @@
         <module>mmath-web</module>
         <module>builds3</module>
         <module>builds3</module>
+        <module>build-orientdb</module>
     </modules>
     <packaging>pom</packaging>
 

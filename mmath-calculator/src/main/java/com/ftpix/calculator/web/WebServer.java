@@ -78,14 +78,14 @@ public class WebServer {
         Optional<MmathFighter> fighter2 = getFighterFromHash(req.params(":fighter2"));
 
         if (fighter1.isPresent() && fighter2.isPresent()) {
-            return betterThan.find(fighter1.get(), fighter2.get())
+            return betterThan.findJDBC(fighter1.get(), fighter2.get())
                     .stream()
                     .map(f -> {
                         try {
-                            return fighterDao.queryForId(f.getSherdogUrl());
+                            return fighterDao.queryForId(f);
                         } catch (SQLException e) {
                             e.printStackTrace();
-                            return f;
+                            return null;
                         }
                     })
                     .collect(Collectors.toList());

@@ -21,6 +21,7 @@
       <module name="build-gson" target="1.8" />
       <module name="build-logs" target="1.8" />
       <module name="build-mongodb" target="1.8" />
+      <module name="build-orientdb" target="1.8" />
       <module name="build-quartz" target="1.8" />
       <module name="build-retrofit" target="1.8" />
       <module name="build-s3" target="1.8" />

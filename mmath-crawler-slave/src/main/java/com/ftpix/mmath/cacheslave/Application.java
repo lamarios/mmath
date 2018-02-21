@@ -1,6 +1,8 @@
 package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.DaoConfiguration;
+import com.ftpix.mmath.cacheslave.graph.GraphGenerator;
+import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
@@ -40,10 +42,14 @@ public class Application {
 
 
     @Bean
-    Refresh refresh(Receiver receiver, Dao<MmathFighter,String> fighterDao) {
+    Refresh refresh(Receiver receiver, Dao<MmathFighter, String> fighterDao) {
         return new Refresh(receiver, fighterDao);
     }
 
+    @Bean
+    GraphGenerator graphGenerator(OrientDBDao orientDBDao, Dao<MmathFight, Long> fightDao) {
+        return new GraphGenerator(orientDBDao, fightDao);
+    }
 
     ///////////////////////////
     ///// Quartz
@@ -61,6 +67,7 @@ public class Application {
 
         return job.getObject();
     }
+
 
     @Bean
     Trigger cronTrigger(JobDetail jobDetail) throws ParseException {
@@ -107,6 +114,62 @@ public class Application {
         return result;
     }
 
+    ///////////////////GRAPH JOBS
+    @Bean
+    Trigger graphSimpleTrigger(JobDetail graphJobDetail) throws ParseException {
+
+        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
+        trigger.setJobDetail(graphJobDetail);
+        trigger.setStartDelay(0);
+        trigger.setName("On start graph");
+        trigger.setRepeatCount(0);
+        trigger.setRepeatInterval(1);
+        trigger.afterPropertiesSet();
+
+        return trigger.getObject();
+    }
+
+    @Bean
+    JobDetail graphJobDetail(GraphGenerator graphGenerator) throws Exception {
+        MethodInvokingJobDetailFactoryBean job = new MethodInvokingJobDetailFactoryBean();
+        job.setTargetObject(graphGenerator);
+        job.setTargetMethod("process");
+        job.setName("refresh_graph");
+        job.setConcurrent(false);
+
+        job.afterPropertiesSet();
+
+        return job.getObject();
+    }
+
+    @Bean
+    Trigger graphCronTrigger(JobDetail graphJobDetail) throws ParseException {
+
+        CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
+        trigger.setJobDetail(graphJobDetail);
+        trigger.setCronExpression("20 00 00 * * ?");
+        // trigger.setCronExpression("00 * * * * ?");
+        trigger.setName("daily_graph");
+
+        trigger.afterPropertiesSet();
+
+        return trigger.getObject();
+    }
+    @Bean
+    Scheduler graphSchedulerFactory(Trigger graphCronTrigger, Trigger graphSimpleTrigger, JobDetail graphJobDetail) throws Exception {
+
+        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
+        scheduler.setJobDetails(graphJobDetail);
+        scheduler.setTriggers(graphSimpleTrigger, graphCronTrigger);
+        scheduler.setAutoStartup(true);
+
+
+        scheduler.afterPropertiesSet();
+
+        Scheduler result = scheduler.getObject();
+        result.start();
+        return result;
+    }
 
     public static void main(String[] args) {
         ApplicationContext context =
