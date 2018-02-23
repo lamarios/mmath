@@ -30,11 +30,17 @@ public class FighterProcessor extends Processor<MmathFighter> {
 
     @Override
     protected void propagate(MmathFighter obj) {
-        obj.getFights().forEach(f -> {
+        obj.getFightsAsFighter1().forEach(f -> {
 //            fighterPool.convertAndSend(f.getFighter2().getSherdogUrl());
 //            eventPool.convertAndSend(f.getEvent().getSherdogUrl());
             receiver.process(new ProcessItem(f.getFighter2().getSherdogUrl(), ProcessType.FIGHTER));
             receiver.process(new ProcessItem(f.getEvent().getSherdogUrl(), ProcessType.EVENT));
+        });
+
+        obj.getFightsAsFighter2().forEach(f -> {
+            receiver.process(new ProcessItem(f.getFighter1().getSherdogUrl(), ProcessType.FIGHTER));
+            receiver.process(new ProcessItem(f.getEvent().getSherdogUrl(), ProcessType.EVENT));
+
         });
     }
 
@@ -105,11 +111,6 @@ public class FighterProcessor extends Processor<MmathFighter> {
     protected MmathFighter getFromSherdog(String url) throws IOException, ParseException {
         Fighter fighter = sherdog.getFighter(url);
         MmathFighter mmathFighter = MmathFighter.fromSherdong(fighter);
-
-        mmathFighter.setFights(new ArrayList<>());
-        fighter.getFights().forEach(f -> mmathFighter.getFights().add(MmathFight.fromSherdog(f))
-        );
-
 
         return mmathFighter;
     }

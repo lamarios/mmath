@@ -22,17 +22,10 @@
             <groupId>com.ftpix</groupId>
             <artifactId>build-s3</artifactId>
             <version>${project.version}</version>
-            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.ftpix</groupId>
             <artifactId>build-spring</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>com.ftpix</groupId>
-            <artifactId>build-s3</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>

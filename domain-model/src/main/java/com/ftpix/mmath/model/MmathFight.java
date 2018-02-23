@@ -4,6 +4,7 @@ import com.ftpix.mmath.model.persisters.ZonedDateTimePersister;
 import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.utils.DateUtils;
+import com.google.gson.annotations.Expose;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -18,26 +19,39 @@ public class MmathFight {
     private long id;
 
 
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 0, uniqueCombo = true, width = 1000)
+    @Expose
+    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, uniqueCombo = true, width = 1000)
     private MmathFighter fighter1;
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 0, uniqueCombo = true, width = 1000)
+
+    @Expose
+    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, uniqueCombo = true, width = 1000)
     private MmathFighter fighter2;
 
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 0, uniqueCombo = true, width = 1000)
+    @Expose
+    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, uniqueCombo = true, width = 1000)
     private MmathEvent event;
 
+    @Expose
     @DatabaseField()
     private Date date;
 
+    @Expose
     @DatabaseField
     private FightResult result = FightResult.NOT_HAPPENED;
+
+    @Expose
     @DatabaseField
     private String winMethod;
+
+    @Expose
     @DatabaseField
     private String winTime;
+
+    @Expose
     @DatabaseField
     private int winRound;
 
+    @Expose
     @DatabaseField
     private Date lastUpdate = new Date();
 

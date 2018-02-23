@@ -1,8 +1,13 @@
 package com.ftpix.mmath.web;
 
-import com.ftpix.calculator.client.CalculatorClient;
-import com.ftpix.calculator.client.CalculatorClientConfiguration;
 import com.ftpix.mmath.DaoConfiguration;
+import com.ftpix.mmath.dao.OrientDBDao;
+import com.ftpix.mmath.model.MmathEvent;
+import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
+import com.j256.ormlite.dao.Dao;
+import mmath.S3Configuration;
+import mmath.S3Helper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
@@ -13,25 +18,17 @@ import org.springframework.context.annotation.*;
 
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import({DaoConfiguration.class, CalculatorClientConfiguration.class})
+@Import({DaoConfiguration.class,  S3Configuration.class})
 public class WebConfiguration {
 
     @Value("${web.port}")
     private int port;
 
 
-    @Value("${web.cache}")
-    private String webCacheFolder;
-
-    @Value("${web.crawler.cache}")
-    private String crawlerCacheFolder;
-
-    @Value("${web.files}")
-    private String webAssets;
 
     @Bean
-    WebServer server(FighterDao fighterDao, CalculatorClient calculatorClient, StatsDao fightStatsDao, StatsDao fighterStatsDao) {
-        WebServer server = new WebServer(port, webAssets, webCacheFolder, crawlerCacheFolder, calculatorClient, fighterDao, fighterStatsDao, fightStatsDao);
+    WebServer server(Dao<MmathFighter, String> fighterDao, Dao<MmathFight, Long> fightDao, Dao<MmathEvent, String> eventDao, OrientDBDao orientDBDao, S3Helper s3Helper) {
+        WebServer server = new WebServer(port, fighterDao, fightDao, eventDao, orientDBDao, s3Helper);
 
         server.startServer();
 

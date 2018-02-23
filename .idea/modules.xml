@@ -15,7 +15,6 @@
       <module fileurl="file://$PROJECT_DIR$/domain-dao/domain-dao.iml" filepath="$PROJECT_DIR$/domain-dao/domain-dao.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain-model/domain-model.iml" filepath="$PROJECT_DIR$/domain-model/domain-model.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath.iml" filepath="$PROJECT_DIR$/mmath.iml" />
-      <module fileurl="file://$PROJECT_DIR$/mmath-calculator/mmath-calculator.iml" filepath="$PROJECT_DIR$/mmath-calculator/mmath-calculator.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath-config/mmath-config.iml" filepath="$PROJECT_DIR$/mmath-config/mmath-config.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath-crawler-slave/mmath-crawler-slave.iml" filepath="$PROJECT_DIR$/mmath-crawler-slave/mmath-crawler-slave.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath-web/mmath-web.iml" filepath="$PROJECT_DIR$/mmath-web/mmath-web.iml" />

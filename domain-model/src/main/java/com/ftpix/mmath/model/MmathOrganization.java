@@ -8,9 +8,11 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gson.annotations.Expose;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import io.gsonfire.annotations.ExposeMethodResult;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Created by gz on 24-Sep-16.
@@ -23,8 +25,11 @@ public class MmathOrganization {
     @DatabaseField()
     private Date lastUpdate = new Date();
 
+    @Expose
     private List<MmathEvent> events;
+
     @DatabaseField
+    @Expose
     private String name;
 
     public Date getLastUpdate() {
@@ -59,6 +64,10 @@ public class MmathOrganization {
         return sherdogUrl;
     }
 
+    @ExposeMethodResult("id")
+    public String getIdAsHash() {
+        return DigestUtils.md5Hex(getSherdogUrl());
+    }
 
     public static MmathOrganization fromSherdog(Organization o) {
         MmathOrganization org = new MmathOrganization();

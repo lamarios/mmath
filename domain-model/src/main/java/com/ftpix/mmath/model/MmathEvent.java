@@ -11,8 +11,11 @@ import java.util.Date;
 import java.util.List;
 
 import com.ftpix.utils.DateUtils;
+import com.google.gson.annotations.Expose;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import io.gsonfire.annotations.ExposeMethodResult;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Created by gz on 24-Sep-16.
@@ -22,19 +25,23 @@ public class MmathEvent {
     @DatabaseField(id = true, width = 1000)
     private String sherdogUrl;
 
-
+    @Expose
     @DatabaseField()
     private Date date;
 
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, width = 1000)
+    @Expose
+    @DatabaseField(foreign = true, foreignAutoRefresh = false, maxForeignAutoRefreshLevel = 0, width = 1000)
     private MmathOrganization organization;
 
 
+    @Expose
     private List<MmathFight> fights;
 
+    @Expose
     @DatabaseField
     private String name;
 
+    @Expose
     @DatabaseField
     private String location;
 
@@ -96,6 +103,11 @@ public class MmathEvent {
 
     public String getSherdogUrl() {
         return sherdogUrl;
+    }
+
+    @ExposeMethodResult("id")
+    public String getIdAsHash() {
+        return DigestUtils.md5Hex(getSherdogUrl());
     }
 
     public static MmathEvent fromSherdog(Event event) {

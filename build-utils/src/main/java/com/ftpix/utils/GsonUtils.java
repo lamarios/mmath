@@ -12,6 +12,6 @@ import io.gsonfire.GsonFireBuilder;
 public class GsonUtils {
     public static Gson getGson() {
         return Converters.registerLocalDate(Converters.registerZonedDateTime(new GsonFireBuilder()
-                .enableExposeMethodResult().createGsonBuilder())).create();
+                .enableExposeMethodResult().createGsonBuilder())).excludeFieldsWithoutExposeAnnotation().create();
     }
 }

@@ -1,11 +1,12 @@
 package com.ftpix.mmath.dao;
 
+import com.ftpix.mmath.model.MmathFighter;
 import com.orientechnologies.orient.jdbc.OrientJdbcConnection;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class OrientDBDao {
@@ -23,6 +24,7 @@ public class OrientDBDao {
 
     /**
      * Gets a graph connection, easy to manage vertices and edges
+     *
      * @return a graph connection
      */
     public OrientGraph getGraph() {
@@ -31,6 +33,7 @@ public class OrientDBDao {
 
     /**
      * Gets a JDBC connection, easier to execute raw queries.
+     *
      * @return the connection
      * @throws SQLException
      */
@@ -39,7 +42,21 @@ public class OrientDBDao {
         info.put("user", username);
         info.put("password", password);
 
-        return (OrientJdbcConnection) DriverManager.getConnection("jdbc:orient:"+dbUrl, info);
+        return (OrientJdbcConnection) DriverManager.getConnection("jdbc:orient:" + dbUrl, info);
+    }
+
+    public List<String> findShortestPath(MmathFighter fighter1, MmathFighter fighter2) throws SQLException {
+        List<String> results = new ArrayList<>();
+        try (
+                Connection con = getJDBCConnection();
+                Statement statement = con.createStatement();
+                ResultSet rs = statement.executeQuery(String.format(OrientDBDao.BETTER_THAN_QUERY, fighter1.getSherdogUrl(), fighter2.getSherdogUrl()));
+        ) {
+            while (rs.next()) {
+                results.add(rs.getString("path"));
+            }
+        }
+        return results;
     }
 
 }

@@ -1,9 +1,12 @@
 package com.ftpix.mmath.sherdog;
 
 import com.ftpix.sherdogparser.Sherdog;
+import mmath.S3Configuration;
+import mmath.S3Helper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -11,30 +14,18 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Configuration
 @PropertySource("classpath:config.properties")
+@Import(S3Configuration.class)
 public class SherdogConfiguration {
 
 
-    @Value("${aws.secret}")
-    private String awsSecret;
 
-    @Value("${aws.access}")
-    private String awsAccess;
-
-    @Value("${aws.bucket}")
-    private String awsBucket;
-
-    @Value("${aws.region}")
-    private String awsRegion;
-
-    @Value("${aws.endpoint}")
-private String awsEndpoint;
     ////////////////////
     //// Sherdog
     /////
 
     @Bean
-    Sherdog sherdog() {
-        return new Sherdog.Builder().withPictureProcessor(new PictureToS3(awsAccess, awsSecret, awsBucket, awsRegion, awsEndpoint)).build();
+    Sherdog sherdog(S3Helper s3Helper) {
+        return new Sherdog.Builder().withPictureProcessor(new PictureToS3(s3Helper)).build();
     }
 
 

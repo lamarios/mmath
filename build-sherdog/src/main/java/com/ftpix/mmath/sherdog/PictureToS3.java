@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ftpix.sherdogparser.PictureProcessor;
 import com.ftpix.sherdogparser.models.Fighter;
+import mmath.S3Helper;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
@@ -19,28 +20,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 public class PictureToS3 implements PictureProcessor {
-    private final String awsAccess, awsSecret, awsBucket, awsRegion, awsEndpoint;
-    private final AmazonS3 awsClient;
-
-    public PictureToS3(String awsAccess, String awsSecret, String awsBucket, String awsRegion, String awsEndpoint) {
-        this.awsAccess = awsAccess;
-        this.awsSecret = awsSecret;
-        this.awsBucket = awsBucket;
-        this.awsRegion = awsRegion;
-        this.awsEndpoint = awsEndpoint;
-
-        AWSCredentials credentials = new BasicAWSCredentials(awsAccess, awsSecret);
-        ClientConfiguration clientConfiguration = new ClientConfiguration();
-        clientConfiguration.setSignerOverride("AWSS3V4SignerType");
+    private final S3Helper s3Helper;
 
 
-        awsClient = AmazonS3ClientBuilder
-                .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(awsEndpoint, awsRegion))
-                .withPathStyleAccessEnabled(true)
-                .withClientConfiguration(clientConfiguration)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .build();
+    public PictureToS3(S3Helper s3Helper) {
+
+        this.s3Helper = s3Helper;
     }
 
 
@@ -52,8 +37,8 @@ public class PictureToS3 implements PictureProcessor {
             Path tempFile = Files.createTempFile(key, "").toAbsolutePath();
             Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);
 
-            awsClient.putObject(awsBucket, key, tempFile.toFile());
-            return key;
+            s3Helper.uploadFile(key, tempFile.toFile());
+            return "/pictures/"+key;
         }
     }
 }
