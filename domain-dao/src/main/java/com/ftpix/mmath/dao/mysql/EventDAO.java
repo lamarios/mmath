@@ -38,8 +38,10 @@ public class EventDAO implements DAO<MmathEvent, String> {
     }
 
     @Override
-    public String getCreateTableString() {
-        return "CREATE TABLE IF NOT EXISTS events\n" +
+    public  void init() {
+
+
+        String createTable = "CREATE TABLE IF NOT EXISTS events\n" +
                 "(\n" +
                 "  sherdogUrl      VARCHAR(1000) NOT NULL\n" +
                 "    PRIMARY KEY,\n" +
@@ -50,6 +52,8 @@ public class EventDAO implements DAO<MmathEvent, String> {
                 "  lastUpdate      DATETIME      NULL\n" +
                 ")\n" +
                 "  ENGINE = InnoDB;";
+
+        template.execute(createTable);
     }
 
     @Override

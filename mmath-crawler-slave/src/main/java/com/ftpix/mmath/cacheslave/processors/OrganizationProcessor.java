@@ -8,6 +8,7 @@ import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organization;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -37,7 +38,11 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
 
     @Override
     protected void insertToDao(MmathOrganization obj) throws SQLException {
-        dao.getOrganizationDAO().insert(obj);
+        try {
+            dao.getOrganizationDAO().insert(obj);
+        }catch (DuplicateKeyException e){
+            logger.info("Organization already exists, skipping insert");
+        }
     }
 
     @Override

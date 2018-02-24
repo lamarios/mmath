@@ -33,6 +33,9 @@ public class DaoConfiguration {
     @Value("${db.url}")
     private String dbUrl;
 
+    @Value("${db.name}")
+    private String dbName;
+
     @Value("${db.username}")
     private String username;
 
@@ -46,6 +49,8 @@ public class DaoConfiguration {
     @Value("${orientdb.user}")
     private String orientdbUsername;
 
+    @Value("${orientdb.dbname}")
+    private String orientdbName;
     @Value("${orientdb.password}")
     private String orientdbPassword;
 
@@ -54,10 +59,25 @@ public class DaoConfiguration {
 
     @Bean
     public DataSource source() throws SQLException, PropertyVetoException {
-         ComboPooledDataSource ds = new ComboPooledDataSource();
+
+        ComboPooledDataSource ds = new ComboPooledDataSource();
         ds.setDriverClass("com.mysql.jdbc.Driver");
         ds.setPassword(password);
         ds.setJdbcUrl(dbUrl);
+        ds.setUser(username);
+        //Creating DB if not exist
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        jdbcTemplate.setDataSource(ds);
+        jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS " + dbName);
+
+        ds.close();
+
+
+
+        ds = new ComboPooledDataSource();
+        ds.setDriverClass("com.mysql.jdbc.Driver");
+        ds.setPassword(password);
+        ds.setJdbcUrl(dbUrl + dbName);
         ds.setUser(username);
 //        ComboPooledDataSource );
         ds.setMinPoolSize(5);
@@ -67,36 +87,41 @@ public class DaoConfiguration {
     }
 
     @Bean
-    JdbcTemplate template(DataSource source){
+    JdbcTemplate template(DataSource source) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setDataSource(source);
+
 
         return jdbcTemplate;
     }
 
-   @Bean
-   public MySQLDao dao(JdbcTemplate template){
+    @Bean
+    public MySQLDao dao(JdbcTemplate template) {
         return new MySQLDao(template);
-   }
+    }
 
     @Bean
-    public OrientDBDao orientDBDao(){
-       OrientDBDao dao = new OrientDBDao(orientdbUrl, orientdbUsername, orientdbPassword);
+    public OrientDBDao orientDBDao() {
+        OrientDBDao dao = new OrientDBDao(orientdbUrl, orientdbUsername, orientdbPassword, orientdbName);
 
         OrientGraph graph = dao.getGraph();
-       try{
-           OrientEdgeType edgeType = graph.createEdgeType(OrientDBDao.EDGE_BEAT);
-           edgeType.createProperty(OrientDBDao.FIGHT_ID, OType.LONG);
 
-           OrientVertexType vertexType = graph.createVertexType(OrientDBDao.VERTEX_FIGHTER);
-           vertexType.createProperty(OrientDBDao.SHERDOG_URL, OType.STRING);
-           graph.commit();
-       }catch(OSchemaException e){
-          //classes probably already exist
-       }finally {
-           graph.shutdown();
-       }
 
-       return dao;
+
+        try {
+
+            OrientEdgeType edgeType = graph.createEdgeType(OrientDBDao.EDGE_BEAT);
+            edgeType.createProperty(OrientDBDao.FIGHT_ID, OType.LONG);
+
+            OrientVertexType vertexType = graph.createVertexType(OrientDBDao.VERTEX_FIGHTER);
+            vertexType.createProperty(OrientDBDao.SHERDOG_URL, OType.STRING);
+            graph.commit();
+        } catch (OSchemaException e) {
+            //classes probably already exist
+        } finally {
+            graph.shutdown();
+        }
+
+        return dao;
     }
 }

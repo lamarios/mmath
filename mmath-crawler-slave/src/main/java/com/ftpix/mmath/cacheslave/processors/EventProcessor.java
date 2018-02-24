@@ -8,6 +8,7 @@ import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Event;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -43,16 +44,20 @@ public class EventProcessor extends Processor<MmathEvent> {
 
     private void insertFight(MmathFight f) {
         //TODO insert fight
-//        try {
-            dao.getFightDAO().insert(f);
-//        }catch (SQLException e){
-//            logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
-//        }
+        try {
+        dao.getFightDAO().insert(f);
+        }catch (DuplicateKeyException e){
+            logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
+       }
     }
 
     @Override
     protected void insertToDao(MmathEvent event) throws SQLException {
-        dao.getEventDAO().insert(event);
+        try {
+            dao.getEventDAO().insert(event);
+        } catch (DuplicateKeyException e) {
+            logger.info("Event already exist, skipping insert");
+        }
     }
 
     @Override

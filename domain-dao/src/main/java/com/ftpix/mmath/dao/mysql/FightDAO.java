@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -65,8 +66,8 @@ public class FightDAO implements DAO<MmathFight, Long> {
     }
 
     @Override
-    public String getCreateTableString() {
-        return "CREATE TABLE IF NOT EXISTS fights\n" +
+    public  void init() {
+        String createTable = "CREATE TABLE IF NOT EXISTS fights\n" +
                 "(\n" +
                 "  id          BIGINT AUTO_INCREMENT\n" +
                 "    PRIMARY KEY,\n" +
@@ -83,6 +84,8 @@ public class FightDAO implements DAO<MmathFight, Long> {
                 "  UNIQUE (fighter1_id, fighter2_id, event_id)\n" +
                 ")\n" +
                 "  ENGINE = InnoDB;";
+
+        template.execute(createTable);
     }
 
     @Override
@@ -107,7 +110,8 @@ public class FightDAO implements DAO<MmathFight, Long> {
 
         PreparedStatementCreator css = connection -> {
             PreparedStatement s = connection.prepareStatement("INSERT  INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, lastUpdate)" +
-                    "VALUES  (?,?,?,?,?,?,?,?,NOW())");
+                    "VALUES  (?,?,?,?,?,?,?,?,NOW())",
+                    Statement.RETURN_GENERATED_KEYS);
             setStatement(s, f);
             return s;
 
@@ -141,6 +145,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
         String query = "SELECT * FROM fights WHERE fighter2_id = ? OR fighter1_id = ? ORDER BY `date` ASC";
 
         return template.query(query, rowMapper, sherdogUrl, sherdogUrl).stream()
+                .filter(f-> Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).isPresent() && Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).isPresent())
                 .map(f -> {
                     //we need to swap
                     if(f.getFighter2().getSherdogUrl().equalsIgnoreCase(sherdogUrl)){
@@ -185,7 +190,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
 
         Optional<String> d = Optional.ofNullable(f.getDate()).map(DAO.TIME_FORMAT::format);
         if (d.isPresent()) {
-            s.setString(4, e.get());
+            s.setString(4, d.get());
         } else {
             s.setNull(4, Types.TIME);
         }

@@ -1,5 +1,6 @@
 package com.ftpix.utils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -13,6 +14,11 @@ public class DateUtils {
 
     public static LocalDateTime toLocalDateTime(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    }
+
+
+    public static LocalDate toLocalDate(Date date) {
+        return toLocalDateTime(date).toLocalDate();
     }
 
     public static Date fromZonedDateTime(ZonedDateTime date){

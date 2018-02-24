@@ -4,15 +4,18 @@ import com.ftpix.mmath.cacheslave.Receiver;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Fighter;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by gz on 16-Sep-16.
@@ -27,7 +30,7 @@ public class FighterProcessor extends Processor<MmathFighter> {
 
     @Override
     protected void propagate(MmathFighter obj) {
-        dao.getFightDAO().getByFighter(obj.getSherdogUrl()).forEach(f -> {
+        obj.getFights().forEach(f -> {
 //            fighterPool.convertAndSend(f.getFighter2().getSherdogUrl());
 //            eventPool.convertAndSend(f.getEvent().getSherdogUrl());
             receiver.process(new ProcessItem(f.getFighter2().getSherdogUrl(), ProcessType.FIGHTER));
@@ -38,7 +41,11 @@ public class FighterProcessor extends Processor<MmathFighter> {
 
     @Override
     protected void insertToDao(MmathFighter obj) throws SQLException {
-        dao.getFighterDAO().insert(obj);
+        try {
+            dao.getFighterDAO().insert(obj);
+        }catch (DuplicateKeyException e){
+            logger.info("Fighter already exist, skipping insert");
+        }
     }
 
     @Override
@@ -100,7 +107,9 @@ public class FighterProcessor extends Processor<MmathFighter> {
     @Override
     protected MmathFighter getFromSherdog(String url) throws IOException, ParseException {
         Fighter fighter = sherdog.getFighter(url);
+
         MmathFighter mmathFighter = MmathFighter.fromSherdong(fighter);
+        mmathFighter.setFights(fighter.getFights().stream().map(MmathFight::fromSherdog).collect(Collectors.toList()));
 
         return mmathFighter;
     }

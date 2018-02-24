@@ -26,8 +26,8 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
     }
 
     @Override
-    public String getCreateTableString() {
-        return"CREATE TABLE IF NOT EXISTS organizations\n" +
+    public void init() {
+        String createTable = "CREATE TABLE IF NOT EXISTS organizations\n" +
                 "(\n" +
                 "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
                 "    PRIMARY KEY,\n" +
@@ -35,6 +35,9 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
                 "  name       VARCHAR(255)  NULL\n" +
                 ")\n" +
                 "  ENGINE = InnoDB;";
+
+        template.execute(createTable);
+
     }
 
     @Override

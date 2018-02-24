@@ -15,7 +15,10 @@ import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,20 +67,32 @@ public class WebServer {
         Spark.post("/api/fighters/query", "application/json", this::searchFighter, gson::toJson);
         Spark.get("/api/fighters/:id", "application/json", this::getFighter, gson::toJson);
         Spark.get("/pictures/*", this::getFighterPicture);
+        Spark.exception(Exception.class, (e, request, response) -> {
+            logger.error("Error while processing request", e);
+            response.status(503);
+            response.body(e.getMessage());
+        });
     }
 
     /**
      * Get an image from the cache path
      */
-    private Object getFighterPicture(Request request, Response response) throws IOException {
+    private Object getFighterPicture(Request request, Response response) throws Exception {
 
         String fighterHash = request.splat()[0];
-
-
         response.raw().setContentType("application/octet-stream");
         response.raw().setHeader("Content-Disposition", "inline; filename=" + fighterHash);
-        try (S3ObjectInputStream in = s3Helper.getFile(fighterHash)) {
 
+        InputStream in;
+        if (fighterHash.equalsIgnoreCase("default.jpg")) {
+            File file = new File(getClass().getClassLoader().getResource("web/public/images/fighterPlaceHolder.gif").getFile());
+            in = new FileInputStream(file);
+
+        } else {
+            in = s3Helper.getFile(fighterHash);
+        }
+
+        try {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = in.read(buffer)) > 0) {
@@ -85,6 +100,9 @@ public class WebServer {
             }
 
             return response.raw();
+
+        } finally {
+            in.close();
         }
     }
 
@@ -97,39 +115,35 @@ public class WebServer {
         response.type("application/json");
     }
 
-    private List<MmathFighter> searchFighter(Request request, Response response) {
-        try {
-            Query query = gson.fromJson(request.body(), Query.class);
-            List<MmathFighter> fighters = dao.getFighterDAO().searchByName(query.getName());
+    private List<MmathFighter> searchFighter(Request request, Response response) throws InterruptedException {
+        Query query = gson.fromJson(request.body(), Query.class);
+        List<MmathFighter> fighters = dao.getFighterDAO().searchByName(query.getName());
 
-            List<Callable<Void>> tasks = new ArrayList<>();
-            List<MmathFighter> results = fighters.stream().map(fighter -> {
-                try {
-                    hydrateFighter(tasks, fighter);
-                    return fighter;
-                } catch (Exception e) {
-                    logger.error("Couldn't get fighter's fights", e);
-                    return null;
-                }
-            }).collect(Collectors.toList());
-
-
-            ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
+        List<Callable<Void>> tasks = new ArrayList<>();
+        List<MmathFighter> results = fighters.stream().map(fighter -> {
             try {
-                exec.invokeAll(tasks);
-            } finally {
-                exec.shutdown();
+                hydrateFighter(tasks, fighter);
+                return fighter;
+            } catch (Exception e) {
+                logger.error("Couldn't get fighter's fights", e);
+                return null;
             }
+        }).collect(Collectors.toList());
 
-            return results;
-        } catch (Exception e) {
-            logger.error(e);
-            return null;
+
+        ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
+        try {
+            exec.invokeAll(tasks);
+        } finally {
+            exec.shutdown();
         }
+
+        return results;
     }
 
     /**
      * Populate needed data for a fighter
+     *
      * @param tasks
      * @param fighter
      */

@@ -26,6 +26,6 @@ public class S3Configuration {
 
     @Bean
     public S3Helper s3Helper() {
-        return new S3Helper(awsAccess, awsSecret, awsBucket, awsRegion, awsEndpoint);
+        return new MinioS3Helper(awsAccess, awsSecret, awsBucket, awsRegion, awsEndpoint);
     }
 }

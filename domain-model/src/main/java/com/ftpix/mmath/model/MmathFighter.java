@@ -6,9 +6,11 @@ import com.google.gson.annotations.Expose;
 import io.gsonfire.annotations.ExposeMethodResult;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -150,7 +152,9 @@ public class MmathFighter {
         MmathFighter fighter = new MmathFighter();
 
         fighter.setSherdogUrl(f.getSherdogUrl());
-        fighter.setBirthday(DateUtils.toLocalDateTime(f.getBirthday()).toLocalDate());
+        Optional.ofNullable(f.getBirthday()).ifPresent(bd->{
+            fighter.setBirthday(DateUtils.toLocalDate(bd));
+        });
         fighter.setDraws(f.getDraws());
         fighter.setLosses(f.getLosses());
         fighter.setWins(f.getWins());

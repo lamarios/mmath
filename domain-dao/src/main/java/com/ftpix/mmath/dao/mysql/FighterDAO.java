@@ -22,7 +22,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         f.setName(resultSet.getString("name"));
         f.setPicture(resultSet.getString("picture"));
         Optional.ofNullable(resultSet.getString("birthday")).ifPresent(s -> {
-            f.setBirthday(LocalDate.parse(s, DAO.TIME_FORMAT));
+            f.setBirthday(LocalDate.parse(s, DAO.DATE_FORMAT));
         });
         f.setDraws(resultSet.getInt("draws"));
         f.setLosses(resultSet.getInt("losses"));
@@ -41,15 +41,15 @@ public class FighterDAO implements DAO<MmathFighter, String> {
     }
 
     @Override
-    public String getCreateTableString() {
-        return "CREATE TABLE fighters\n" +
+    public  void init() {
+        String createTable = "CREATE TABLE IF NOT  EXISTS fighters\n" +
                 "(\n" +
                 "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
                 "    PRIMARY KEY,\n" +
                 "  lastUpdate DATETIME      NULL,\n" +
                 "  name       VARCHAR(255)  NULL,\n" +
                 "  picture    VARCHAR(255)  NULL,\n" +
-                "  birthday   DATETIME      NULL,\n" +
+                "  birthday   DATE      NULL,\n" +
                 "  draws      INT           NULL,\n" +
                 "  losses     INT           NULL,\n" +
                 "  wins       INT           NULL,\n" +
@@ -59,6 +59,9 @@ public class FighterDAO implements DAO<MmathFighter, String> {
                 "  nc         INT           NULL\n" +
                 ")\n" +
                 "  ENGINE = InnoDB;\n";
+
+
+        template.execute(createTable);
     }
 
     @Override
@@ -80,14 +83,14 @@ public class FighterDAO implements DAO<MmathFighter, String> {
     @Override
     public String insert(MmathFighter f) {
         String sql = "INSERT INTO fighters (sherdogUrl, lastUpdate, name, picture, birthday, draws, losses, wins, weight, height, nickname, nc) VALUES (?,NOW(),?,?,?,?,?,?,?,?,?,?)";
-        template.update(sql, f.getSherdogUrl(), f.getName(), f.getPicture(), f.getBirthday() == null ? "MULL" : DAO.TIME_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc());
+        template.update(sql, f.getSherdogUrl(), f.getName(), f.getPicture(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc());
         return f.getSherdogUrl();
     }
 
     @Override
     public boolean update(MmathFighter f) {
         String sql = "UPDATE fighters SET  lastUpdate = NOW(), name = ?, picture = ?, birthday = ?, draws = ?, losses = ?, wins = ?, weight = ?, height = ?, nickname = ?, nc = ? WHERE sherdogUrl = ?";
-        return 1 == template.update(sql, f.getName(), f.getPicture(), f.getBirthday() == null ? "MULL" : DAO.TIME_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getSherdogUrl());
+        return 1 == template.update(sql, f.getName(), f.getPicture(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getSherdogUrl());
     }
 
     @Override

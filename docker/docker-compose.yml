@@ -1,0 +1,48 @@
+version: '2.2'
+services:
+ mmath_crawler:
+  container_name: mmath_crawler
+  image: gonzague/mmath-crawler
+  depends_on:
+   - "mmath_mysql"
+   - "mmath_orientdb"
+   - "mmath_minio"
+ mmath_web:
+  container_name: mmath_web
+  image: gonzague/mmath-web
+  depends_on:
+   - "mmath_mysql"
+   - "mmath_orientdb"
+   - "mmath_minio"
+  ports:
+   - "15678:15678"
+ mmath_mysql:
+  container_name: mmath_mysql
+  image: mysql
+  command: --innodb_buffer_pool_size=4G
+  volumes:
+   - ./mmath/mysql:/var/lib/mysql
+  environment:
+   MYSQL_ROOT_PASSWORD: password
+ mmath_orientdb:
+  container_name: mmath_orientdb
+  image: orientdb
+  ports:
+     - "12424:2424"
+     - "12480:2480"
+  volumes:
+   - ./mmath/orientdb/databases:/orientdb/databases
+  environment:
+   ORIENTDB_ROOT_PASSWORD: password
+ mmath_minio:
+  container_name: mmath_minio
+  image: minio/minio
+  command: server /data
+  ports:
+     - "19000:9000"
+  volumes:
+   - ./mmath/minio/data:/data
+   - ./mmath/minio/config:/root/.minio
+  environment:
+   MINIO_ACCESS_KEY: helloworld
+   MINIO_SECRET_KEY: helloworld

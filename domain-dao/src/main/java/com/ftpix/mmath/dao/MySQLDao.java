@@ -12,7 +12,7 @@ public class MySQLDao {
     private final EventDAO eventDAO;
     private final FightDAO fightDAO;
     private final OrganizationDAO organizationDAO;
-private JdbcTemplate template;
+    private JdbcTemplate template;
 
     public MySQLDao(JdbcTemplate template) {
 
@@ -23,13 +23,15 @@ private JdbcTemplate template;
         organizationDAO = new OrganizationDAO(template);
         this.template = template;
 
-        initTables();
+        init();
 
     }
 
-    private void initTables() {
-        template.execute(fightDAO.getCreateTableString());
-        template.execute(fightDAO.getCreateTableString());
+    private void init() {
+        fighterDAO.init();
+        fightDAO.init();
+        eventDAO.init();
+        organizationDAO.init();
     }
 
     public FighterDAO getFighterDAO() {
