@@ -2,14 +2,11 @@ package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.cacheslave.models.ProcessType;
-import com.ftpix.mmath.model.MmathFighter;
-import com.ftpix.utils.DateUtils;
-import com.j256.ormlite.dao.Dao;
+import com.ftpix.mmath.dao.MySQLDao;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -19,13 +16,13 @@ import static java.time.temporal.ChronoUnit.DAYS;
  */
 public class Refresh {
     private Logger logger = LogManager.getLogger();
-    private final Dao<MmathFighter, String> fighterDao;
+    private final MySQLDao dao;
     private final Receiver receiver;
 
     public static int RATE = 3;
 
-    public Refresh(Receiver receiver, Dao<MmathFighter, String> fighterDao) {
-        this.fighterDao = fighterDao;
+    public Refresh(Receiver receiver, MySQLDao dao) {
+        this.dao = dao;
         this.receiver = receiver;
     }
 
@@ -35,14 +32,14 @@ public class Refresh {
 
         final LocalDateTime today = LocalDateTime.now();
 
-        receiver.process(new ProcessItem("http://www.sherdog.com/fighter/Alistair-Overeem-461", ProcessType.FIGHTER));
+//        receiver.process(new ProcessItem("http://www.sherdog.com/fighter/Alistair-Overeem-461", ProcessType.FIGHTER));
 
-        fighterDao.queryForAll().parallelStream()
+        dao.getFighterDAO().getAll().parallelStream()
                 .forEach(f -> {
                     //refreshing the count for each fighter
 
 
-                    if (DAYS.between(DateUtils.toLocalDateTime(f.getLastUpdate()), today) >= RATE) {
+                    if (DAYS.between(f.getLastUpdate(), today) >= RATE) {
                         logger.info("Sending {} for refresh", f.getName());
                         receiver.process(new ProcessItem(f.getSherdogUrl(), ProcessType.FIGHTER));
                     }

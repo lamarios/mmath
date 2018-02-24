@@ -55,7 +55,7 @@ public abstract class Processor<T> {
                 LocalDateTime now = LocalDateTime.now();
                 T optResult = opt.get();
 
-                LocalDateTime date = DateUtils.toLocalDateTime(getLastUpdate(optResult));
+                LocalDateTime date = getLastUpdate(optResult);
                 long daysbetween = ChronoUnit.DAYS.between(date, now);
 
                 if (daysbetween >= Refresh.RATE) {
@@ -95,7 +95,7 @@ public abstract class Processor<T> {
 
     protected abstract T getFromSherdog(String url) throws IOException, ParseException;
 
-    protected abstract Date getLastUpdate(T obj);
+    protected abstract LocalDateTime getLastUpdate(T obj);
 
     protected abstract Optional<T> getFromDao(String url) throws SQLException;
 

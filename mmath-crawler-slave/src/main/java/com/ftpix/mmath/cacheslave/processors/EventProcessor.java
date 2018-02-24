@@ -3,31 +3,30 @@ package com.ftpix.mmath.cacheslave.processors;
 import com.ftpix.mmath.cacheslave.Receiver;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.cacheslave.models.ProcessType;
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Event;
-import com.j256.ormlite.dao.Dao;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Optional;
 
 /**
  * Created by gz on 16-Sep-16.
  */
 public class EventProcessor extends Processor<MmathEvent> {
-    private final Dao<MmathEvent, String> eventDao;
-    private final Dao<MmathFight, Long> fightDao;
 
-    public EventProcessor(Receiver receiver, Dao<MmathEvent, String> eventDao, Sherdog sherdog, Dao<MmathFight, Long> fightDao) {
+    private final MySQLDao dao;
+
+    public EventProcessor(Receiver receiver, MySQLDao dao, Sherdog sherdog) {
         super(receiver, sherdog);
-        this.eventDao = eventDao;
-        this.fightDao = fightDao;
+
+        this.dao = dao;
     }
 
 
@@ -44,24 +43,21 @@ public class EventProcessor extends Processor<MmathEvent> {
 
     private void insertFight(MmathFight f) {
         //TODO insert fight
-        try {
-            fightDao.createIfNotExists(f);
-        }catch (SQLException e){
-            logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
-        }
+//        try {
+            dao.getFightDAO().insert(f);
+//        }catch (SQLException e){
+//            logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
+//        }
     }
 
     @Override
     protected void insertToDao(MmathEvent event) throws SQLException {
-        eventDao.createOrUpdate(event);
+        dao.getEventDAO().insert(event);
     }
 
     @Override
     protected void updateToDao(MmathEvent old, MmathEvent event) throws SQLException {
-        event.setLastUpdate(new Date());
-
-
-        eventDao.update(event);
+        dao.getEventDAO().update(event);
     }
 
     @Override
@@ -77,13 +73,13 @@ public class EventProcessor extends Processor<MmathEvent> {
     }
 
     @Override
-    protected Date getLastUpdate(MmathEvent event) {
+    protected LocalDateTime getLastUpdate(MmathEvent event) {
         return event.getLastUpdate();
     }
 
     @Override
     protected Optional<MmathEvent> getFromDao(String url) throws SQLException {
-        return Optional.ofNullable(eventDao.queryForId(url));
+        return Optional.ofNullable(dao.getEventDAO().getById(url));
     }
 }
 

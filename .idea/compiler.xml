@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="build-s3" />
         <module name="build-sherdog" />
         <module name="build-utils" />
         <module name="builds3" />
@@ -20,6 +21,7 @@
       <module name="build-gson" target="1.8" />
       <module name="build-logs" target="1.8" />
       <module name="build-mongodb" target="1.8" />
+      <module name="build-mysql" target="1.8" />
       <module name="build-orientdb" target="1.8" />
       <module name="build-quartz" target="1.8" />
       <module name="build-retrofit" target="1.8" />

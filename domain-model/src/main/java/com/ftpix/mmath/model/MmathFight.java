@@ -1,59 +1,46 @@
 package com.ftpix.mmath.model;
 
-import com.ftpix.mmath.model.persisters.ZonedDateTimePersister;
 import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.utils.DateUtils;
 import com.google.gson.annotations.Expose;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
 
-@DatabaseTable(tableName = "fights")
 public class MmathFight {
 
-    @DatabaseField(generatedId = true, allowGeneratedIdInsert = true)
     private long id;
 
 
     @Expose
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, uniqueCombo = true, width = 1000)
     private MmathFighter fighter1;
 
     @Expose
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, uniqueCombo = true, width = 1000)
     private MmathFighter fighter2;
 
     @Expose
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 1, uniqueCombo = true, width = 1000)
     private MmathEvent event;
 
     @Expose
-    @DatabaseField()
-    private Date date;
+    private ZonedDateTime date;
 
     @Expose
-    @DatabaseField
     private FightResult result = FightResult.NOT_HAPPENED;
 
     @Expose
-    @DatabaseField
     private String winMethod;
 
     @Expose
-    @DatabaseField
     private String winTime;
 
     @Expose
-    @DatabaseField
     private int winRound;
 
     @Expose
-    @DatabaseField
-    private Date lastUpdate = new Date();
+    private LocalDateTime lastUpdate = LocalDateTime.now();
 
     public long getId() {
         return id;
@@ -85,14 +72,6 @@ public class MmathFight {
 
     public void setFighter2(MmathFighter fighter2) {
         this.fighter2 = fighter2;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public FightResult getResult() {
@@ -127,19 +106,26 @@ public class MmathFight {
         this.winRound = winRound;
     }
 
+    public ZonedDateTime getDate() {
+        return date;
+    }
 
-    public Date getLastUpdate() {
+    public void setDate(ZonedDateTime date) {
+        this.date = date;
+    }
+
+    public LocalDateTime getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
     public static MmathFight fromSherdog(Fight fight) {
         MmathFight newFight = new MmathFight();
 
-        newFight.setDate(DateUtils.fromZonedDateTime(fight.getDate()));
+        newFight.setDate(fight.getDate());
 
         MmathEvent event = new MmathEvent();
         event.setSherdogUrl(fight.getEvent().getSherdogUrl());

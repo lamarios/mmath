@@ -1,17 +1,10 @@
 package com.ftpix.mmath;
 
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
-import com.ftpix.mmath.model.MmathEvent;
-import com.ftpix.mmath.model.MmathFight;
-import com.ftpix.mmath.model.MmathFighter;
-import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.mmath.sherdog.SherdogConfiguration;
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.table.TableUtils;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.orientechnologies.orient.core.exception.OSchemaException;
-import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.tinkerpop.blueprints.impls.orient.OrientEdgeType;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
@@ -21,7 +14,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 
 /**
@@ -56,42 +53,31 @@ public class DaoConfiguration {
     }
 
     @Bean
-    public JdbcConnectionSource source() throws SQLException {
-        return new JdbcConnectionSource(dbUrl, username, password);
+    public DataSource source() throws SQLException, PropertyVetoException {
+         ComboPooledDataSource ds = new ComboPooledDataSource();
+        ds.setDriverClass("com.mysql.jdbc.Driver");
+        ds.setPassword(password);
+        ds.setJdbcUrl(dbUrl);
+        ds.setUser(username);
+//        ComboPooledDataSource );
+        ds.setMinPoolSize(5);
+        ds.setMaxPoolSize(10);
+
+        return ds;
     }
 
     @Bean
-    public Dao<MmathEvent, String> eventDao(JdbcConnectionSource source) throws SQLException {
-        Dao<MmathEvent, String> dao = DaoManager.createDao(source, MmathEvent.class);
-        TableUtils.createTableIfNotExists(source, MmathEvent.class);
+    JdbcTemplate template(DataSource source){
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        jdbcTemplate.setDataSource(source);
 
-        return dao;
+        return jdbcTemplate;
     }
 
-    @Bean
-    public Dao<MmathFighter, String> fighterDao(JdbcConnectionSource source) throws SQLException {
-        Dao<MmathFighter, String> dao = DaoManager.createDao(source, MmathFighter.class);
-        TableUtils.createTableIfNotExists(source, MmathFighter.class);
-
-
-        return dao;
-    }
-
-    @Bean
-    public Dao<MmathFight, Long> fightDao(JdbcConnectionSource source) throws SQLException {
-        Dao<MmathFight, Long> dao = DaoManager.createDao(source, MmathFight.class);
-        TableUtils.createTableIfNotExists(source, MmathFight.class);
-
-        return dao;
-    }
-
-    @Bean
-    public Dao<MmathOrganization, String> orgDao(JdbcConnectionSource source) throws SQLException {
-        Dao<MmathOrganization, String> dao = DaoManager.createDao(source, MmathOrganization.class);
-        TableUtils.createTableIfNotExists(source, MmathOrganization.class);
-
-        return dao;
-    }
+   @Bean
+   public MySQLDao dao(JdbcTemplate template){
+        return new MySQLDao(template);
+   }
 
     @Bean
     public OrientDBDao orientDBDao(){

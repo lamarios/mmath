@@ -1,9 +1,9 @@
 package com.ftpix.mmath.cacheslave.graph;
 
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.sherdogparser.models.FightResult;
-import com.j256.ormlite.dao.Dao;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import static com.ftpix.mmath.dao.OrientDBDao.FIGHT_ID;
@@ -22,12 +21,12 @@ import static com.ftpix.mmath.dao.OrientDBDao.SHERDOG_URL;
 
 public class GraphGenerator {
     private final OrientDBDao orientDb;
-    private final Dao<MmathFight, Long> fightDao;
+    private final MySQLDao dao;
     private Logger logger = LogManager.getLogger();
 
-    public GraphGenerator(OrientDBDao orientDb, Dao<MmathFight, Long> fightDao) {
+    public GraphGenerator(OrientDBDao orientDb, MySQLDao dao) {
         this.orientDb = orientDb;
-        this.fightDao = fightDao;
+        this.dao = dao;
     }
 
 
@@ -47,7 +46,7 @@ public class GraphGenerator {
 
 
             logger.info("Getting all the processable fights");
-            fightDao.queryForAll()
+            dao.getFightDAO().getAll()
                     .stream()
                     .filter(f -> f.getFighter2() != null && f.getFighter1() != null && (f.getResult() == FightResult.FIGHTER_1_WIN || f.getResult() == FightResult.FIGHTER_2_WIN))
                     .filter(f -> !graphFights.containsKey(f.getId()))

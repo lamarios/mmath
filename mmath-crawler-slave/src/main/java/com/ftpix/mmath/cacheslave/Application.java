@@ -2,13 +2,9 @@ package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.DaoConfiguration;
 import com.ftpix.mmath.cacheslave.graph.GraphGenerator;
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
-import com.ftpix.mmath.model.MmathEvent;
-import com.ftpix.mmath.model.MmathFight;
-import com.ftpix.mmath.model.MmathFighter;
-import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
-import com.j256.ormlite.dao.Dao;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
@@ -36,19 +32,19 @@ public class Application {
 
     //Receiver
     @Bean
-    Receiver receiver(Dao<MmathFighter, String> fighterDao, Dao<MmathEvent, String> eventDao, Dao<MmathOrganization, String> orgDao, Dao<MmathFight, Long> fightDao, Sherdog sherdog) {
-        return new Receiver(fighterDao, eventDao, orgDao, fightDao, sherdog);
+    Receiver receiver(MySQLDao dao, Sherdog sherdog) {
+        return new Receiver(dao, sherdog);
     }
 
 
     @Bean
-    Refresh refresh(Receiver receiver, Dao<MmathFighter, String> fighterDao) {
-        return new Refresh(receiver, fighterDao);
+    Refresh refresh(Receiver receiver, MySQLDao dao) {
+        return new Refresh(receiver, dao);
     }
 
     @Bean
-    GraphGenerator graphGenerator(OrientDBDao orientDBDao, Dao<MmathFight, Long> fightDao) {
-        return new GraphGenerator(orientDBDao, fightDao);
+    GraphGenerator graphGenerator(OrientDBDao orientDBDao, MySQLDao dao)  {
+        return new GraphGenerator(orientDBDao, dao);
     }
 
     ///////////////////////////

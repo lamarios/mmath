@@ -1,42 +1,33 @@
 package com.ftpix.mmath.model;
 
-import com.ftpix.mmath.model.persisters.LocalDatePersister;
-import com.ftpix.sherdogparser.models.Event;
 import com.ftpix.sherdogparser.models.Organization;
-
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-
 import com.google.gson.annotations.Expose;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 import io.gsonfire.annotations.ExposeMethodResult;
 import org.apache.commons.codec.digest.DigestUtils;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by gz on 24-Sep-16.
  */
-@DatabaseTable(tableName = "organizations")
 public class MmathOrganization {
-    @DatabaseField(id = true, width = 1000)
     private String sherdogUrl;
 
-    @DatabaseField()
-    private Date lastUpdate = new Date();
+    private LocalDateTime lastUpdate = LocalDateTime.now();
 
     @Expose
     private List<MmathEvent> events;
 
-    @DatabaseField
     @Expose
     private String name;
 
-    public Date getLastUpdate() {
+    public LocalDateTime getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 

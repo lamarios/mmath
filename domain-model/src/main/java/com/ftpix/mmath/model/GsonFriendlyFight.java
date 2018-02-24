@@ -2,11 +2,25 @@ package com.ftpix.mmath.model;
 
 import com.ftpix.sherdogparser.models.FightResult;
 import com.google.gson.annotations.Expose;
-import com.j256.ormlite.field.DatabaseField;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 public class GsonFriendlyFight {
+
+    public GsonFriendlyFight(MmathFight f){
+
+        setDate(f.getEvent().getDate());
+        //we need to swap
+
+        setResult(f.getResult());
+        setOpponent(f.getFighter2().getName());
+        setEvent(f.getEvent().getName());
+        setWinMethod(f.getWinMethod());
+        setWinRound(f.getWinRound());
+        setWinTime(f.getWinTime());
+    }
 
     @Expose
     private String opponent;
@@ -15,7 +29,7 @@ public class GsonFriendlyFight {
     private FightResult result;
 
     @Expose
-    private Date date;
+    private ZonedDateTime date;
 
     @Expose
     private String event;
@@ -29,11 +43,11 @@ public class GsonFriendlyFight {
     @Expose
     private int winRound;
 
-    public Date getDate() {
+    public ZonedDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(ZonedDateTime date) {
         this.date = date;
     }
 
@@ -84,4 +98,7 @@ public class GsonFriendlyFight {
     public void setWinRound(int winRound) {
         this.winRound = winRound;
     }
+
+
+
 }

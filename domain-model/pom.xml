@@ -20,11 +20,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.j256.ormlite</groupId>
-            <artifactId>ormlite-jdbc</artifactId>
-            <version>5.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.ftpix</groupId>
             <artifactId>build-sherdog</artifactId>
             <version>${project.version}</version>

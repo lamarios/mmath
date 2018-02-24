@@ -1,11 +1,8 @@
 package com.ftpix.mmath.web;
 
 import com.ftpix.mmath.DaoConfiguration;
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
-import com.ftpix.mmath.model.MmathEvent;
-import com.ftpix.mmath.model.MmathFight;
-import com.ftpix.mmath.model.MmathFighter;
-import com.j256.ormlite.dao.Dao;
 import mmath.S3Configuration;
 import mmath.S3Helper;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +24,8 @@ public class WebConfiguration {
 
 
     @Bean
-    WebServer server(Dao<MmathFighter, String> fighterDao, Dao<MmathFight, Long> fightDao, Dao<MmathEvent, String> eventDao, OrientDBDao orientDBDao, S3Helper s3Helper) {
-        WebServer server = new WebServer(port, fighterDao, fightDao, eventDao, orientDBDao, s3Helper);
+    WebServer server(MySQLDao dao, OrientDBDao orientDBDao, S3Helper s3Helper) {
+        WebServer server = new WebServer(port, dao, orientDBDao, s3Helper);
 
         server.startServer();
 

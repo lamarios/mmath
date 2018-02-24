@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>build-spring</module>
+        <module>build-s3</module>
         <module>domain-model</module>
         <module>build-gson</module>
         <module>build-logs</module>
@@ -22,6 +23,7 @@
         <module>build-quartz</module>
         <module>mmath-web</module>
         <module>build-orientdb</module>
+        <module>build-mysql</module>
     </modules>
     <packaging>pom</packaging>
 

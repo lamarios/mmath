@@ -1,36 +1,24 @@
 package com.ftpix.mmath.model;
 
-import com.ftpix.mmath.model.persisters.LocalDatePersister;
-import com.ftpix.mmath.model.persisters.ZonedDateTimePersister;
 import com.ftpix.sherdogparser.models.Event;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.List;
-
-import com.ftpix.utils.DateUtils;
 import com.google.gson.annotations.Expose;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 import io.gsonfire.annotations.ExposeMethodResult;
 import org.apache.commons.codec.digest.DigestUtils;
+
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * Created by gz on 24-Sep-16.
  */
-@DatabaseTable(tableName = "events")
 public class MmathEvent {
-    @DatabaseField(id = true, width = 1000)
     private String sherdogUrl;
 
     @Expose
-    @DatabaseField()
-    private Date date;
+    private ZonedDateTime date;
 
     @Expose
-    @DatabaseField(foreign = true, foreignAutoRefresh = false, maxForeignAutoRefreshLevel = 0, width = 1000)
     private MmathOrganization organization;
 
 
@@ -38,30 +26,19 @@ public class MmathEvent {
     private List<MmathFight> fights;
 
     @Expose
-    @DatabaseField
     private String name;
 
     @Expose
-    @DatabaseField
     private String location;
 
-    @DatabaseField()
-    private Date lastUpdate = new Date();
+    private LocalDateTime lastUpdate = LocalDateTime.now();
 
-    public Date getLastUpdate() {
+    public LocalDateTime getLastUpdate() {
         return lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public MmathOrganization getOrganization() {
@@ -96,6 +73,13 @@ public class MmathEvent {
         return location;
     }
 
+    public ZonedDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(ZonedDateTime date) {
+        this.date = date;
+    }
 
     public String getName() {
         return name;
@@ -112,7 +96,7 @@ public class MmathEvent {
 
     public static MmathEvent fromSherdog(Event event) {
         MmathEvent newEvent = new MmathEvent();
-        newEvent.setDate(DateUtils.fromZonedDateTime(event.getDate()));
+        newEvent.setDate(event.getDate());
         newEvent.setLocation(event.getLocation());
         newEvent.setName(event.getName());
         newEvent.setSherdogUrl(event.getSherdogUrl());

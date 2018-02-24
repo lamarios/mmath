@@ -1,21 +1,13 @@
 package com.ftpix.mmath.web;
 
+import com.amazonaws.services.s3.model.FileHeaderInfo;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
-import com.ftpix.mmath.model.GsonFriendlyFight;
-import com.ftpix.mmath.model.MmathEvent;
-import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.web.models.Query;
-import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.field.SqlType;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
-import com.j256.ormlite.stmt.Where;
 import mmath.S3Helper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,9 +18,11 @@ import spark.Spark;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -38,20 +32,17 @@ public class WebServer {
 
     private final int port;
 
-    private final Dao<MmathFighter, String> fighterDao;
-    private final Dao<MmathFight, Long> fightDao;
-    private final Dao<MmathEvent, String> eventDao;
+    private final MySQLDao dao;
     private final OrientDBDao orientDBDao;
     private final S3Helper s3Helper;
 
     private Logger logger = LogManager.getLogger();
     private final Gson gson = GsonUtils.getGson();
 
-    public WebServer(int port, Dao<MmathFighter, String> fighterDao, Dao<MmathFight, Long> fightDao, Dao<MmathEvent, String> eventDao, OrientDBDao orientDBDao, S3Helper s3Helper) {
+
+    public WebServer(int port, MySQLDao dao, OrientDBDao orientDBDao, S3Helper s3Helper) {
         this.port = port;
-        this.fighterDao = fighterDao;
-        this.fightDao = fightDao;
-        this.eventDao = eventDao;
+        this.dao = dao;
         this.orientDBDao = orientDBDao;
         this.s3Helper = s3Helper;
     }
@@ -99,7 +90,7 @@ public class WebServer {
 
     private MmathFighter getFighter(Request request, Response response) throws SQLException {
 
-        return getFighterFromHash(request.params(":id")).get();
+        return Optional.ofNullable(dao.getFighterDAO().getFromHash(request.params(":id"))).get();
     }
 
     private void jsonRequest(Request request, Response response) {
@@ -109,18 +100,12 @@ public class WebServer {
     private List<MmathFighter> searchFighter(Request request, Response response) {
         try {
             Query query = gson.fromJson(request.body(), Query.class);
-            PreparedQuery<MmathFighter> like = fighterDao.queryBuilder()
-                    .limit(5l)
-                    .where()
-                    .like("name", "%" + query.getName() + "%")
-                    .prepare();
-            ;
-            List<MmathFighter> fighters = fighterDao.query(like);
+            List<MmathFighter> fighters = dao.getFighterDAO().searchByName(query.getName());
 
-
+            List<Callable<Void>> tasks = new ArrayList<>();
             List<MmathFighter> results = fighters.stream().map(fighter -> {
                 try {
-                   // setFighterFights(fighter);
+                    hydrateFighter(tasks, fighter);
                     return fighter;
                 } catch (Exception e) {
                     logger.error("Couldn't get fighter's fights", e);
@@ -128,11 +113,35 @@ public class WebServer {
                 }
             }).collect(Collectors.toList());
 
+
+            ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
+            try {
+                exec.invokeAll(tasks);
+            } finally {
+                exec.shutdown();
+            }
+
             return results;
         } catch (Exception e) {
             logger.error(e);
             return null;
         }
+    }
+
+    /**
+     * Populate needed data for a fighter
+     * @param tasks
+     * @param fighter
+     */
+    private void hydrateFighter(List<Callable<Void>> tasks, MmathFighter fighter) {
+        tasks.add(() -> {
+            fighter.setFights(dao.getFightDAO().getByFighter(fighter.getSherdogUrl()));
+            fighter.getFights().forEach(f -> {
+                f.setEvent(dao.getEventDAO().getById(f.getEvent().getSherdogUrl()));
+                f.setFighter2(dao.getFighterDAO().getById(f.getFighter2().getSherdogUrl()));
+            });
+            return null;
+        });
     }
 
     private List<MmathFighter> betterThan(Request request, Response response) throws IOException {
@@ -143,22 +152,33 @@ public class WebServer {
 
             logger.info("{} vs {}", fighter1, fighter2);
 
-            Optional<MmathFighter> fighter1Opt = getFighterFromHash(fighter1);
-            Optional<MmathFighter> fighter2Opt = getFighterFromHash(fighter2);
+            List<Callable<Void>> tasks = new ArrayList<>();
+
+            Optional<MmathFighter> fighter1Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter1));
+            Optional<MmathFighter> fighter2Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter2));
 
             if (fighter1Opt.isPresent() && fighter2Opt.isPresent()) {
                 List<MmathFighter> result = orientDBDao.findShortestPath(fighter1Opt.get(), fighter2Opt.get())
                         .stream()
                         .map(f -> {
-                            try {
-                                MmathFighter fighter = fighterDao.queryForId(f);
-                                //setFighterFights(fighter);
-                                return fighter;
-                            } catch (SQLException e) {
-                                return null;
-                            }
+//                            try {
+                            final MmathFighter fighter = dao.getFighterDAO().getById(f);
+
+                            hydrateFighter(tasks, fighter);
+                            //setFighterFights(fighter);
+                            return fighter;
+//                            } catch (SQLException e) {
+//                                return null;
+//                            }
                         })
                         .collect(Collectors.toList());
+
+                ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
+                try {
+                    exec.invokeAll(tasks);
+                } finally {
+                    exec.shutdown();
+                }
 
                 logger.info("Result size: {}", result.size());
                 return result;
@@ -176,18 +196,6 @@ public class WebServer {
 
     }
 
-    /**
-     * Gets a fighter from its url hash
-     *
-     * @param hash
-     * @return
-     * @throws SQLException
-     */
-    private Optional<MmathFighter> getFighterFromHash(String hash) throws SQLException {
-        PreparedQuery<MmathFighter> query = fighterDao.queryBuilder().where().raw("MD5(sherdogUrl) = ?", new SelectArg(SqlType.STRING, hash)).prepare();
-        return fighterDao.query(query).stream().findFirst();
-
-    }
 
     /* private void setFighterFights(MmathFighter fighter) throws SQLException {
 

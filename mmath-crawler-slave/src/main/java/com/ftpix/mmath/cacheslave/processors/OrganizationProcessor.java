@@ -3,18 +3,17 @@ package com.ftpix.mmath.cacheslave.processors;
 import com.ftpix.mmath.cacheslave.Receiver;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.mmath.cacheslave.models.ProcessType;
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organization;
-import com.j256.ormlite.dao.Dao;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -22,11 +21,11 @@ import java.util.Optional;
  */
 public class OrganizationProcessor extends Processor<MmathOrganization> {
 
-    private final Dao<MmathOrganization, String> orgDao;
+    private final MySQLDao dao;
 
-    public OrganizationProcessor(Receiver receiver, Dao<MmathOrganization, String> orgDao, Sherdog sherdog) {
+    public OrganizationProcessor(Receiver receiver, MySQLDao dao, Sherdog sherdog) {
         super(receiver, sherdog);
-        this.orgDao = orgDao;
+        this.dao = dao;
     }
 
     @Override
@@ -38,12 +37,12 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
 
     @Override
     protected void insertToDao(MmathOrganization obj) throws SQLException {
-        orgDao.createOrUpdate(obj);
+        dao.getOrganizationDAO().insert(obj);
     }
 
     @Override
     protected void updateToDao(MmathOrganization old, MmathOrganization fromSherdog) {
-        fromSherdog.setLastUpdate(new Date());
+        dao.getOrganizationDAO().update(fromSherdog);
     }
 
     @Override
@@ -59,13 +58,13 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
     }
 
     @Override
-    protected Date getLastUpdate(MmathOrganization obj) {
+    protected LocalDateTime getLastUpdate(MmathOrganization obj) {
         return obj.getLastUpdate();
     }
 
     @Override
     protected Optional<MmathOrganization> getFromDao(String url) throws SQLException {
-        return Optional.ofNullable(orgDao.queryForId(url));
+        return Optional.ofNullable(dao.getOrganizationDAO().getById(url));
     }
 
     /*public void receiveMessage(String message) {
