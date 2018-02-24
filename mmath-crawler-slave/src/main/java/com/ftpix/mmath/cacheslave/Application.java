@@ -70,7 +70,7 @@ public class Application {
 
         CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
         trigger.setJobDetail(jobDetail);
-        trigger.setCronExpression("00 00 00 ? * TUE");
+        trigger.setCronExpression("00 00 00 * * ?");
         // trigger.setCronExpression("00 * * * * ?");
         trigger.setName("weekly");
 
@@ -143,7 +143,7 @@ public class Application {
 
         CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
         trigger.setJobDetail(graphJobDetail);
-        trigger.setCronExpression("23 00 00 ? * TUE");
+        trigger.setCronExpression("23 00 00 * * ?");
         // trigger.setCronExpression("00 * * * * ?");
         trigger.setName("weekly_graph");
 
