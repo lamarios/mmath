@@ -42,6 +42,9 @@ public class DaoConfiguration {
     @Value("${db.password}")
     private String password;
 
+    @Value("${db.options}")
+    private String options;
+
 
     @Value("${orientdb.url}")
     private String orientdbUrl;
@@ -63,7 +66,7 @@ public class DaoConfiguration {
         ComboPooledDataSource ds = new ComboPooledDataSource();
         ds.setDriverClass("com.mysql.jdbc.Driver");
         ds.setPassword(password);
-        ds.setJdbcUrl(dbUrl);
+        ds.setJdbcUrl(dbUrl+options);
         ds.setUser(username);
         //Creating DB if not exist
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
@@ -77,7 +80,7 @@ public class DaoConfiguration {
         ds = new ComboPooledDataSource();
         ds.setDriverClass("com.mysql.jdbc.Driver");
         ds.setPassword(password);
-        ds.setJdbcUrl(dbUrl + dbName);
+        ds.setJdbcUrl(dbUrl + dbName+options);
         ds.setUser(username);
 //        ComboPooledDataSource );
         ds.setMinPoolSize(5);

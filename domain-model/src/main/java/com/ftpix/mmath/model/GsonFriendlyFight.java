@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 public class GsonFriendlyFight {
 
@@ -15,7 +16,14 @@ public class GsonFriendlyFight {
         //we need to swap
 
         setResult(f.getResult());
-        setOpponent(f.getFighter2().getName());
+        Optional<String> opponent = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getName);
+        if(opponent.isPresent()){
+            setOpponent(f.getFighter2().getName());
+        }else{
+           setOpponent("Unknown Fighter");
+        }
+
+
         setEvent(f.getEvent().getName());
         setWinMethod(f.getWinMethod());
         setWinRound(f.getWinRound());

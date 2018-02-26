@@ -130,12 +130,13 @@ public class WebServer {
             }
         }).collect(Collectors.toList());
 
-
-        ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
-        try {
-            exec.invokeAll(tasks);
-        } finally {
-            exec.shutdown();
+        if (results.size() > 0) {
+            ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
+            try {
+                exec.invokeAll(tasks);
+            } finally {
+                exec.shutdown();
+            }
         }
 
         return results;
@@ -171,9 +172,20 @@ public class WebServer {
             Optional<MmathFighter> fighter1Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter1));
             Optional<MmathFighter> fighter2Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter2));
 
+
             if (fighter1Opt.isPresent() && fighter2Opt.isPresent()) {
-                List<MmathFighter> result = orientDBDao.findShortestPath(fighter1Opt.get(), fighter2Opt.get())
+
+                // cutting short uselss long tree parsing
+                MmathFighter f1 = fighter1Opt.get();
+                MmathFighter f2 = fighter2Opt.get();
+
+                if (f1.getWins() == 0 || f1.getLosses() == 0) {
+                    return new ArrayList<>();
+                }
+
+                List<MmathFighter> result = orientDBDao.findShortestPath(f1, f2)
                         .stream()
+                        .filter(f -> f != null)
                         .map(f -> {
 //                            try {
                             final MmathFighter fighter = dao.getFighterDAO().getById(f);
@@ -186,12 +198,13 @@ public class WebServer {
 //                            }
                         })
                         .collect(Collectors.toList());
-
-                ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
-                try {
-                    exec.invokeAll(tasks);
-                } finally {
-                    exec.shutdown();
+                if (result.size() > 0) {
+                    ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
+                    try {
+                        exec.invokeAll(tasks);
+                    } finally {
+                        exec.shutdown();
+                    }
                 }
 
                 logger.info("Result size: {}", result.size());

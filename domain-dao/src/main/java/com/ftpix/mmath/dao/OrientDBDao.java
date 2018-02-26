@@ -2,8 +2,9 @@ package com.ftpix.mmath.dao;
 
 import com.ftpix.mmath.model.MmathFighter;
 import com.orientechnologies.orient.client.remote.OServerAdmin;
-import com.orientechnologies.orient.jdbc.OrientJdbcConnection;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.sql.*;
@@ -19,7 +20,7 @@ public class OrientDBDao {
     public final static String VERTEX_FIGHTER = "fighter", EDGE_BEAT = "beat", SHERDOG_URL = "sherdog_url", FIGHT_ID = "fight_id";
 
     public final static String BETTER_THAN_QUERY = "select path.sherdog_url from (SELECT shortestPath( (SELECT FROM fighter WHERE sherdog_url='%s' ) , (SELECT FROM fighter WHERE sherdog_url='%s'), 'OUT', 'beat') AS path UNWIND path);";
-    public final static String CREATE_DB = "CREATE DATABASE %s %s %s";
+    private Logger logger = LogManager.getLogger();
 
     public OrientDBDao(String dbUrl, String username, String password, String dbname) {
         this.dbUrl = dbUrl;
@@ -28,17 +29,17 @@ public class OrientDBDao {
         this.dbname = dbname;
 
 
-        try{
+        try {
             createSchema();
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.warn("Database probably already exist: {}", e.getMessage());
         }
     }
 
 
     public void createSchema() throws SQLException, IOException {
 
-        OServerAdmin admin = new OServerAdmin(dbUrl.replace("/","")).connect(username, password);
+        OServerAdmin admin = new OServerAdmin(dbUrl.replace("/", "")).connect(username, password);
         admin.createDatabase(dbname, "graph", "plocal");
 
         admin.close();
@@ -52,7 +53,7 @@ public class OrientDBDao {
      * @return a graph connection
      */
     public OrientGraph getGraph() {
-        return new OrientGraph(dbUrl+dbname, username, password);
+        return new OrientGraph(dbUrl + dbname, username, password);
     }
 
     /**
