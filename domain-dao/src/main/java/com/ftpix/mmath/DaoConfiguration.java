@@ -82,8 +82,10 @@ public class DaoConfiguration {
         ds.setPassword(password);
         ds.setJdbcUrl(dbUrl + dbName+options);
         ds.setUser(username);
+        ds.setAutomaticTestTable("jdbc_test");
+        ds.setTestConnectionOnCheckin(true);
+        ds.setIdleConnectionTestPeriod(300);
 //        ComboPooledDataSource );
-        ds.setMinPoolSize(5);
         ds.setMaxPoolSize(10);
 
         return ds;
@@ -107,23 +109,6 @@ public class DaoConfiguration {
     public OrientDBDao orientDBDao() {
         OrientDBDao dao = new OrientDBDao(orientdbUrl, orientdbUsername, orientdbPassword, orientdbName);
 
-        OrientGraph graph = dao.getGraph();
-
-
-
-        try {
-
-            OrientEdgeType edgeType = graph.createEdgeType(OrientDBDao.EDGE_BEAT);
-            edgeType.createProperty(OrientDBDao.FIGHT_ID, OType.LONG);
-
-            OrientVertexType vertexType = graph.createVertexType(OrientDBDao.VERTEX_FIGHTER);
-            vertexType.createProperty(OrientDBDao.SHERDOG_URL, OType.STRING);
-            graph.commit();
-        } catch (OSchemaException e) {
-            //classes probably already exist
-        } finally {
-            graph.shutdown();
-        }
 
         return dao;
     }
