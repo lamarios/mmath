@@ -120,6 +120,17 @@ public class FightDAO implements DAO<MmathFight, Long> {
         template.update(css, keyHolder);
 
         return keyHolder.getKey().longValue();
+   }
+
+    /**
+     * Deletes all fights for the triple fighter1, fighter2, event. Done to be able to insert a new one with more updated results
+     * @param fighter1 first fighter
+     * @param fighter2 second fighter
+     * @param event event it happened
+     * @return true if the delete query actually deleted something
+     */
+    public boolean deleteExistingSimilarFight(String fighter1, String fighter2, String event){
+        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?) AND event_id = ?)",  fighter1, fighter2, fighter1, fighter2, event) > 0;
     }
 
     @Override
@@ -201,5 +212,19 @@ public class FightDAO implements DAO<MmathFight, Long> {
         s.setString(7, f.getWinTime());
         s.setInt(8, f.getWinRound());
 
+    }
+
+    public void replace(MmathFight f) {
+
+        PreparedStatementCreator css = connection -> {
+            PreparedStatement s = connection.prepareStatement("REPLACE INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, lastUpdate)" +
+                            "VALUES  (?,?,?,?,?,?,?,?,NOW())",
+                    Statement.RETURN_GENERATED_KEYS);
+            setStatement(s, f);
+            return s;
+
+        };
+
+        template.update(css);
     }
 }

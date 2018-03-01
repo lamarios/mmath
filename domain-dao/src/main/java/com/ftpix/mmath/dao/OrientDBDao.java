@@ -2,7 +2,17 @@ package com.ftpix.mmath.dao;
 
 import com.ftpix.mmath.model.MmathFighter;
 import com.orientechnologies.orient.client.remote.OServerAdmin;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
+import com.orientechnologies.orient.core.exception.OSchemaException;
+import com.orientechnologies.orient.core.exception.OStorageException;
+import com.orientechnologies.orient.core.index.OIndexException;
+import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Parameter;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.orient.OrientEdgeType;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientVertexType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,21 +41,91 @@ public class OrientDBDao {
 
         try {
             createSchema();
+            createClasses();
+            createIndices();
         } catch (Exception e) {
-            logger.warn("Database probably already exist: {}", e.getMessage());
+            logger.error("Something went wrong went setting up the schema", e);
         }
     }
 
 
-    public void createSchema() throws SQLException, IOException {
-
-        OServerAdmin admin = new OServerAdmin(dbUrl.replace("/", "")).connect(username, password);
-        admin.createDatabase(dbname, "graph", "plocal");
-
-        admin.close();
+    /**
+     * Creates the OrientDB Schema
+     *
+     * @throws IOException
+     */
+    private void createSchema() throws IOException {
+        logger.info("Creating schema on orientDB if necessary");
+        try {
+            OServerAdmin admin = new OServerAdmin(dbUrl.replace("/", "")).connect(username, password);
+            admin.createDatabase(dbname, "graph", "plocal");
+            admin.close();
+        } catch (ODatabaseException | OStorageException e) {
+            logger.warn("The schema probably already exists: {}", e.getMessage());
+        }
 
 
     }
+
+    /**
+     * Creates the required oreintdb classes
+     */
+    private void createClasses() {
+        logger.info("Creating classes for OrientDB");
+        OrientGraph graph = getGraph();
+
+        try {
+            try {
+                OrientEdgeType edgeType = graph.createEdgeType(OrientDBDao.EDGE_BEAT);
+                edgeType.createProperty(OrientDBDao.FIGHT_ID, OType.LONG);
+            } catch (OSchemaException e) {
+                logger.warn("Classes probably already exist: {}", e.getMessage());
+            }
+
+            try {
+
+                OrientVertexType vertexType = graph.createVertexType(OrientDBDao.VERTEX_FIGHTER);
+                vertexType.createProperty(OrientDBDao.SHERDOG_URL, OType.STRING);
+            } catch (OSchemaException e) {
+                logger.warn("Classes probably already exist: {}", e.getMessage());
+            }
+            graph.commit();
+        } finally {
+            graph.shutdown();
+        }
+
+    }
+
+
+    /**
+     * Creare required indices
+     */
+    private void createIndices() {
+        OrientGraph graph = getGraph();
+        logger.info("Creating indices for Orient DB classes");
+        try {
+            try {
+                graph.createKeyIndex(SHERDOG_URL, Vertex.class, new Parameter("type", "UNIQUE"), new Parameter("class", VERTEX_FIGHTER));
+            } catch (OIndexException e) {
+                logger.warn("Indices probably already exist: {}", e.getMessage());
+            }
+
+            try {
+                graph.createKeyIndex(FIGHT_ID, Edge.class, new Parameter("type", "UNIQUE"), new Parameter("class", EDGE_BEAT));
+            } catch (OIndexException e) {
+                logger.warn("Indices probably already exist: {}", e.getMessage());
+            }
+
+            graph.commit();
+
+        } catch (OIndexException e) {
+            System.out.println(e.getClass());
+            logger.warn("Indices probably already exist: {}", e.getMessage());
+        } finally {
+            graph.shutdown();
+        }
+    }
+
 
     /**
      * Gets a graph connection, easy to manage vertices and edges

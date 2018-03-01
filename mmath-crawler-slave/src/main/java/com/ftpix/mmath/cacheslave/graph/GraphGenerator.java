@@ -1,5 +1,6 @@
 package com.ftpix.mmath.cacheslave.graph;
 
+import com.ftpix.mmath.cacheslave.Refresh;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.model.MmathFight;
@@ -13,6 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +71,17 @@ public class GraphGenerator {
     private void addFightToGraph(MmathFight fight, OrientGraph graph, Map<Long, Edge> graphFights, Map<String, Vertex> graphFighters) {
 
         logger.info("[{}] vs [{}] at event [{}]", fight.getFighter1().getSherdogUrl(), fight.getFighter2().getSherdogUrl(), fight.getEvent().getSherdogUrl());
+
+        LocalDateTime today = LocalDateTime.now();
+        long lastUpdated = Math.abs(ChronoUnit.DAYS.between(fight.getLastUpdate(), today));
+
+        boolean alreadyExists = graphFights.containsKey(fight.getId());
+
+        if ( alreadyExists && lastUpdated >= Refresh.RATE) {
+            graph.removeEdge(graphFights.get(fight.getId()));
+            graphFights.remove(fight.getId());
+            logger.info("FIGHT NEEDS TO BE REPLACED");
+        }
 
         //we check if it already exists
         if (!graphFights.containsKey(fight.getId())) {

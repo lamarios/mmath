@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.FileHeaderInfo;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
+import com.ftpix.mmath.model.GsonFriendlyFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.web.models.Query;
 import com.ftpix.utils.GsonUtils;
@@ -15,6 +16,7 @@ import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -66,12 +68,36 @@ public class WebServer {
         Spark.get("/api/better-than/:fighter1/:fighter2", "application/json", this::betterThan, gson::toJson);
         Spark.post("/api/fighters/query", "application/json", this::searchFighter, gson::toJson);
         Spark.get("/api/fighters/:id", "application/json", this::getFighter, gson::toJson);
+        Spark.get("/api/fights/:id", "application/json", this::getFights, gson::toJson);
         Spark.get("/pictures/*", this::getFighterPicture);
         Spark.exception(Exception.class, (e, request, response) -> {
             logger.error("Error while processing request", e);
             response.status(503);
             response.body(e.getMessage());
         });
+    }
+
+    /**
+     * Returns a list of fights for a fighter
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    private List<GsonFriendlyFight> getFights(Request request, Response response) {
+
+        String fighter1 = request.params(":id");
+
+        return Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter1))
+                .map(fighter -> {
+                    fighter.setFights(dao.getFightDAO().getByFighter(fighter.getSherdogUrl()));
+                    fighter.getFights().forEach(f -> {
+                        f.setEvent(dao.getEventDAO().getById(f.getEvent().getSherdogUrl()));
+                        f.setFighter2(dao.getFighterDAO().getById(f.getFighter2().getSherdogUrl()));
+                    });
+
+                    return fighter.getGsonFriendlyFights();
+                }).orElse(new ArrayList<>());
     }
 
     /**
@@ -117,47 +143,10 @@ public class WebServer {
 
     private List<MmathFighter> searchFighter(Request request, Response response) throws InterruptedException {
         Query query = gson.fromJson(request.body(), Query.class);
-        List<MmathFighter> fighters = dao.getFighterDAO().searchByName(query.getName());
+        return Optional.ofNullable(dao.getFighterDAO().searchByName(query.getName())).orElse(new ArrayList<>());
 
-        List<Callable<Void>> tasks = new ArrayList<>();
-        List<MmathFighter> results = fighters.stream().map(fighter -> {
-            try {
-                hydrateFighter(tasks, fighter);
-                return fighter;
-            } catch (Exception e) {
-                logger.error("Couldn't get fighter's fights", e);
-                return null;
-            }
-        }).collect(Collectors.toList());
-
-        if (results.size() > 0) {
-            ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
-            try {
-                exec.invokeAll(tasks);
-            } finally {
-                exec.shutdown();
-            }
-        }
-
-        return results;
     }
 
-    /**
-     * Populate needed data for a fighter
-     *
-     * @param tasks
-     * @param fighter
-     */
-    private void hydrateFighter(List<Callable<Void>> tasks, MmathFighter fighter) {
-        tasks.add(() -> {
-            fighter.setFights(dao.getFightDAO().getByFighter(fighter.getSherdogUrl()));
-            fighter.getFights().forEach(f -> {
-                f.setEvent(dao.getEventDAO().getById(f.getEvent().getSherdogUrl()));
-                f.setFighter2(dao.getFighterDAO().getById(f.getFighter2().getSherdogUrl()));
-            });
-            return null;
-        });
-    }
 
     private List<MmathFighter> betterThan(Request request, Response response) throws IOException {
         try {
@@ -167,7 +156,6 @@ public class WebServer {
 
             logger.info("{} vs {}", fighter1, fighter2);
 
-            List<Callable<Void>> tasks = new ArrayList<>();
 
             Optional<MmathFighter> fighter1Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter1));
             Optional<MmathFighter> fighter2Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter2));
@@ -190,22 +178,9 @@ public class WebServer {
 //                            try {
                             final MmathFighter fighter = dao.getFighterDAO().getById(f);
 
-                            hydrateFighter(tasks, fighter);
-                            //setFighterFights(fighter);
                             return fighter;
-//                            } catch (SQLException e) {
-//                                return null;
-//                            }
                         })
                         .collect(Collectors.toList());
-                if (result.size() > 0) {
-                    ExecutorService exec = Executors.newFixedThreadPool(tasks.size());
-                    try {
-                        exec.invokeAll(tasks);
-                    } finally {
-                        exec.shutdown();
-                    }
-                }
 
                 logger.info("Result size: {}", result.size());
                 return result;

@@ -3,6 +3,26 @@ var createReactClass = require('create-react-class');
 
 var FighterDetails =
     createReactClass({
+
+        getInitialState: function () {
+            return {fights: []};
+        },
+
+        componentDidMount: function () {
+            $.ajax({
+                method: 'GET',
+                url: '/api/fights/' + this.props.fighter.id,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    console.log(data);
+                    this.setState({
+                        fights: data
+                    });
+                }.bind(this)
+            });
+        },
+
         render: function () {
             var fighter = this.props.fighter;
 
@@ -51,7 +71,7 @@ var FighterDetails =
                                 <tbody>
                                 {
                                     //using slice to duplicate the array
-                                    fighter.fights.slice(0).reverse().map(
+                                    this.state.fights.slice(0).reverse().map(
                                         function (fight, i, arr) {
                                             //row class
                                             var rowClass = '';

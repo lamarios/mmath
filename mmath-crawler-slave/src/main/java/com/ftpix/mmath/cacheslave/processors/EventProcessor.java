@@ -6,6 +6,7 @@ import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Event;
 import org.springframework.dao.DuplicateKeyException;
@@ -43,12 +44,16 @@ public class EventProcessor extends Processor<MmathEvent> {
     }
 
     private void insertFight(MmathFight f) {
-        //TODO insert fight
         try {
-        dao.getFightDAO().insert(f);
-        }catch (DuplicateKeyException e){
+            String fighter1 = Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse("");
+            String fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse("");
+
+            //deleting any existing similar fights, so we can insert it again, as sometimes sherdog changes the order of  fighter1 / fighter2
+            dao.getFightDAO().deleteExistingSimilarFight(fighter1, fighter2, f.getEvent().getSherdogUrl());
+            dao.getFightDAO().replace(f);
+        } catch (DuplicateKeyException e) {
             logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
-       }
+        }
     }
 
     @Override

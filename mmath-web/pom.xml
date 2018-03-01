@@ -14,6 +14,7 @@
         <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
         <docker.image.name>gonzague/mmath-web</docker.image.name>
         <docker.skip>false</docker.skip>
+        <docker.skip.push>true</docker.skip.push>
     </properties>
 
     <artifactId>mmath-web</artifactId>
@@ -235,6 +236,22 @@
                                 <argument>-t</argument>
                                 <argument>${docker.image.name}</argument>
                                 <argument>.</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Docker push</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>install</phase>
+                        <configuration>
+                            <skip>${docker.skip.push}</skip>
+                            <workingDirectory>${basedir}/target/docker</workingDirectory>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>push</argument>
+                                <argument>${docker.image.name}</argument>
                             </arguments>
                         </configuration>
                     </execution>

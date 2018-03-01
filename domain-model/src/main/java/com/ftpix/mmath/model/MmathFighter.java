@@ -177,7 +177,6 @@ public class MmathFighter {
     }
 
 
-    @ExposeMethodResult("fights")
     public List<GsonFriendlyFight> getGsonFriendlyFights() {
         return fights.stream().map(GsonFriendlyFight::new).collect(Collectors.toList());
     }
