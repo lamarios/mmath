@@ -1,39 +1,55 @@
-var React = require('react');
-var createReactClass = require('create-react-class');
+import React from 'react';
+import FighterTypeAhead from './fighter-type-ahead.jsx';
+import FighterChip from './fighter-chip.jsx';
+import Loader from './loader.jsx';
+import MmathService from './services/MmathService.jsx';
 
-var FighterTypeAhead = require('./fighter-type-ahead.jsx');
-var FighterChip = require('./fighter-chip.jsx');
-var Loader = require('./loader.jsx');
-var FighterSearch = createReactClass({
-    //loads fighters based on the text search
-    loadFighters: function (name) {
 
-        this.setState({loading: true});
+export default class FighterSearch extends React.Component {
 
-        $.ajax({
-            method: 'POST',
-            url: '/api/fighters/query',
-            dataType: 'json',
-            data: JSON.stringify({'name': name}),
-            cache: false,
-            success: function (data) {
-                console.log(data);
-                this.setState(
-                    {loading: false, fighters: data});
-            }.bind(this)
-        });
-    },
-    //initial state
-    getInitialState: function () {
-        return {
+    constructor(props) {
+        super(props);
+
+        this.mmathService = new MmathService();
+
+        this.state = {
             fighters: [],
             query: '',
             selected: null,
-            loading: false
+            loading: false,
+            preSelectionHappened: false
         };
-    },
+
+
+        this.loadFighters = this.loadFighters.bind(this);
+        this.handleFighterSelection = this.handleFighterSelection.bind(this);
+        this.handleSearch = this.handleSearch.bind(this);
+        this.removeSelected = this.removeSelected.bind(this);
+
+    }
+
+    componentWillReceiveProps(props){
+        console.log('received prop', props);
+        if(props.preSelectedFighter !== null && !this.state.preSelectionHappened){
+            console.log('doing something');
+            const fighter = Object.assign({}, props.preSelectedFighter);
+            this.setState({selected: fighter, preSelectionHappened: true});
+        }
+    }
+
+    //loads fighters based on the text search
+    loadFighters(name) {
+
+        this.setState({loading: true}, () => {
+            this.mmathService.search(name).then(res => {
+                this.setState({loading: false, fighters: res.data});
+            })
+        });
+    }
+
+
     //Triggers the search
-    handleSearch: function (e) {
+    handleSearch(e) {
         console.log(e);
         var query = e.target.value;
         if (query.length >= 3) {
@@ -45,31 +61,36 @@ var FighterSearch = createReactClass({
         } else {
             this.setState({fighters: []});
         }
-    },
+    }
 
     //Handles the click when the user clicks on the fighter
     // he wants to choose
-    handleFighterSelection: function (fighter) {
+    handleFighterSelection(fighter) {
         this.setState({selected: fighter});
         this.props.fighterSelected(fighter);
-    },
+    }
+
     //Remove the selected fighter
-    removeSelected: function () {
+    removeSelected(e) {
+        console.log('removing !', e);
         this.setState({selected: null, fighters: []});
         this.props.fighterSelected(null);
+        e.stopPropagation();
 
-    },
-    render: function () {
+    }
+
+    render() {
         if (this.state.selected === null) {
             return (
                 <div className="fighter-search">
                     {this.state.loading &&
                     <div className="search-loader">
-                        <Loader />
+                        <Loader/>
                     </div>
                     }
                     <input className="form-control"
                            type="text"
+                           autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"
                            onKeyUp={this.handleSearch}
                            placeholder="Search for fighter"
                     />
@@ -86,6 +107,5 @@ var FighterSearch = createReactClass({
             );
         }
     }
-});
+}
 
-module.exports = FighterSearch;

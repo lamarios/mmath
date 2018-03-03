@@ -1,110 +1,108 @@
-var React = require('react');
-var createReactClass = require('create-react-class');
+import React from 'react';
+import MmathService from './services/MmathService.jsx'
+export default class FighterDetails extends React.Component {
 
-var FighterDetails =
-    createReactClass({
+    constructor() {
+        super();
 
-        getInitialState: function () {
-            return {fights: []};
-        },
+        this.mmathService = new MmathService();
+        this.state = {fights: []};
+    }
 
-        componentDidMount: function () {
-            $.ajax({
-                method: 'GET',
-                url: '/api/fights/' + this.props.fighter.id,
-                dataType: 'json',
-                cache: false,
-                success: function (data) {
-                    console.log(data);
-                    this.setState({
-                        fights: data
-                    });
-                }.bind(this)
+
+    componentDidMount() {
+
+        this.mmathService.getFights(this.props.fighter.id)
+            .then(res => {
+                this.setState({
+                    fights: res.data
+                });
             });
-        },
+    }
 
-        render: function () {
-            var fighter = this.props.fighter;
-
-
-            var picture = {
-                backgroundImage: 'url(' + fighter.picture + ')'
-            };
-
-            return (
-                <div className="fighter-details">
-
-                    <div className="remove" onClick={this.props.onCloseClick}>
-                        <i className="fa fa-times" aria-hidden="true"></i>
-                    </div>
-
-                    <div className="title">
-                        <h1>{fighter.name}</h1>
-                        {fighter.nickname != undefined && fighter.nickname.length > 0 &&
-                        <p>"{fighter.nickname}"</p>
-                        }
-                    </div>
-
-                    <div className="picture" style={picture}>
-                    </div>
-
-                    <div className="info">
-                        <p><label>Record:</label> {fighter.wins} - {fighter.losses} - {fighter.draws} - {fighter.nc}</p>
-                        <p><label>Birthday: </label> {fighter.birthday}</p>
-                        <p><label>Weight: </label> {fighter.weight}</p>
-                        <p><label>Height: </label> {fighter.height}</p>
-                    </div>
-
-                    <div className="fights">
-                        <h2>Fights</h2>
-                        <div className="table-responsive">
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>Opponent</th>
-                                    <th>Event</th>
-                                    <th>Result</th>
-                                    <th>Round</th>
-                                    <th>Time</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {
-                                    //using slice to duplicate the array
-                                    this.state.fights.slice(0).reverse().map(
-                                        function (fight, i, arr) {
-                                            //row class
-                                            var rowClass = '';
-                                            if (fight.result === 'FIGHTER_1_WIN') {
-                                                rowClass = 'win';
-                                            } else if (fight.result === 'FIGHTER_2_WIN') {
-                                                rowClass = 'loss';
-                                            } else {
-                                                rowClass = 'draw';
-                                            }
+    render() {
+        var fighter = this.props.fighter;
 
 
-                                            var key = fight.date + fight.opponent;
+        var picture = {
+            backgroundImage: 'url(' + fighter.picture + ')'
+        };
 
-                                            return (
-                                                <tr key={key} className={rowClass}>
-                                                    <td>{fight.opponent}</td>
-                                                    <td>{fight.event}</td>
-                                                    <td>{fight.winMethod}</td>
-                                                    <td>{fight.winRound}</td>
-                                                    <td>{fight.winTime}</td>
-                                                </tr>
-                                            )
-                                        })
-                                }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
+        return (
+            <div className="fighter-details">
+                <div className="background-picture" style={picture}>
+                    <div className="overlay" />
                 </div>
-            )
-        }
-    });
+                <div className="remove" onClick={this.props.onCloseClick}>
+                    <i className="fa fa-times" aria-hidden="true"></i>
+                </div>
 
-module.exports = FighterDetails;
+                <div className="title">
+                    <h1>{fighter.name}</h1>
+                    {fighter.nickname != undefined && fighter.nickname.length > 0 &&
+                    <p>"{fighter.nickname}"</p>
+                    }
+                </div>
+
+                <div className="picture" style={picture}>
+                </div>
+
+                <div className="info">
+                    <p><label>Record:</label> {fighter.wins} - {fighter.losses} - {fighter.draws} - {fighter.nc}</p>
+                    <p><label>Birthday: </label> {fighter.birthday}</p>
+                    <p><label>Weight: </label> {fighter.weight}</p>
+                    <p><label>Height: </label> {fighter.height}</p>
+                </div>
+
+                <div className="fights">
+                    <h2>Fights</h2>
+                    <div>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Opponent</th>
+                                <th>Event</th>
+                                <th>Result</th>
+                                <th>Round</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                                //using slice to duplicate the array
+                                this.state.fights.slice(0).reverse().map(
+                                    function (fight, i, arr) {
+                                        //row class
+                                        var rowClass = '';
+                                        if (fight.result === 'FIGHTER_1_WIN') {
+                                            rowClass = 'win';
+                                        } else if (fight.result === 'FIGHTER_2_WIN') {
+                                            rowClass = 'loss';
+                                        } else {
+                                            rowClass = 'draw';
+                                        }
+
+
+                                        var key = fight.date + fight.opponent;
+
+                                        return (
+                                            <tr key={key} className={rowClass}>
+                                                <td>{fight.opponent}</td>
+                                                <td>{fight.event}</td>
+                                                <td>{fight.winMethod}</td>
+                                                <td>{fight.winRound}</td>
+                                                <td>{fight.winTime}</td>
+                                            </tr>
+                                        )
+                                    })
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        )
+    }
+}
+

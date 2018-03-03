@@ -1,83 +1,69 @@
-var React = require('react');
-var ReactDOM  = require('react-dom');
+import React from 'react';
+import BetterThan from './better-than.jsx';
+import FightResult from './fight-result.jsx';
+import Loader from './loader.jsx';
+import MmathService from './services/MmathService.jsx';
 
-var createReactClass = require('create-react-class');
-var BetterThan = require('./better-than.jsx');
-
-var FightResult = require('./fight-result.jsx');
-
-var Loader = require('./loader.jsx');
-
-let images =   require.context("../images/", true, /^\.\/.*\.(png|gif|svg)/);
-
-var Mmath = createReactClass({
-    getInitialState: function () {
-        return {
+export default class Mmath extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
             fighter1VsFighter2: null,
             fighter2VsFighter1: null,
             loading1v2: false,
             loading2v1: false,
             switch: false
         };
-    },
+
+
+        this.mmathService = new MmathService();
+
+        this.triggerSearch = this.triggerSearch.bind(this);
+        this.handleSwitch = this.handleSwitch.bind(this);
+    }
+
 
     /**
      * Searching for mmath results
      * @param fighter1
      * @param fighter2
      */
-    triggerSearch: function (fighter1, fighter2) {
+    triggerSearch(fighter1, fighter2) {
         console.log(fighter1);
         console.log(fighter2);
 
-        this.setState({loading1v2: true, loading2v1: true, fighter1VsFighter2: null, fighter2VsFighter1: null});
-
-        // searching fightre 1 vs fighter 2
-        $.ajax({
-            method: 'GET',
-            url: '/api/better-than/' + fighter1.id + '/'
-            + fighter2.id,
-            dataType: 'json',
-            cache: false,
-            success: function (data) {
-                console.log(data);
-                this.setState({
-                    loading1v2: false,
-                    fighter1VsFighter2: data
+        this.setState({loading1v2: true, loading2v1: true, fighter1VsFighter2: null, fighter2VsFighter1: null}, () => {
+            this.mmathService.betterThan(fighter1.id, fighter2.id)
+                .then(res => {
+                    this.setState({
+                        loading1v2: false,
+                        fighter1VsFighter2: res.data
+                    });
                 });
-            }.bind(this)
+
+            this.mmathService.betterThan(fighter2.id, fighter1.id)
+                .then(res => {
+                    this.setState({
+                        loading2v1: false,
+                        fighter2VsFighter1: res.data
+                    });
+                });
+            const pageTitle = 'Mmath - ' + fighter1.name + ' vs. ' + fighter2.name;
+
+            window.history.pushState({}, pageTitle, '/' + fighter1.id + '/vs/' + fighter2.id);
+            document.title = pageTitle;
         });
 
-        //serching fighter 2 vs fighter 1
-        $.ajax({
-            method: 'GET',
-            url: '/api/better-than/' + fighter2.id + '/'
-            + fighter1.id,
-            dataType: 'json',
-            cache: false,
-            success: function (data) {
-                console.log(data);
-                this.setState({
-                    loading2v1: false,
-                    fighter2VsFighter1: data
-                });
-            }.bind(this)
-        });
-    },
+    }
 
     /**
      * Handle when the user clicks on switch (mobile only
      */
-    handleSwitch: function () {
+    handleSwitch() {
         this.setState({switch: !this.state.switch});
-    },
+    }
 
-    /**
-     * Rendering the content
-     * @returns {XML}
-     */
-    render: function () {
-
+    render() {
         //Handling which column we should show first (mobile only)
         var results1v2Class = "col-md-6 column";
         if (this.state.switch === false) results1v2Class += " active";
@@ -87,7 +73,8 @@ var Mmath = createReactClass({
 
         return (
             <div>
-                <BetterThan triggerSearch={this.triggerSearch}/>
+                <BetterThan fighter1={this.props.match.params.fighter1} fighter2={this.props.match.params.fighter2}
+                            triggerSearch={this.triggerSearch}/>
                 <div className="results row">
                     <div className="col-sm-12">
 
@@ -121,11 +108,4 @@ var Mmath = createReactClass({
             </div>
         )
     }
-
-});
-
-ReactDOM.render(
-    <Mmath/>
-    ,
-    document.getElementById('content')
-);
+}

@@ -4,6 +4,7 @@
 @import "fight-results";
 @import "spinner";
 @import "fighter-details";
+@import "share";
 
 body {
   color: @textColor;
@@ -12,7 +13,16 @@ body {
   font-family: 'Maven Pro', sans-serif;
   background-color: black;
 
+  background-image: url("/images/background.jpg");
+  background-size: 100% auto;
+  background-position: center top;
+  background-repeat: no-repeat;
+
   .title {
+    display: inline-block;
+    width: 49%;
+    vertical-align: top;
+
     h1 {
       font-weight: 700;
       font-size: 50px;
@@ -26,7 +36,52 @@ body {
       font-size: 30px;
       line-height: 10px;
     }
+  }
 
+  .quote {
+    display: inline-block;
+    width: 49%;
+    vertical-align: top;
+    text-align: right;
+
+    .actual {
+      display: block;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ddd;
+
+      .red {
+        color: @accentColor;
+      }
+    }
+
+    .author {
+      font-style: italic;
+      font-size: 17px;
+      font-weight: bold;
+      color: #999;
+    }
   }
 }
 
+@media only screen and (max-width: @mobileBreakPoint) {
+  body {
+    background-size: 140% auto;
+    .title {
+      width: 100%;
+      display: block;
+      text-align: center;
+    }
+
+    .quote {
+      text-align: center;
+      width: 100%;
+      .actual{
+        font-size: 15px;
+      }
+      .author{
+        font-size: 13px;
+      }
+    }
+  }
+}

@@ -1,16 +1,20 @@
 .fighter-details {
   padding: 10px;
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  top: 50px;
+  left: 50px;
+  bottom: 50px;
+  right: 50px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
   z-index: 10;
 
   text-align: left;
 
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 5px 5px 10px black;
 
   animation-name: fadeIn;
   animation-duration: 0.25s;
@@ -20,7 +24,6 @@
     top: 10px;
     right: 10px;
 
-    color: white;
     font-size: 30px;
     cursor: pointer;
   }
@@ -31,6 +34,7 @@
     float: left;
     border-radius: 5px;
     margin: 10px;
+    box-shadow: 5px 5px 40px black;
   }
 
   .title {
@@ -50,11 +54,10 @@
       }
     }
 
-
     margin-bottom: 20px;
   }
 
-  .info:after{
+  .info:after {
     content: '';
     display: block;
     clear: both;
@@ -65,22 +68,56 @@
     tr td {
       padding: 2px 7px;
     }
-    @transparency: 0.5;
     .win {
-      background-color: rgba(67, 160, 71, @transparency);
+      background-color: darken(rgb(67, 160, 71), 20%);
     }
     .loss {
-      background-color: rgba(239, 83, 80, @transparency);
+      background-color: darken(rgb(239, 83, 80), 20%);
     }
     .draw {
-      background-color: rgba(33, 150, 243, @transparency);
+      background-color: darken(rgb(33, 150, 243), 20%);
     }
   }
+
+  .background-picture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    filter: blur(10px);
+    background-size: 100%;
+    background-position: center top;
+    background-repeat: no-repeat;
+    transform: scale(1.5);
+    border-radius: 5px;
+    background-color:black;
+
+    opacity: 0.5;
+    .overlay{
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: black;
+      opacity: 0.5;
+    }
+  }
+
 }
 
 @media only screen and (max-width: @mobileBreakPoint) {
   .fighter-details {
     padding-top: 0;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+
     .remove {
       position: relative;
       text-align: right;
@@ -88,6 +125,13 @@
 
     .picture {
       display: none;
+    }
+
+    .fights table {
+      thead tr th:nth-child(4), thead tr th:nth-child(5), tbody tr td:nth-child(4), tbody tr td:nth-child(5) {
+        display: none;
+      }
+
     }
   }
 }

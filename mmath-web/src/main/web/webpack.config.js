@@ -8,13 +8,17 @@ var APP_DIR = path.resolve(__dirname, 'src');
 
 
 var API_ROOT = "";
-var API_URL = API_ROOT + '/API';
+var API_URL = API_ROOT + '/api';
 
 var constants = {
+    BETTER_THAN: JSON.stringify(API_URL + "/better-than/{0}/{1}"),
+    SEARCH: JSON.stringify(API_URL + "/fighters/query"),
+    FIGHTS: JSON.stringify(API_URL + "/fights/{0}"),
+    FIGHTER_BY_HASH: JSON.stringify(API_URL+"/fighter/{0}")
 };
 
 var config = {
-    entry: [APP_DIR + '/jsx/main.jsx', APP_DIR + '/less/main.less'],
+    entry: [APP_DIR + '/jsx/index.jsx', APP_DIR + '/less/main.less'],
     output: {
         path: BUILD_DIR,
         filename: 'bundle.js'

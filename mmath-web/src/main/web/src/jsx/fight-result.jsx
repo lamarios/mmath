@@ -1,26 +1,19 @@
-var React = require('react');
-var createReactClass = require('create-react-class');
+import React from 'react';
 
-var FighterChip = require('./fighter-chip.jsx');
+import FighterChip from './fighter-chip.jsx';
 
-var FightResult = createReactClass({
+export default class FightResult extends React.Component {
 
-    render: function () {
+    render() {
         return (
             <div className="result">
                 {
                     this.props.results.map(
                         function (fighter, i, arr) {
-                            console.log(fighter);
+                            var notLast = i < arr.length - 1;
                             return (
                                 <div key={fighter.id} className="result-step">
                                     <FighterChip fighter={fighter} small={true} removable={false}/>
-                                    { i < arr.length - 1 ?
-                                        <div
-                                            className="separator">
-
-                                        </div>
-                                        : ''}
                                 </div>
                             )
                         })
@@ -28,6 +21,5 @@ var FightResult = createReactClass({
             </div>
         );
     }
-});
+}
 
-module.exports = FightResult;

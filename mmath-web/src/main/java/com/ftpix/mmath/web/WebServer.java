@@ -17,10 +17,7 @@ import spark.Response;
 import spark.Spark;
 
 import javax.swing.text.html.Option;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,16 +62,38 @@ public class WebServer {
 
         Spark.before("*", this::logRequest);
         Spark.before("/api/*", this::jsonRequest);
+
         Spark.get("/api/better-than/:fighter1/:fighter2", "application/json", this::betterThan, gson::toJson);
         Spark.post("/api/fighters/query", "application/json", this::searchFighter, gson::toJson);
-        Spark.get("/api/fighters/:id", "application/json", this::getFighter, gson::toJson);
+        Spark.get("/api/fighter/:id", "application/json", this::getFighter, gson::toJson);
         Spark.get("/api/fights/:id", "application/json", this::getFights, gson::toJson);
         Spark.get("/pictures/*", this::getFighterPicture);
+
+        //front end endpoints
+        Spark.get("/:fighter1/vs/:fighter2", this::serveIndex);
+
         Spark.exception(Exception.class, (e, request, response) -> {
             logger.error("Error while processing request", e);
             response.status(503);
             response.body(e.getMessage());
         });
+    }
+
+
+    /**
+     * Serves the content of the index file;
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    private String serveIndex(Request request, Response response) throws IOException {
+        try (
+                InputStream inputStream = getClass().getClassLoader().getResource("web/public/index.html").openStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            return reader.lines().collect(Collectors.joining(""));
+        }
     }
 
     /**
@@ -111,9 +130,7 @@ public class WebServer {
 
         InputStream in;
         if (fighterHash.equalsIgnoreCase("default.jpg")) {
-            File file = new File(getClass().getClassLoader().getResource("web/public/images/fighterPlaceHolder.gif").getFile());
-            in = new FileInputStream(file);
-
+            in = getClass().getClassLoader().getResource("web/public/images/fighterPlaceHolder.gif").openStream();
         } else {
             in = s3Helper.getFile(fighterHash);
         }
@@ -167,7 +184,7 @@ public class WebServer {
                 MmathFighter f1 = fighter1Opt.get();
                 MmathFighter f2 = fighter2Opt.get();
 
-                if (f1.getWins() == 0 || f1.getLosses() == 0) {
+                if (f1.getWins() == 0 || f2.getLosses() == 0) {
                     return new ArrayList<>();
                 }
 
