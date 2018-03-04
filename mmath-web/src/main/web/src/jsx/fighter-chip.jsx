@@ -3,8 +3,9 @@ import FighterDetails from './fighter-details.jsx';
 
 export default class FighterChip extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
+
 
         this.state = {details: false};
 
@@ -25,8 +26,9 @@ export default class FighterChip extends React.Component {
      */
     render() {
         var picture = {
-            backgroundImage: 'url(' + this.props.fighter.picture + ')'
+            backgroundImage: 'url(' + (this.props.unknown === undefined ? this.props.fighter.picture : '/pictures/default.jpg') + ')'
         };
+
 
         var className = "fighter-chip small";
 
@@ -36,25 +38,36 @@ export default class FighterChip extends React.Component {
 
         return (
             <div className="fighter-chip-wrapper">
-                <div className={className} onClick={this.toggleDetails}>
-                    <div className="picture" style={picture}></div>
-                    <div className="info">
-                        <p className="name">
-                            {this.props.fighter.name}
-                        </p>
-                        <p className="record">
-                            {this.props.fighter.wins} - {this.props.fighter.losses}
-                            - {this.props.fighter.draws} - {this.props.fighter.nc}
-                        </p>
-                        {this.props.removable &&
-                        <div className="remove" onClick={this.props.onClick}>
-                            <i className="fa fa-times"
-                               aria-hidden="true"></i>
-                        </div>
+                {this.props.unknown === undefined ?
+                    <div className={className} onClick={this.toggleDetails}>
+                        <div className="picture" style={picture}></div>
+                        <div className="info">
+                            <p className="name">
+                                {this.props.fighter.name}
+                            </p>
+                            <p className="record">
+                                {this.props.fighter.wins} - {this.props.fighter.losses}
+                                - {this.props.fighter.draws} - {this.props.fighter.nc}
+                            </p>
+                            {this.props.removable &&
+                            <div className="remove" onClick={this.props.onClick}>
+                                <i className="fa fa-times"
+                                   aria-hidden="true"></i>
+                            </div>
 
-                        }
+                            }
+                        </div>
                     </div>
-                </div>
+                    :
+                    <div className={className}>
+                        <div className="picture" style={picture}></div>
+                        <div className="info">
+                            <p className="name">
+                                Unknown Fighter
+                            </p>
+                        </div>
+                    </div>
+                }
                 {
                     this.state.details === true &&
                     <FighterDetails fighter={this.props.fighter} onCloseClick={this.toggleDetails}/>

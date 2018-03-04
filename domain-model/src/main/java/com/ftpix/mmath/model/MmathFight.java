@@ -4,6 +4,7 @@ import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.utils.DateUtils;
 import com.google.gson.annotations.Expose;
+import io.gsonfire.annotations.ExposeMethodResult;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -12,6 +13,7 @@ import java.util.Date;
 
 public class MmathFight {
 
+    @Expose
     private long id;
 
 
