@@ -1,9 +1,11 @@
 .fighter-details {
   padding: 10px;
   position: fixed;
-  top: 50px;
+  margin: 50px auto;
+  width:700px;
+  top:0;
+  bottom:0;
   left: 50px;
-  bottom: 50px;
   right: 50px;
   border-radius: 5px;
   background-color: black;
@@ -86,8 +88,8 @@
     right: 0;
     bottom: 0;
     z-index: -1;
-    filter: blur(10px);
-    background-size: 100%;
+    filter: blur(30px);
+    background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
     transform: scale(1.5);
@@ -109,14 +111,15 @@
 
 }
 
-@media only screen and (max-width: @mobileBreakPoint) {
+@media only screen and (max-width: @tabletBreakPoint) {
   .fighter-details {
     padding-top: 0;
     top: 0;
     left: 0;
-    bottom: 0;
     right: 0;
     border-radius: 0;
+    width:auto;
+    margin:0;
 
     .remove {
       position: relative;

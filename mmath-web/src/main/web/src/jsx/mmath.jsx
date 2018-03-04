@@ -13,7 +13,7 @@ export default class Mmath extends React.Component {
             loading1v2: false,
             loading2v1: false,
             switch: false,
-            fromLink: this.props.match.params.fighter1 !== null
+            fromLink: this.props.match.params.fighter1 !== undefined
 
         };
 
@@ -31,8 +31,6 @@ export default class Mmath extends React.Component {
      * @param fighter2
      */
     triggerSearch(fighter1, fighter2) {
-        console.log(fighter1);
-        console.log(fighter2);
 
         this.setState({loading1v2: true, loading2v1: true, fighter1VsFighter2: null, fighter2VsFighter1: null}, () => {
             this.mmathService.betterThan(fighter1.id, fighter2.id)

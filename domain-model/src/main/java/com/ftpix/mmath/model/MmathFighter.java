@@ -10,6 +10,7 @@ import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -152,7 +153,7 @@ public class MmathFighter {
         MmathFighter fighter = new MmathFighter();
 
         fighter.setSherdogUrl(f.getSherdogUrl());
-        Optional.ofNullable(f.getBirthday()).ifPresent(bd->{
+        Optional.ofNullable(f.getBirthday()).ifPresent(bd -> {
             fighter.setBirthday(DateUtils.toLocalDate(bd));
         });
         fighter.setDraws(f.getDraws());
@@ -181,4 +182,9 @@ public class MmathFighter {
         return fights.stream().map(GsonFriendlyFight::new).collect(Collectors.toList());
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        return Objects.equals(sherdogUrl, ((MmathFighter) obj).getSherdogUrl());
+    }
 }

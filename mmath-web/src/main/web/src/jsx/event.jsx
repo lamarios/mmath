@@ -47,7 +47,7 @@ export default class Event extends React.Component {
                                         {validFight ?
                                             <button onClick={() => {
                                                 this.props.history.push(fightLink)
-                                            }} className="btn btn-danger btn-lg">vs.</button>
+                                            }} className="btn btn-danger btn-lg">VS.</button>
                                             : <span>VS.</span>
                                         }
                                     </div>

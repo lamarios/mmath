@@ -1,5 +1,6 @@
 package com.ftpix.mmath.dao.mysql;
 
+import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,11 +10,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FighterDAO implements DAO<MmathFighter, String> {
     private final JdbcTemplate template;
+
+    private final static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
 
     private RowMapper<MmathFighter> rowMapper = (resultSet, i) -> {
         MmathFighter f = new MmathFighter();
@@ -99,12 +112,44 @@ public class FighterDAO implements DAO<MmathFighter, String> {
     }
 
     public List<MmathFighter> searchByName(String name) {
-        String query = "SELECT * FROM fighters WHERE `name` LIKE ? OR `nickname` LIKE ? LIMIT 10";
-
         String searchQuery = "%" + name + "%";
-        List<MmathFighter> query1 = template.query(query, rowMapper, searchQuery, searchQuery);
 
-        return query1;
+        String[] nameSplit = name.split(" ");
+        ExecutorService exec = Executors.newFixedThreadPool(nameSplit.length + 2);
+
+        List<Future<List<MmathFighter>>> futures = new ArrayList<>();
+
+        futures.add(exec.submit(() -> {
+            String query = "SELECT * FROM fighters WHERE `name` LIKE ? LIMIT 10";
+            return template.query(query, rowMapper, searchQuery);
+        }));
+
+        futures.add(exec.submit(() -> {
+            String query2 = "SELECT * FROM fighters WHERE `nickname` LIKE ? LIMIT 10";
+            return template.query(query2, rowMapper, searchQuery);
+        }));
+
+        if (nameSplit.length > 1) {
+            futures.addAll(
+                    Stream.of(nameSplit)
+                            .map(s -> {
+                                return exec.submit(() -> {
+                                    String query2 = "SELECT * FROM fighters WHERE `nickname` LIKE ? OR `name` LIKE ? LIMIT 10";
+                                    return template.query(query2, rowMapper, s, s);
+                                });
+                            }).collect(Collectors.toList())
+            );
+        }
+        return futures.stream()
+                .flatMap(f -> {
+                    try {
+                        return f.get().stream();
+                    } catch (InterruptedException | ExecutionException e) {
+                        return null;
+                    }
+                })
+                .filter(s -> s != null)
+                .filter(distinctByKey(MmathFighter::getSherdogUrl)).limit(10).collect(Collectors.toList());
     }
 
     public MmathFighter getFromHash(String hash) {
