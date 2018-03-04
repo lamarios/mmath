@@ -3,11 +3,15 @@ package com.ftpix.mmath.web;
 import com.ftpix.mmath.DaoConfiguration;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
+import com.ftpix.mmath.web.controllers.EventsController;
+import com.ftpix.mmath.web.controllers.MmathController;
 import mmath.S3Configuration;
 import mmath.S3Helper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
+import org.springframework.core.annotation.Order;
+import spark.Spark;
 
 /**
  * Created by gz on 26-Sep-16.
@@ -15,17 +19,33 @@ import org.springframework.context.annotation.*;
 
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import({DaoConfiguration.class,  S3Configuration.class})
+@Import({DaoConfiguration.class, S3Configuration.class})
 public class WebConfiguration {
 
     @Value("${web.port}")
     private int port;
 
 
+    @Bean
+    EventsController eventsController(MySQLDao dao, WebServer server) {
+
+        EventsController controller = new EventsController(dao);
+        controller.declareEndPoints();
+
+        return controller;
+    }
 
     @Bean
-    WebServer server(MySQLDao dao, OrientDBDao orientDBDao, S3Helper s3Helper) {
-        WebServer server = new WebServer(port, dao, orientDBDao, s3Helper);
+    MmathController mmathController(MySQLDao dao, OrientDBDao orientDBDao, WebServer server) {
+        MmathController mmathController = new MmathController(dao, orientDBDao);
+        mmathController.declareEndPoints();
+
+        return mmathController;
+    }
+
+    @Bean
+    WebServer server(S3Helper s3Helper) {
+        WebServer server = new WebServer(port, s3Helper);
 
         server.startServer();
 
@@ -33,7 +53,7 @@ public class WebConfiguration {
     }
 
 
-    public static void main(String... args){
+    public static void main(String... args) {
         ApplicationContext context =
                 new AnnotationConfigApplicationContext(WebConfiguration.class);
     }

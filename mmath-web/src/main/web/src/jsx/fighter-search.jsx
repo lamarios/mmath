@@ -50,7 +50,6 @@ export default class FighterSearch extends React.Component {
 
     //Triggers the search
     handleSearch(e) {
-        console.log(e);
         var query = e.target.value;
         if (query.length >= 3) {
             clearTimeout(this.state.timeout);

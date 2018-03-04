@@ -1,0 +1,29 @@
+.EventChip {
+  height: 50px;
+  background-color: white;
+  color: black;
+  font-size: 17px;
+  margin: 10px 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    @scale: 1.05;
+    transform: scale(@scale);
+    background-color: #ddd;
+  }
+
+  .date, .name {
+    display: inline-block;
+    padding: 12px 10px 0;
+    height: 100%;
+  }
+
+  .date {
+    background-color: @accentColor;
+    color: @textColor;
+    width: 130px;
+    text-align: center;
+  }
+
+}

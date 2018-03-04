@@ -12,7 +12,9 @@ export default class Mmath extends React.Component {
             fighter2VsFighter1: null,
             loading1v2: false,
             loading2v1: false,
-            switch: false
+            switch: false,
+            fromLink: this.props.match.params.fighter1 !== null
+
         };
 
 
@@ -50,7 +52,9 @@ export default class Mmath extends React.Component {
                 });
             const pageTitle = 'Mmath - ' + fighter1.name + ' vs. ' + fighter2.name;
 
-            window.history.pushState({}, pageTitle, '/' + fighter1.id + '/vs/' + fighter2.id);
+            if(this.state.fromLink === false) {
+                window.history.pushState({}, pageTitle, '/' + fighter1.id + '/vs/' + fighter2.id);
+            }
             document.title = pageTitle;
         });
 

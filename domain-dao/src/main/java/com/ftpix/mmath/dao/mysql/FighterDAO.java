@@ -41,7 +41,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
     }
 
     @Override
-    public  void init() {
+    public void init() {
         String createTable = "CREATE TABLE IF NOT  EXISTS fighters\n" +
                 "(\n" +
                 "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
@@ -99,9 +99,10 @@ public class FighterDAO implements DAO<MmathFighter, String> {
     }
 
     public List<MmathFighter> searchByName(String name) {
-        String query = "SELECT * FROM fighters WHERE name LIKE ? LIMIT 5";
+        String query = "SELECT * FROM fighters WHERE `name` LIKE ? OR `nickname` LIKE ? LIMIT 10";
 
-        List<MmathFighter> query1 = template.query(query, rowMapper, "%" + name + "%");
+        String searchQuery = "%" + name + "%";
+        List<MmathFighter> query1 = template.query(query, rowMapper, searchQuery, searchQuery);
 
         return query1;
     }

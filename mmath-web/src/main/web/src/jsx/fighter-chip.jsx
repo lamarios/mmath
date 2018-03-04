@@ -35,7 +35,7 @@ export default class FighterChip extends React.Component {
         // }
 
         return (
-            <div>
+            <div className="fighter-chip-wrapper">
                 <div className={className} onClick={this.toggleDetails}>
                     <div className="picture" style={picture}></div>
                     <div className="info">

@@ -11,10 +11,17 @@ var API_ROOT = "";
 var API_URL = API_ROOT + '/api';
 
 var constants = {
-    BETTER_THAN: JSON.stringify(API_URL + "/better-than/{0}/{1}"),
-    SEARCH: JSON.stringify(API_URL + "/fighters/query"),
-    FIGHTS: JSON.stringify(API_URL + "/fights/{0}"),
-    FIGHTER_BY_HASH: JSON.stringify(API_URL+"/fighter/{0}")
+    MMATH: {
+        BETTER_THAN: JSON.stringify(API_URL + "/better-than/{0}/{1}"),
+        SEARCH: JSON.stringify(API_URL + "/fighters/query"),
+        FIGHTS: JSON.stringify(API_URL + "/fights/{0}"),
+        FIGHTER_BY_HASH: JSON.stringify(API_URL + "/fighter/{0}")
+    },
+    EVENTS: {
+        BY_ID: JSON.stringify(API_URL+"/events/{0}"),
+        INCOMING: JSON.stringify(API_URL+"/events/incoming"),
+        FIGHTS: JSON.stringify(API_URL+"/events/{0}/fights")
+    }
 };
 
 var config = {

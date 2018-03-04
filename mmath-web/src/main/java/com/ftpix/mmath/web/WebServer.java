@@ -34,18 +34,14 @@ public class WebServer {
 
     private final int port;
 
-    private final MySQLDao dao;
-    private final OrientDBDao orientDBDao;
     private final S3Helper s3Helper;
 
     private Logger logger = LogManager.getLogger();
     private final Gson gson = GsonUtils.getGson();
 
 
-    public WebServer(int port, MySQLDao dao, OrientDBDao orientDBDao, S3Helper s3Helper) {
+    public WebServer(int port,  S3Helper s3Helper) {
         this.port = port;
-        this.dao = dao;
-        this.orientDBDao = orientDBDao;
         this.s3Helper = s3Helper;
     }
 
@@ -63,14 +59,12 @@ public class WebServer {
         Spark.before("*", this::logRequest);
         Spark.before("/api/*", this::jsonRequest);
 
-        Spark.get("/api/better-than/:fighter1/:fighter2", "application/json", this::betterThan, gson::toJson);
-        Spark.post("/api/fighters/query", "application/json", this::searchFighter, gson::toJson);
-        Spark.get("/api/fighter/:id", "application/json", this::getFighter, gson::toJson);
-        Spark.get("/api/fights/:id", "application/json", this::getFights, gson::toJson);
         Spark.get("/pictures/*", this::getFighterPicture);
 
         //front end endpoints
         Spark.get("/:fighter1/vs/:fighter2", this::serveIndex);
+        Spark.get("/events", this::serveIndex);
+        Spark.get("/events/:id/fights", this::serveIndex);
 
         Spark.exception(Exception.class, (e, request, response) -> {
             logger.error("Error while processing request", e);
@@ -96,28 +90,6 @@ public class WebServer {
         }
     }
 
-    /**
-     * Returns a list of fights for a fighter
-     *
-     * @param request
-     * @param response
-     * @return
-     */
-    private List<GsonFriendlyFight> getFights(Request request, Response response) {
-
-        String fighter1 = request.params(":id");
-
-        return Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter1))
-                .map(fighter -> {
-                    fighter.setFights(dao.getFightDAO().getByFighter(fighter.getSherdogUrl()));
-                    fighter.getFights().forEach(f -> {
-                        f.setEvent(dao.getEventDAO().getById(f.getEvent().getSherdogUrl()));
-                        f.setFighter2(dao.getFighterDAO().getById(f.getFighter2().getSherdogUrl()));
-                    });
-
-                    return fighter.getGsonFriendlyFights();
-                }).orElse(new ArrayList<>());
-    }
 
     /**
      * Get an image from the cache path
@@ -149,115 +121,17 @@ public class WebServer {
         }
     }
 
-    private MmathFighter getFighter(Request request, Response response) throws SQLException {
-
-        return Optional.ofNullable(dao.getFighterDAO().getFromHash(request.params(":id"))).get();
-    }
 
     private void jsonRequest(Request request, Response response) {
         response.type("application/json");
     }
 
-    private List<MmathFighter> searchFighter(Request request, Response response) throws InterruptedException {
-        Query query = gson.fromJson(request.body(), Query.class);
-        return Optional.ofNullable(dao.getFighterDAO().searchByName(query.getName())).orElse(new ArrayList<>());
-
-    }
 
 
-    private List<MmathFighter> betterThan(Request request, Response response) throws IOException {
-        try {
-            String fighter1 = request.params(":fighter1");
-            String fighter2 = request.params(":fighter2");
-
-
-            logger.info("{} vs {}", fighter1, fighter2);
-
-
-            Optional<MmathFighter> fighter1Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter1));
-            Optional<MmathFighter> fighter2Opt = Optional.ofNullable(dao.getFighterDAO().getFromHash(fighter2));
-
-
-            if (fighter1Opt.isPresent() && fighter2Opt.isPresent()) {
-
-                // cutting short uselss long tree parsing
-                MmathFighter f1 = fighter1Opt.get();
-                MmathFighter f2 = fighter2Opt.get();
-
-                if (f1.getWins() == 0 || f2.getLosses() == 0) {
-                    return new ArrayList<>();
-                }
-
-                List<MmathFighter> result = orientDBDao.findShortestPath(f1, f2)
-                        .stream()
-                        .filter(f -> f != null)
-                        .map(f -> {
-//                            try {
-                            final MmathFighter fighter = dao.getFighterDAO().getById(f);
-
-                            return fighter;
-                        })
-                        .collect(Collectors.toList());
-
-                logger.info("Result size: {}", result.size());
-                return result;
-            } else {
-                return new ArrayList<>();
-            }
-        } catch (Exception e) {
-            logger.error("error: ", e);
-            return new ArrayList<>();
-        }
-    }
 
     private void logRequest(Request request, Response response) {
         logger.info("{} {}", request.requestMethod(), request.url());
 
     }
 
-
-    /* private void setFighterFights(MmathFighter fighter) throws SQLException {
-
-        QueryBuilder<MmathFight, Long> query = fightDao.queryBuilder();
-        Where<MmathFight, Long> where = query.where();
-
-        PreparedQuery<MmathFight> prepare = where.or(
-                where.eq("fighter1_id", fighter.getSherdogUrl())
-                ,
-                where.eq("fighter2_id", fighter.getSherdogUrl())
-        ).prepare();
-
-        List<GsonFriendlyFight> fights = fightDao.query(prepare).stream()
-                .map(f -> {
-                    GsonFriendlyFight gsonFight = new GsonFriendlyFight();
-                    gsonFight.setDate(f.getEvent().getDate());
-                    //we need to swap
-                    if (f.getFighter2().getSherdogUrl().equalsIgnoreCase(fighter.getSherdogUrl())) {
-                        f.setFighter2(f.getFighter1());
-                        f.setFighter1(fighter);
-                        switch (f.getResult()) {
-                            case FIGHTER_1_WIN:
-                                f.setResult(FightResult.FIGHTER_2_WIN);
-                                break;
-                            case FIGHTER_2_WIN:
-                                f.setResult(FightResult.FIGHTER_1_WIN);
-                                break;
-                        }
-                    }
-
-                    gsonFight.setResult(f.getResult());
-                    gsonFight.setOpponent(f.getFighter2().getName());
-                    gsonFight.setEvent(f.getEvent().getName());
-                    gsonFight.setWinMethod(f.getWinMethod());
-                    gsonFight.setWinRound(f.getWinRound());
-                    gsonFight.setWinTime(f.getWinTime());
-
-                    return gsonFight;
-                })
-                .sorted(Comparator.comparing(f -> f.getDate()))
-                .collect(Collectors.toList());
-
-        fighter.setGsonFriendlyFights(fights);
-
-    } */
 }

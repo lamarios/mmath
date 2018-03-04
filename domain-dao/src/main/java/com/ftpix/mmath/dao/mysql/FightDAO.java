@@ -104,6 +104,12 @@ public class FightDAO implements DAO<MmathFight, Long> {
         return template.query(query, rowMapper);
     }
 
+    public List<MmathFight> getFightsForEventHash(String hash){
+        String query = "SELECT * FROM fights WHERE MD5(`event_id`) = ?";
+
+        return template.query(query, rowMapper, hash);
+    }
+
     @Override
     public Long insert(MmathFight f) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -130,7 +136,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
      * @return true if the delete query actually deleted something
      */
     public boolean deleteExistingSimilarFight(String fighter1, String fighter2, String event){
-        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?) AND event_id = ?)",  fighter1, fighter2, fighter1, fighter2, event) > 0;
+        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?)) AND event_id = ?",  fighter1, fighter2, fighter1, fighter2, event) > 0;
     }
 
     @Override

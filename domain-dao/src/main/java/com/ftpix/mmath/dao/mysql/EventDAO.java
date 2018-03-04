@@ -66,11 +66,31 @@ public class EventDAO implements DAO<MmathEvent, String> {
         return query1.size() == 1 ? query1.get(0) : null;
     }
 
+
+    public MmathEvent getFromHash(String hash) {
+        String query = "SELECT * FROM events WHERE MD5(sherdogUrl) = ?";
+
+        List<MmathEvent> query1 = template.query(query, rowMapper, hash);
+
+        return query1.size() == 1 ? query1.get(0) : null;
+    }
+
+
     @Override
     public List<MmathEvent> getAll() {
         String query = "SELECT * FROM events";
 
         return template.query(query, rowMapper);
+    }
+
+    public List<MmathEvent> getIncoming(){
+        LocalDateTime now = LocalDateTime.now().minusDays(2);
+        LocalDateTime then = now.plusDays(9);
+
+
+        String query = "SELECT * FROM events WHERE `date` BETWEEN  ? and ? ORDER BY `date` ASC";
+
+        return template.query(query, rowMapper, now.format(DAO.TIME_FORMAT), then.format(DAO.TIME_FORMAT));
     }
 
     @Override
@@ -90,4 +110,5 @@ public class EventDAO implements DAO<MmathEvent, String> {
     public boolean deleteById(String id) {
         return template.update("DELETE FROM events WHERE  sherdogUrl = ?", id) == 1;
     }
+
 }
