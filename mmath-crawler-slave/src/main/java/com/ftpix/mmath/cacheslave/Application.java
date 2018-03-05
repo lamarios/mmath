@@ -43,7 +43,7 @@ public class Application {
     }
 
     @Bean
-    GraphGenerator graphGenerator(OrientDBDao orientDBDao, MySQLDao dao)  {
+    GraphGenerator graphGenerator(OrientDBDao orientDBDao, MySQLDao dao) {
         return new GraphGenerator(orientDBDao, dao);
     }
 
@@ -70,7 +70,7 @@ public class Application {
 
         CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
         trigger.setJobDetail(jobDetail);
-        trigger.setCronExpression("00 00 00 * * ?");
+        trigger.setCronExpression("0 0 0 ? * TUE");
         // trigger.setCronExpression("00 * * * * ?");
         trigger.setName("weekly");
 
@@ -94,21 +94,21 @@ public class Application {
     }
 
 
-    @Bean
-    Scheduler schedulerFactory(Trigger cronTrigger, Trigger simpleTrigger, JobDetail jobDetail) throws Exception {
+        @Bean
+       Scheduler schedulerFactory(Trigger cronTrigger, Trigger simpleTrigger, JobDetail jobDetail) throws Exception {
 
-        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-        scheduler.setJobDetails(jobDetail);
-        scheduler.setTriggers(cronTrigger, simpleTrigger);
-        scheduler.setAutoStartup(true);
+            SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
+            scheduler.setJobDetails(jobDetail);
+            scheduler.setTriggers(cronTrigger, simpleTrigger);
+            scheduler.setAutoStartup(true);
 
 
-        scheduler.afterPropertiesSet();
+            scheduler.afterPropertiesSet();
 
-        Scheduler result = scheduler.getObject();
-        result.start();
-        return result;
-    }
+            Scheduler result = scheduler.getObject();
+            result.start();
+            return result;
+        }
 
     ///////////////////GRAPH JOBS
     @Bean
@@ -143,14 +143,15 @@ public class Application {
 
         CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
         trigger.setJobDetail(graphJobDetail);
-        trigger.setCronExpression("23 00 00 * * ?");
-        // trigger.setCronExpression("00 * * * * ?");
+        trigger.setCronExpression("0 0 23 ? * TUE");
+//         trigger.setCronExpression("00 * * * * ?");
         trigger.setName("weekly_graph");
 
         trigger.afterPropertiesSet();
 
         return trigger.getObject();
     }
+
     @Bean
     Scheduler graphSchedulerFactory(Trigger graphCronTrigger, Trigger graphSimpleTrigger, JobDetail graphJobDetail) throws Exception {
 

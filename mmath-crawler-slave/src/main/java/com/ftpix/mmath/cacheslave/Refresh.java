@@ -20,7 +20,7 @@ public class Refresh {
     private final MySQLDao dao;
     private final Receiver receiver;
 
-    public static int RATE = 4;
+    public static int RATE = 1;
 
     public Refresh(Receiver receiver, MySQLDao dao) {
         this.dao = dao;

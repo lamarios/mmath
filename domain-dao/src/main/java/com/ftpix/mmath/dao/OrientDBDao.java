@@ -30,6 +30,8 @@ public class OrientDBDao {
     public final static String VERTEX_FIGHTER = "fighter", EDGE_BEAT = "beat", SHERDOG_URL = "sherdog_url", FIGHT_ID = "fight_id";
 
     public final static String BETTER_THAN_QUERY = "select path.sherdog_url from (SELECT shortestPath( (SELECT FROM fighter WHERE sherdog_url='%s' ) , (SELECT FROM fighter WHERE sherdog_url='%s'), 'OUT', 'beat') AS path UNWIND path);";
+    public static final String DELETE_ALL_EDGES = "DELETE EDGE " + EDGE_BEAT + ";";
+    public static final String DELETE_ALL_FIGHTERS = "DELETE VERTEX " + VERTEX_FIGHTER + ";";
     private Logger logger = LogManager.getLogger();
 
     public OrientDBDao(String dbUrl, String username, String password, String dbname) {
@@ -150,6 +152,42 @@ public class OrientDBDao {
         return DriverManager.getConnection("jdbc:orient:" + dbUrl + dbname, info);
     }
 
+    /**
+     * Deletes all fighters from orientDB
+     * @return
+     * @throws SQLException
+     */
+    public boolean deleteAllFighters() throws SQLException {
+        try (
+                Connection con = getJDBCConnection();
+                Statement statement = con.createStatement();
+        ) {
+            return statement.executeUpdate(OrientDBDao.DELETE_ALL_FIGHTERS) >= 0;
+        }
+    }
+
+
+    /**
+     * Deletes all Beat edges from orientdb
+     * @return
+     * @throws SQLException
+     */
+    public boolean deleteAllEdges() throws SQLException {
+        try (
+                Connection con = getJDBCConnection();
+                Statement statement = con.createStatement();
+        ) {
+            return statement.executeUpdate(OrientDBDao.DELETE_ALL_EDGES) >= 0;
+        }
+    }
+
+    /**
+     * Finds the shortest path between two fighters
+     * @param fighter1
+     * @param fighter2
+     * @return
+     * @throws SQLException
+     */
     public List<String> findShortestPath(MmathFighter fighter1, MmathFighter fighter2) throws SQLException {
         List<String> results = new ArrayList<>();
         try (

@@ -43,10 +43,9 @@ public class GraphGenerator {
             Map<String, Vertex> graphFighters = new HashMap<>();
             Map<Long, Edge> graphFights = new HashMap<>();
 
-            logger.info("Getting all data from GraphDB to make process faster");
-            graph.getVerticesOfClass(OrientDBDao.VERTEX_FIGHTER).forEach(f -> graphFighters.put(f.getProperty(SHERDOG_URL), f));
-            graph.getEdgesOfClass(OrientDBDao.EDGE_BEAT).forEach(b -> graphFights.put(b.getProperty(FIGHT_ID), b));
-
+            logger.info("Cleaning all data before starting from scratch");
+            orientDb.deleteAllEdges();
+            orientDb.deleteAllFighters();
 
             logger.info("Getting all the processable fights");
             dao.getFightDAO().getAll()
@@ -72,16 +71,6 @@ public class GraphGenerator {
 
         logger.info("[{}] vs [{}] at event [{}]", fight.getFighter1().getSherdogUrl(), fight.getFighter2().getSherdogUrl(), fight.getEvent().getSherdogUrl());
 
-        LocalDateTime today = LocalDateTime.now();
-        long lastUpdated = Math.abs(ChronoUnit.DAYS.between(fight.getLastUpdate(), today));
-
-        boolean alreadyExists = graphFights.containsKey(fight.getId());
-
-        if ( alreadyExists && lastUpdated >= Refresh.RATE) {
-            graph.removeEdge(graphFights.get(fight.getId()));
-            graphFights.remove(fight.getId());
-            logger.info("FIGHT NEEDS TO BE REPLACED");
-        }
 
         //we check if it already exists
         if (!graphFights.containsKey(fight.getId())) {
