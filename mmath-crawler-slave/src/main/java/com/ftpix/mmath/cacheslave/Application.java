@@ -79,51 +79,24 @@ public class Application {
         return trigger.getObject();
     }
 
+
     @Bean
-    Trigger simpleTrigger(JobDetail jobDetail) throws ParseException {
+    Scheduler schedulerFactory(Trigger cronTrigger,  JobDetail jobDetail) throws Exception {
 
-        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-        trigger.setJobDetail(jobDetail);
-        trigger.setStartDelay(0);
-        trigger.setName("On start");
-        trigger.setRepeatCount(0);
-        trigger.setRepeatInterval(1);
-        trigger.afterPropertiesSet();
+        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
+        scheduler.setJobDetails(jobDetail);
+        scheduler.setTriggers(cronTrigger);
+        scheduler.setAutoStartup(true);
 
-        return trigger.getObject();
+
+        scheduler.afterPropertiesSet();
+
+        Scheduler result = scheduler.getObject();
+        result.start();
+        return result;
     }
-
-
-        @Bean
-       Scheduler schedulerFactory(Trigger cronTrigger, Trigger simpleTrigger, JobDetail jobDetail) throws Exception {
-
-            SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-            scheduler.setJobDetails(jobDetail);
-            scheduler.setTriggers(cronTrigger, simpleTrigger);
-            scheduler.setAutoStartup(true);
-
-
-            scheduler.afterPropertiesSet();
-
-            Scheduler result = scheduler.getObject();
-            result.start();
-            return result;
-        }
 
     ///////////////////GRAPH JOBS
-    @Bean
-    Trigger graphSimpleTrigger(JobDetail graphJobDetail) throws ParseException {
-
-        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-        trigger.setJobDetail(graphJobDetail);
-        trigger.setStartDelay(0);
-        trigger.setName("On start graph");
-        trigger.setRepeatCount(0);
-        trigger.setRepeatInterval(1);
-        trigger.afterPropertiesSet();
-
-        return trigger.getObject();
-    }
 
     @Bean
     JobDetail graphJobDetail(GraphGenerator graphGenerator) throws Exception {
@@ -153,11 +126,11 @@ public class Application {
     }
 
     @Bean
-    Scheduler graphSchedulerFactory(Trigger graphCronTrigger, Trigger graphSimpleTrigger, JobDetail graphJobDetail) throws Exception {
+    Scheduler graphSchedulerFactory(Trigger graphCronTrigger, JobDetail graphJobDetail) throws Exception {
 
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
         scheduler.setJobDetails(graphJobDetail);
-        scheduler.setTriggers(graphSimpleTrigger, graphCronTrigger);
+        scheduler.setTriggers( graphCronTrigger);
         scheduler.setAutoStartup(true);
 
 
@@ -166,6 +139,13 @@ public class Application {
         Scheduler result = scheduler.getObject();
         result.start();
         return result;
+    }
+
+
+    @Bean
+    WebController web(Refresh refresh, GraphGenerator graphGenerator){
+        return new WebController(refresh, graphGenerator);
+
     }
 
     public static void main(String[] args) {
