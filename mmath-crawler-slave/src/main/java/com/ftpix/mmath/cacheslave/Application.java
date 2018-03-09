@@ -2,6 +2,7 @@ package com.ftpix.mmath.cacheslave;
 
 import com.ftpix.mmath.DaoConfiguration;
 import com.ftpix.mmath.cacheslave.graph.GraphGenerator;
+import com.ftpix.mmath.cacheslave.stats.StatsRefresher;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.sherdogparser.Sherdog;
@@ -13,7 +14,6 @@ import org.springframework.context.annotation.*;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
 import java.text.ParseException;
 
@@ -24,12 +24,6 @@ import java.text.ParseException;
 @PropertySource("classpath:config.properties")
 @Import({DaoConfiguration.class})
 public class Application {
-    private final static int CORE_POOL_SIZE = 1, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 15, THREAD_TIMEOUT = 60;
-
-
-    //Thread pools
-
-
     //Receiver
     @Bean
     Receiver receiver(MySQLDao dao, Sherdog sherdog) {
@@ -81,7 +75,7 @@ public class Application {
 
 
     @Bean
-    Scheduler schedulerFactory(Trigger cronTrigger,  JobDetail jobDetail) throws Exception {
+    Scheduler schedulerFactory(Trigger cronTrigger, JobDetail jobDetail) throws Exception {
 
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
         scheduler.setJobDetails(jobDetail);
@@ -130,7 +124,7 @@ public class Application {
 
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
         scheduler.setJobDetails(graphJobDetail);
-        scheduler.setTriggers( graphCronTrigger);
+        scheduler.setTriggers(graphCronTrigger);
         scheduler.setAutoStartup(true);
 
 
@@ -143,8 +137,8 @@ public class Application {
 
 
     @Bean
-    WebController web(Refresh refresh, GraphGenerator graphGenerator){
-        return new WebController(refresh, graphGenerator);
+    WebController web(Refresh refresh, GraphGenerator graphGenerator, StatsRefresher statsRefresher) {
+        return new WebController(refresh, graphGenerator, statsRefresher);
 
     }
 
@@ -153,4 +147,58 @@ public class Application {
                 new AnnotationConfigApplicationContext(Application.class);
 
     }
+
+
+    /////////////////// STATS PROCESSOR
+    @Bean
+    StatsRefresher statsRefresher(MySQLDao dao) {
+        return new StatsRefresher(dao);
+    }
+
+
+
+    @Bean
+    JobDetail statsJobDetail(StatsRefresher statsRefresher) throws Exception {
+        MethodInvokingJobDetailFactoryBean job = new MethodInvokingJobDetailFactoryBean();
+        job.setTargetObject(statsRefresher);
+        job.setTargetMethod("process");
+        job.setName("refresh_stats");
+        job.setConcurrent(false);
+
+        job.afterPropertiesSet();
+
+        return job.getObject();
+    }
+
+    @Bean
+    Trigger statsCronTrigger(JobDetail statsJobDetail) throws ParseException {
+
+        CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
+        trigger.setJobDetail(statsJobDetail);
+        trigger.setCronExpression("0 0 20 ? * TUE");
+//         trigger.setCronExpression("00 * * * * ?");
+        trigger.setName("weekly_graph");
+
+        trigger.afterPropertiesSet();
+
+        return trigger.getObject();
+    }
+
+    @Bean
+    Scheduler statsSchedulerFactory(Trigger statsCronTrigger, JobDetail statsJobDetail) throws Exception {
+
+        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
+        scheduler.setJobDetails(statsJobDetail);
+        scheduler.setTriggers(statsCronTrigger);
+        scheduler.setAutoStartup(true);
+
+
+        scheduler.afterPropertiesSet();
+
+        Scheduler result = scheduler.getObject();
+        result.start();
+        return result;
+    }
+
+
 }

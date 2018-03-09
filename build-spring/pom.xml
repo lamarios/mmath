@@ -11,7 +11,7 @@
 
     <artifactId>build-spring</artifactId>
     <properties>
-        <spring.version>4.3.2.RELEASE</spring.version>
+        <spring.version>5.0.4.RELEASE</spring.version>
     </properties>
 
     <packaging>pom</packaging>
@@ -40,10 +40,5 @@
             <version>${spring.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit</artifactId>
-            <version>1.6.2.RELEASE</version>
-        </dependency>
     </dependencies>
 </project>

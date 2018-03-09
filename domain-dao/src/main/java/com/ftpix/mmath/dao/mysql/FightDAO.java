@@ -179,7 +179,8 @@ public class FightDAO implements DAO<MmathFight, Long> {
                         }
                     }
                     return  f;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
     }
 
 
