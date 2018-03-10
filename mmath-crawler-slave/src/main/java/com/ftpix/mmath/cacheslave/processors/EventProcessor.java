@@ -9,6 +9,7 @@ import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Event;
+import com.ftpix.sherdogparser.models.FightResult;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.io.IOException;
@@ -45,12 +46,14 @@ public class EventProcessor extends Processor<MmathEvent> {
 
     private void insertFight(MmathFight f) {
         try {
-            String fighter1 = Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse("");
-            String fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse("");
+            if (f.getResult() != null && f.getResult() != FightResult.NOT_HAPPENED) {
+                String fighter1 = Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse("");
+                String fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse("");
 
-            //deleting any existing similar fights, so we can insert it again, as sometimes sherdog changes the order of  fighter1 / fighter2
-            dao.getFightDAO().deleteExistingSimilarFight(fighter1, fighter2, f.getEvent().getSherdogUrl());
-            dao.getFightDAO().replace(f);
+                //deleting any existing similar fights, so we can insert it again, as sometimes sherdog changes the order of  fighter1 / fighter2
+                dao.getFightDAO().deleteExistingSimilarFight(fighter1, fighter2, f.getEvent().getSherdogUrl());
+                dao.getFightDAO().replace(f);
+            }
         } catch (DuplicateKeyException e) {
             logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
         }

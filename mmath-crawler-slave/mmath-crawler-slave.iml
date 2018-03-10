@@ -70,7 +70,7 @@
     <orderEntry type="library" name="Maven: com.orientechnologies:orientdb-client:2.2.32" level="project" />
     <orderEntry type="library" name="Maven: com.orientechnologies:orientdb-jdbc:2.2.32" level="project" />
     <orderEntry type="module" module-name="build-sherdog" />
-    <orderEntry type="library" name="Maven: com.ftpix:sherdog-parser:1.4" level="project" />
+    <orderEntry type="library" name="Maven: com.ftpix:sherdog-parser:1.5" level="project" />
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.9.2" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
     <orderEntry type="module" module-name="build-s3" />
