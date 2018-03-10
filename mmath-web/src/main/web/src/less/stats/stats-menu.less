@@ -1,0 +1,59 @@
+.StatsMenu {
+
+  position: relative;
+  ul {
+    margin: 20px 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      a {
+        color: white;
+        text-decoration: none;
+
+        &.active {
+          color: @accentColor;
+        }
+      }
+
+      &:first-of-type {
+        color: #999999;
+      }
+    }
+  }
+
+}
+
+@media only screen and (max-width: @tabletBreakPoint) {
+  .StatsMenu {
+    ul {
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.5);
+      transform-origin: center;
+      transition: all 0.25s ease-in-out;
+      background-color: black;
+      margin: 0;
+      z-index: 100;
+
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      li {
+        text-align: center;
+        font-size: 30px;
+      }
+
+      &.show {
+        pointer-events: auto;
+        opacity: 1;
+        transform: scale(1);
+
+      }
+    }
+  }
+}

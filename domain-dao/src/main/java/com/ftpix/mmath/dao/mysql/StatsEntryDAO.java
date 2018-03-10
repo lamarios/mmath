@@ -26,7 +26,7 @@ public class StatsEntryDAO implements DAO<StatsEntry, Long> {
 
         MmathFighter fighter = new MmathFighter();
         fighter.setSherdogUrl(rs.getString("fighter_id"));
-        s.setFigher(fighter);
+        s.setFighter(fighter);
 
         s.setTextToShow(rs.getString("text_to_show"));
         s.setDetails(rs.getString("details"));
@@ -80,6 +80,11 @@ public class StatsEntryDAO implements DAO<StatsEntry, Long> {
     }
 
 
+    public List<StatsEntry> getByCategory(String cat) {
+        return template.query("SELECT * FROM stats_entries WHERE category_id = ? ORDER BY percent DESC ", rowMapper, cat);
+    }
+
+
     public boolean deleteByCategory(String category) {
         return template.update("DELETE FROM stats_entries WHERE category_id = ?", category) > 0;
     }
@@ -88,7 +93,7 @@ public class StatsEntryDAO implements DAO<StatsEntry, Long> {
     public Long insert(StatsEntry entry) {
         template.update("INSERT INTO stats_entries (category_id, fighter_id, text_to_show, percent, details, lastUpdate) VALUES (?,?,?,?,?,NOW())",
                 entry.getCategory().getId(),
-                entry.getFigher().getSherdogUrl(),
+                entry.getFighter().getSherdogUrl(),
                 entry.getTextToShow(),
                 entry.getPercent(),
                 entry.getDetails()

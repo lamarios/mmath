@@ -21,6 +21,11 @@ var constants = {
         BY_ID: JSON.stringify(API_URL+"/events/{0}"),
         INCOMING: JSON.stringify(API_URL+"/events/incoming"),
         FIGHTS: JSON.stringify(API_URL+"/events/{0}/fights")
+    },
+    STATS: {
+        GET_ALL_CATEGORIES: JSON.stringify(API_URL+"/stats"),
+        GET_CATEGORY:JSON.stringify(API_URL+"/stats/{0}"),
+        GET_ENTRIES:JSON.stringify(API_URL+"/stats/entries/{0}")
     }
 };
 

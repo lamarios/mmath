@@ -1,12 +1,5 @@
 package com.ftpix.mmath.web;
 
-import com.amazonaws.services.s3.model.FileHeaderInfo;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.ftpix.mmath.dao.MySQLDao;
-import com.ftpix.mmath.dao.OrientDBDao;
-import com.ftpix.mmath.model.GsonFriendlyFight;
-import com.ftpix.mmath.model.MmathFighter;
-import com.ftpix.mmath.web.models.Query;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
 import mmath.S3Helper;
@@ -16,15 +9,10 @@ import spark.Request;
 import spark.Response;
 import spark.Spark;
 
-import javax.swing.text.html.Option;
-import java.io.*;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +53,8 @@ public class WebServer {
         Spark.get("/:fighter1/vs/:fighter2", this::serveIndex);
         Spark.get("/events", this::serveIndex);
         Spark.get("/events/:id/fights", this::serveIndex);
+        Spark.get("/stats", this::serveIndex);
+        Spark.get("/stats/:cat", this::serveIndex);
 
         Spark.exception(Exception.class, (e, request, response) -> {
             logger.error("Error while processing request", e);

@@ -1,0 +1,129 @@
+.StatsEntry {
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  margin-bottom: 10px;
+
+  &:hover{
+    transform: scale(1.05);
+
+  }
+
+
+  .rank {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 5px;
+    &.champ {
+      color: #FFD700;
+    }
+  }
+
+  .bar {
+    width: 100%;
+    height: 30px;
+    position: relative;
+
+    .entry-text{
+      position: absolute;
+      top:2px;
+      left:30px;
+      animation-name: fadeIn;
+      animation-duration: 0.5s;
+      animation-timing-function: ease-in-out;
+      animation-delay: 1s;
+      animation-fill-mode: forwards;
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .percent {
+      background-color: darken(@accentColor, 10%);
+      height: 100%;
+      border-radius: 2px;
+      animation-name: percent-extend;
+      animation-duration: 1s;
+      animation-timing-function: ease-in-out;
+      animation-fill-mode: forwards;
+      transform-origin: left;
+      transition: all 1s ease-in-out;
+      transform: scaleX(0);
+    }
+
+
+    .picture{
+      width:25px;
+      background-size: cover;
+      position: absolute;
+      top:0;
+      bottom: 0;
+      left: 0;
+      border-bottom-left-radius: 2px;
+      border-top-left-radius: 2px;
+
+      animation-name: fadeIn;
+      animation-duration: 0.5s;
+      animation-timing-function: ease-in-out;
+      animation-delay: 1s;
+      animation-fill-mode: forwards;
+      opacity: 0;
+      z-index: 1;
+    }
+
+  }
+
+
+
+
+
+  .details{
+    width: 250px;
+    background-color: white;
+    color: black;
+    position: absolute;
+    bottom:100%;
+    margin:auto;
+    z-index: 10;
+    padding: 10px;
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 5px;
+    box-shadow: 5px 5px 40px black;
+    transition: all 0.5s ease-in-out;
+
+   &:before{
+      content: ' ';
+      background-color:white;
+      transform: rotate(45deg);
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      bottom: -5px;
+    }
+  }
+}
+
+
+.StatsEntry:hover .details{
+  opacity: 1;
+}
+
+@keyframes percent-extend {
+  from{
+    transform: scaleX(0);
+  }
+
+  to{
+    transform: scaleX(1);
+  }
+}
+
+@keyframes fadeIn {
+  from{
+    opacity: 0;
+  }
+  to{
+    opacity: 1;
+  }
+}

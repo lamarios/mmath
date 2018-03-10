@@ -3,9 +3,7 @@ package com.ftpix.mmath.model;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.google.gson.annotations.Expose;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 public class GsonFriendlyFight {
@@ -23,12 +21,17 @@ public class GsonFriendlyFight {
            setOpponent("Unknown Fighter");
         }
 
+        setEventId(f.getEvent().getIdAsHash());
 
         setEvent(f.getEvent().getName());
         setWinMethod(f.getWinMethod());
         setWinRound(f.getWinRound());
         setWinTime(f.getWinTime());
     }
+
+
+    @Expose
+    private String eventId;
 
     @Expose
     private String opponent;
@@ -107,6 +110,11 @@ public class GsonFriendlyFight {
         this.winRound = winRound;
     }
 
+    public String getEventId() {
+        return eventId;
+    }
 
-
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
 }

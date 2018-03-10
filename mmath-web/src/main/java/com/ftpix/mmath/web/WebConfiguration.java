@@ -5,13 +5,12 @@ import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.web.controllers.EventsController;
 import com.ftpix.mmath.web.controllers.MmathController;
+import com.ftpix.mmath.web.controllers.StatsController;
 import mmath.S3Configuration;
 import mmath.S3Helper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
-import org.springframework.core.annotation.Order;
-import spark.Spark;
 
 /**
  * Created by gz on 26-Sep-16.
@@ -41,6 +40,15 @@ public class WebConfiguration {
         mmathController.declareEndPoints();
 
         return mmathController;
+    }
+
+
+    @Bean
+    StatsController statsController(MySQLDao dao,  WebServer server){
+        StatsController statsController = new StatsController(dao);
+        statsController.declareEndPoints();
+
+        return statsController;
     }
 
     @Bean

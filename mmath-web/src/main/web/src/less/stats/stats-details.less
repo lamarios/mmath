@@ -1,0 +1,25 @@
+.StatsDetails {
+
+  .mobile {
+    display: none;
+  }
+
+}
+
+@media only screen and (max-width: @tabletBreakPoint) {
+  .StatsDetails {
+    .details {
+
+      cursor: pointer;
+
+      .mobile {
+
+        color: @accentColor;
+        display: inline;
+        font-size: 25px;
+        padding: 5px;
+        vertical-align: middle;
+      }
+    }
+  }
+}

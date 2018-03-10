@@ -46,8 +46,8 @@ public class MostFightStats extends StatsProcessor {
         return fighters.stream()
                 .map(f -> {
                     StatsEntry e = new StatsEntry();
-                    e.setFigher(f);
-                    e.setTextToShow(countFighterFights(f)+" fights");
+                    e.setFighter(f);
+                    e.setTextToShow(countFighterFights(f) + " fights");
                     e.setDetails(f.getWins() + " wins, " + f.getLosses() + " losses, " + f.getDraws() + " draws, " + f.getNc() + " no contests");
                     double percent = ((double) countFighterFights(f) / (double) reference) * 100;
                     e.setPercent((int) Math.ceil(percent));

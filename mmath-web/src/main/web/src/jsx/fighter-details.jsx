@@ -1,5 +1,7 @@
 import React from 'react';
-import MmathService from './services/MmathService.jsx'
+import MmathService from './services/MmathService.jsx';
+import {NavLink} from 'react-router-dom';
+
 export default class FighterDetails extends React.Component {
 
     constructor() {
@@ -83,12 +85,12 @@ export default class FighterDetails extends React.Component {
                                         }
 
 
-                                        var key = fight.date + fight.opponent;
-
+                                        const key = fight.date + fight.opponent;
+                                        const eventLink = '/events/'+fight.eventId+"/fights";
                                         return (
                                             <tr key={key} className={rowClass}>
                                                 <td>{fight.opponent}</td>
-                                                <td>{fight.event}</td>
+                                                <td><NavLink to={eventLink}>{fight.event}</NavLink></td>
                                                 <td>{fight.winMethod}</td>
                                                 <td>{fight.winRound}</td>
                                                 <td>{fight.winTime}</td>

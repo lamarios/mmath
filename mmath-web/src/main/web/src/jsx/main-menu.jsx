@@ -7,6 +7,7 @@ export default class MainMenu extends React.Component {
         return (<ul className="MainMenu">
             <li><NavLink exact to="/" >Mmath</NavLink></li>
             <li><NavLink to="/events" >Events</NavLink></li>
+            <li><NavLink to="/stats/GLASS_CANNON" >Stats</NavLink></li>
         </ul>);
     }
 

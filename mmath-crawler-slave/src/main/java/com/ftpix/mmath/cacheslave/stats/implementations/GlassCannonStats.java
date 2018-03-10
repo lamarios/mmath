@@ -20,7 +20,7 @@ public class GlassCannonStats extends StatsProcessor {
     @Override
     protected StatsCategory getStatsCategory() {
         StatsCategory category = new StatsCategory();
-        category.setName("Glass Cannon");
+        category.setName("Glass Cannons");
         category.setId("GLASS_CANNON");
         category.setDescription("Fighters with only (T)KO wins or losses");
         return category;
@@ -92,7 +92,7 @@ public class GlassCannonStats extends StatsProcessor {
                 })
                 .map(f -> {
                     StatsEntry e = new StatsEntry();
-                    e.setFigher(f);
+                    e.setFighter(f);
                     e.setTextToShow(countFighterFights(f) + " fights");
                     e.setDetails(f.getName() + "has " + f.getFights().size() + " fights and they all finished by a KO or a TKO, " + f.getWins() + " wins for " + f.getLosses() + " losses");
 

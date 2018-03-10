@@ -102,7 +102,7 @@ public class LongestCareer extends StatsProcessor {
                     StatsEntry e = new StatsEntry();
                     MmathFighter fighter = dao.getFighterDAO().getById(f);
 
-                    e.setFigher(fighter);
+                    e.setFighter(fighter);
 
                     long days = careerLengths.get(f);
                     int percent = (int) Math.ceil(((double) days / (double) reference) * 100);

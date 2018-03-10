@@ -1,15 +1,22 @@
 package com.ftpix.mmath.model.stats;
 
 import com.ftpix.mmath.model.MmathFighter;
+import com.google.gson.annotations.Expose;
 
 import java.time.LocalDateTime;
 
 public class StatsEntry {
 
     private long id;
+
+    @Expose
     private int percent;
-    private MmathFighter figher;
+
+    @Expose
+    private MmathFighter fighter;
+    @Expose
     private StatsCategory category;
+    @Expose
     private String textToShow, details;
     private LocalDateTime lastUpdate;
 
@@ -38,12 +45,12 @@ public class StatsEntry {
         this.percent = percent;
     }
 
-    public MmathFighter getFigher() {
-        return figher;
+    public MmathFighter getFighter() {
+        return fighter;
     }
 
-    public void setFigher(MmathFighter figher) {
-        this.figher = figher;
+    public void setFighter(MmathFighter fighter) {
+        this.fighter = fighter;
     }
 
     public String getTextToShow() {
