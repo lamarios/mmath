@@ -75,6 +75,7 @@ public class GlassCannonStats extends StatsProcessor {
 
         List<MmathFighter> top100 = fightersWithKO.stream()
                 .map(f -> dao.getFighterDAO().getById(f))
+                .filter(f -> f != null)
                 .sorted((f1, f2) -> {
                     return Integer.compare(countFighterFights(f2), countFighterFights(f1));
                 })

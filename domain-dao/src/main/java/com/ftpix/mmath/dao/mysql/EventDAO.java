@@ -15,7 +15,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
     private RowMapper<MmathEvent> rowMapper = (rs, i) -> {
         MmathEvent e = new MmathEvent();
         e.setSherdogUrl(rs.getString("sherdogUrl"));
-        Optional.ofNullable(rs.getString("date")).ifPresent(s->{
+        Optional.ofNullable(rs.getString("date")).ifPresent(s -> {
             e.setDate(ZonedDateTime.parse(s, DAO.TIME_FORMAT));
         });
 
@@ -38,7 +38,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
     }
 
     @Override
-    public  void init() {
+    public void init() {
 
 
         String createTable = "CREATE TABLE IF NOT EXISTS events\n" +
@@ -83,7 +83,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
         return template.query(query, rowMapper);
     }
 
-    public List<MmathEvent> getIncoming(){
+    public List<MmathEvent> getIncoming() {
         LocalDateTime now = LocalDateTime.now().minusDays(2);
         LocalDateTime then = now.plusDays(9);
 
@@ -91,6 +91,11 @@ public class EventDAO implements DAO<MmathEvent, String> {
         String query = "SELECT * FROM events WHERE `date` BETWEEN  ? and ? ORDER BY `date` ASC";
 
         return template.query(query, rowMapper, now.format(DAO.TIME_FORMAT), then.format(DAO.TIME_FORMAT));
+    }
+
+
+    public boolean deleteNotHappenedEvents() {
+        return template.update("DELETE FROM events WHERE  `date`>= NOW()") >= 0;
     }
 
     @Override
@@ -103,7 +108,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
     @Override
     public boolean update(MmathEvent e) {
         return template.update("UPDATE events SET `date` = ?, organization_id=?, name=?, location = ?, lastUpdate = NOW() WHERE sherdogUrl = ?"
-                ,DAO.TIME_FORMAT.format(e.getDate()), e.getOrganization().getSherdogUrl(), e.getName(), e.getLocation(), e.getSherdogUrl()) == 1;
+                , DAO.TIME_FORMAT.format(e.getDate()), e.getOrganization().getSherdogUrl(), e.getName(), e.getLocation(), e.getSherdogUrl()) == 1;
     }
 
     @Override

@@ -157,6 +157,11 @@ public class FightDAO implements DAO<MmathFight, Long> {
         return template.update("DELETE  FROM fights WHERE  id = ?", id) == 1;
     }
 
+
+   public boolean deleteAllNotHappenedFights(){
+        return template.update("DELETE FROM fights WHERE  result='NOT_HAPPENED'") >= 0;
+   }
+
     public List<MmathFight> getByFighter(String sherdogUrl) {
 
         String query = "SELECT * FROM fights WHERE fighter2_id = ? OR fighter1_id = ? ORDER BY `date` ASC";

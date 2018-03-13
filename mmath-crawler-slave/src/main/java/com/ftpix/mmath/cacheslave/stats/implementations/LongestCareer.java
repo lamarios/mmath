@@ -72,11 +72,11 @@ public class LongestCareer extends StatsProcessor {
                     };
 
                     Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl)
-                            .filter(s->s.length()>0)
+                            .filter(s -> s.length() > 0)
                             .ifPresent(processFighter);
 
                     Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl)
-                            .filter(s->s.length()>0)
+                            .filter(s -> s.length() > 0)
                             .ifPresent(processFighter);
                 });
 
@@ -111,14 +111,20 @@ public class LongestCareer extends StatsProcessor {
                     String text = (days / 365) + " years and " + (days % 365) + " days";
                     e.setTextToShow(text);
 
-                    int fights = fighter.getWins()+fighter.getLosses()+fighter.getDraws()+fighter.getNc();
+                    int fights = 0;
+                    try {
+                        fights = fighter.getWins() + fighter.getLosses() + fighter.getDraws() + fighter.getNc();
+                    } catch (Exception exception) {
+                        return null;
+                    }
                     e.setDetails(
-                            fighter.getName()+" had "+fights+" fights in the span of "+text
+                            fighter.getName() + " had " + fights + " fights in the span of " + text
                     );
 
                     return e;
 
                 })
+                .filter(f -> f != null)
                 .collect(Collectors.toList());
     }
 
