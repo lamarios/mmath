@@ -6,7 +6,6 @@ import com.google.gson.annotations.Expose;
 import io.gsonfire.annotations.ExposeMethodResult;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,6 +45,9 @@ public class MmathFighter {
     private String nickname;
     @Expose
     private int nc;
+
+
+    private int searchRank;
 
     public LocalDateTime getLastUpdate() {
         return lastUpdate;
@@ -182,6 +184,13 @@ public class MmathFighter {
         return fights.stream().map(GsonFriendlyFight::new).collect(Collectors.toList());
     }
 
+    public int getSearchRank() {
+        return searchRank;
+    }
+
+    public void setSearchRank(int searchRank) {
+        this.searchRank = searchRank;
+    }
 
     @Override
     public boolean equals(Object obj) {

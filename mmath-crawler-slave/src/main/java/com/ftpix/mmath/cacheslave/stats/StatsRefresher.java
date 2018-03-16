@@ -4,17 +4,25 @@ import com.ftpix.mmath.cacheslave.stats.implementations.GlassCannonStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.LongestCareer;
 import com.ftpix.mmath.cacheslave.stats.implementations.MostFightStats;
 import com.ftpix.mmath.dao.MySQLDao;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class StatsRefresher {
 
     private final MySQLDao dao;
 
+    protected Logger logger = LogManager.getLogger();
 
     public StatsRefresher(MySQLDao dao) {
         this.dao = dao;
     }
 
     public void process() {
+        logger.info("Refreshing fighter search rank");
+        dao.getFighterDAO().setAllFighterSearchRank();
+        logger.info("Fighter search rank updated");
+
+
         MostFightStats mostFightStats = new MostFightStats(dao);
         mostFightStats.process();
 
@@ -23,6 +31,7 @@ public class StatsRefresher {
 
         LongestCareer longestCareer = new LongestCareer(dao);
         longestCareer.process();
+
 
     }
 

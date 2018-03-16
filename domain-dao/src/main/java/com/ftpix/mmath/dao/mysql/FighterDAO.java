@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 public class FighterDAO implements DAO<MmathFighter, String> {
     private final JdbcTemplate template;
 
+
     private final static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
@@ -37,6 +38,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         f.setHeight(resultSet.getString("height"));
         f.setNickname(resultSet.getString("nickname"));
         f.setNc(resultSet.getInt("nc"));
+        f.setSearchRank(resultSet.getInt("search_rank"));
         return f;
     };
 
@@ -48,26 +50,37 @@ public class FighterDAO implements DAO<MmathFighter, String> {
 
     @Override
     public void init() {
-        String createTable = "CREATE TABLE IF NOT  EXISTS fighters\n" +
-                "(\n" +
-                "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
-                "    PRIMARY KEY,\n" +
-                "  lastUpdate DATETIME      NULL,\n" +
-                "  name       VARCHAR(255)  NULL,\n" +
-                "  picture    VARCHAR(255)  NULL,\n" +
-                "  birthday   DATE      NULL,\n" +
-                "  draws      INT           NULL,\n" +
-                "  losses     INT           NULL,\n" +
-                "  wins       INT           NULL,\n" +
-                "  weight     VARCHAR(255)  NULL,\n" +
-                "  height     VARCHAR(255)  NULL,\n" +
-                "  nickname   VARCHAR(255)  NULL,\n" +
-                "  nc         INT           NULL\n" +
-                ")\n" +
-                "  ENGINE = InnoDB;\n";
+        try {
+            String createTable = "CREATE TABLE IF NOT  EXISTS fighters\n" +
+                    "(\n" +
+                    "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
+                    "    PRIMARY KEY,\n" +
+                    "  lastUpdate DATETIME      NULL,\n" +
+                    "  name       VARCHAR(255)  NULL,\n" +
+                    "  picture    VARCHAR(255)  NULL,\n" +
+                    "  birthday   DATE      NULL,\n" +
+                    "  draws      INT           NULL,\n" +
+                    "  losses     INT           NULL,\n" +
+                    "  wins       INT           NULL,\n" +
+                    "  weight     VARCHAR(255)  NULL,\n" +
+                    "  height     VARCHAR(255)  NULL,\n" +
+                    "  nickname   VARCHAR(255)  NULL,\n" +
+                    "  nc         INT           NULL\n" +
+                    ")\n" +
+                    "  ENGINE = InnoDB;\n";
 
 
-        template.execute(createTable);
+            template.execute(createTable);
+        } catch (Exception e) {
+            //table probably already exist
+        }
+
+
+        try {
+            template.execute("ALTER TABLE fighters ADD COLUMN search_rank INT(2) DEFAULT 99");
+        } catch (Exception e) {
+
+        }
     }
 
     @Override
@@ -104,6 +117,11 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         return template.update("DELETE FROM fighters WHERE sherdogUrl = ?", id) == 1;
     }
 
+    /**
+     * Search fighter by their name and nickname
+     * @param name
+     * @return
+     */
     public List<MmathFighter> searchByName(String name) {
         String searchQuery = "%" + name + "%";
 
@@ -113,12 +131,12 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         List<Future<List<MmathFighter>>> futures = new ArrayList<>();
 
         futures.add(exec.submit(() -> {
-            String query = "SELECT * FROM fighters WHERE `name` LIKE ? LIMIT 10";
+            String query = "SELECT * FROM fighters WHERE `name` LIKE ? ORDER BY search_rank LIMIT 10";
             return template.query(query, rowMapper, searchQuery);
         }));
 
         futures.add(exec.submit(() -> {
-            String query2 = "SELECT * FROM fighters WHERE `nickname` LIKE ? LIMIT 10";
+            String query2 = "SELECT * FROM fighters WHERE `nickname` LIKE ? ORDER BY search_rank LIMIT 10";
             return template.query(query2, rowMapper, searchQuery);
         }));
 
@@ -127,7 +145,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
                     Stream.of(nameSplit)
                             .map(s -> {
                                 return exec.submit(() -> {
-                                    String query2 = "SELECT * FROM fighters WHERE `nickname` LIKE ? OR `name` LIKE ? LIMIT 10";
+                                    String query2 = "SELECT * FROM fighters WHERE `nickname` LIKE ? OR `name` LIKE ? ORDER BY search_rank LIMIT 10";
                                     return template.query(query2, rowMapper, s, s);
                                 });
                             }).collect(Collectors.toList())
@@ -143,6 +161,43 @@ public class FighterDAO implements DAO<MmathFighter, String> {
                 })
                 .filter(s -> s != null)
                 .filter(distinctByKey(MmathFighter::getSherdogUrl)).limit(10).collect(Collectors.toList());
+    }
+
+    /**
+     * Will give each fighter a search rank based on the organisation they fought on. so a fighter that fought in the UFC will appear first in results as users are most likely to search for them
+     * @return
+     */
+    public boolean setAllFighterSearchRank() {
+        template.update("UPDATE fighters fi\n" +
+                "SET search_rank = (\n" +
+                "  SELECT DISTINCT CASE e.organization_id\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/Ultimate-Fighting-Championship-UFC-2'\n" +
+                "                    THEN 1\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/Dream-1357'\n" +
+                "                    THEN 2\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/Strikeforce-716'\n" +
+                "                    THEN 2\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/Pride-Fighting-Championships-3'\n" +
+                "                    THEN 2\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/Bellator-MMA-1960'\n" +
+                "                    THEN 2\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/Invicta-Fighting-Championships-4469'\n" +
+                "                    THEN 3\n" +
+                "                  WHEN 'http://www.sherdog.com/organizations/One-Championship-3877'\n" +
+                "                    THEN 3\n" +
+                "                  ELSE 99\n" +
+                "                  END AS rank\n" +
+                "  FROM fights f\n" +
+                "    JOIN events e ON f.event_id = e.sherdogUrl\n" +
+                "  WHERE f.fighter1_id = fi.sherdogUrl OR\n" +
+                "        f.fighter2_id = fi.sherdogUrl\n" +
+                "  ORDER BY rank ASC\n" +
+                "  LIMIT 0, 1)");
+
+        //some might have null values, setting it to 99
+        template.update("UPDATE fighters SET search_rank = IF(search_rank IS NULL, 99, search_rank)");
+
+        return true;
     }
 
     public MmathFighter getFromHash(String hash) {
