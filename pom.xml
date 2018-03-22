@@ -24,6 +24,8 @@
         <module>mmath-web</module>
         <module>build-orientdb</module>
         <module>build-mysql</module>
+        <module>build-reddit</module>
+        <module>mmath-reddit-bot</module>
     </modules>
     <packaging>pom</packaging>
 
