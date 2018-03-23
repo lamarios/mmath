@@ -22,21 +22,27 @@ import java.util.stream.Collectors;
 public class MmathBot {
     private final MySQLDao dao;
     private final OrientDBDao orientDBDao;
+    private final String subreddit;
     private final Pattern pattern;
     private RedditBot bot;
     private final ExecutorService exec = Executors.newFixedThreadPool(4);
 
 
     private final static String COMMENT_REGEX = "^( )*!mmath( )+(([a-zA-Z. ])+)( )+vs( )+(([a-zA-Z. ])+)( )*$";
+    private final static String NEW_LINE = "%0A";
+    private final static String BOT_REPLY = "MmathBot \n\n " +
+            "[**%s** vs. **%s**](https://mmathbro.science/%s/vs/%s) \n\n " +
+            "* %s \n\n " +
+            "* %s \n\n\n\n\n\n ";
 
     private Logger logger = LogManager.getLogger();
 
-    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao) {
+    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao, String subreddit) {
         this.dao = dao;
         this.orientDBDao = orientDBDao;
+        this.subreddit = subreddit;
 
         pattern = Pattern.compile(COMMENT_REGEX);
-        //reading properties from system properties
 
         startBot();
     }
@@ -50,12 +56,12 @@ public class MmathBot {
         Credentials oauthCreds = Credentials.script(username, password, clientId, secret);
 
 // Create a unique User-Agent for our bot
-        UserAgent userAgent = new UserAgent("bot", "science.mmathbro.bot", "1.0.0", username);
+        UserAgent userAgent = new UserAgent("bot", "science.mmathbro.bot", "1.0.0",username);
 
-
+//        logger.info("Creating reddit bot using account: {}, clientid:{} secret:{} password:{}", username, clientId, secret, password);
         bot = new RedditBot.Builder(oauthCreds, userAgent)
-                .followingSubReddit("testabot")
-                .withPullDelay(1000)
+                .followingSubReddit(subreddit)
+                .withPullDelay(10_000)
                 .filterComments(c -> c.getBody().trim().matches(COMMENT_REGEX))
                 .onNewComment(this::processComment)
                 .build();
@@ -84,28 +90,30 @@ public class MmathBot {
                     Future<List<String>> f1Vsf2 = exec.submit(() -> orientDBDao.findShortestPath(f1, f2));
                     Future<List<String>> f2Vsf1 = exec.submit(() -> orientDBDao.findShortestPath(f2, f1));
 
-                    String f1Vsf2Result = f1Vsf2.get().stream()
+                    List<String> f1Vsf2List = f1Vsf2.get();
+                    List<String> f2Vsf1List = f2Vsf1.get();
+
+
+                    String f1Vsf2Result = f1Vsf2List.stream()
+                            .filter(s -> s != null)
                             .map(f -> dao.getFighterDAO().getById(f).getName())
                             .collect(Collectors.joining(" > "));
-                    String f2Vsf1Result = f2Vsf1.get().stream()
+                    String f2Vsf1Result = f2Vsf1List.stream()
+                            .filter(s -> s != null)
                             .map(f -> dao.getFighterDAO().getById(f).getName())
                             .collect(Collectors.joining(" > "));
 
                     logger.info("result 1 vs 2: {}", f1Vsf2Result);
                     logger.info("result 2 vs 1: {}", f2Vsf1Result);
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Mmath Bot <br /> ");
-                    sb.append("**").append(f1.getName()).append("**");
-                    sb.append(" vs ");
-                    sb.append("**").append(f2.getName()).append("**");
+                    if (f1Vsf2Result.length() == 0) {
+                        f1Vsf2Result = f1.getName() + " can't beat " + f2.getName();
+                    }
+                    if (f2Vsf1Result.length() == 0) {
+                        f2Vsf1Result = f2.getName() + " can't beat " + f1.getName();
+                    }
 
-                    sb.append(" \n\n ");
-                    sb.append(f1Vsf2Result);
-                    sb.append(" \n\n ");
-                    sb.append(f2Vsf1Result);
-
-                    String reply = sb.toString();
+                    String reply = String.format(BOT_REPLY, f1.getName(), f2.getName(), f1.getIdAsHash(), f2.getIdAsHash(), f1Vsf2Result, f2Vsf1Result).replace("\n", NEW_LINE);
                     logger.info("Replying {}", reply);
                     bot.getClient().comment(comment.getId()).reply(reply);
 

@@ -74,6 +74,15 @@ public class RedditBot {
     }
 
     /**
+     * Generate some sort of unique identifier for a comment
+     * @param c
+     * @return
+     */
+    private String getCommentId(Comment c){
+        return c.getUrl()+c.getId()+c.getCreated();
+    }
+
+    /**
      * Will fetch the comments until the last seen
      */
     private void fetchComments() {
@@ -86,7 +95,8 @@ public class RedditBot {
             final BarebonesPaginator<Comment> lastComment = commentsBuilder.limit(1).build();
             final Listing<Comment> next = lastComment.next();
             if (next.size() > 0) {
-                lastSeen = next.get(0).getId();
+                Comment c = next.get(0);
+                lastSeen = getCommentId(c);
             }
             System.out.println("last seen -> " + lastSeen);
         } else {
@@ -100,9 +110,11 @@ public class RedditBot {
                 while (iterator.hasNext()) {
                     final Listing<Comment> next = iterator.next();
                     for (Comment c : next) {
-                        if (!c.getId().equalsIgnoreCase(lastSeen)) {
+                        System.out.println("Comparing "+lastSeen+" with "+getCommentId(c));
+                        if (!getCommentId(c).equalsIgnoreCase(lastSeen)) {
                             comments.add(c);
                         } else {
+                            System.out.println("Seen all already");
                             break PROCESS_COMMENTS;
                         }
                     }
@@ -113,7 +125,7 @@ public class RedditBot {
             System.out.println(comments.size() + " Comments to process");
             if (comments.size() > 0) {
                 //when fetching, most recent comments come first
-                lastSeen = comments.get(0).getId();
+                lastSeen = getCommentId(comments.get(0));
                 Collections.reverse(comments);
 
                 comments.stream()

@@ -39,7 +39,7 @@
       <module name="mmath" target="1.9" />
       <module name="mmath-calculator" target="1.8" />
       <module name="mmath-config" target="1.9" />
-      <module name="mmath-crawler-slave" target="1.8" />
+      <module name="mmath-crawler-slave" target="1.9" />
       <module name="mmath-reddit-bot" target="1.9" />
       <module name="mmath-web" target="9" />
     </bytecodeTargetLevel>
