@@ -8,6 +8,8 @@ import net.dean.jraw.models.Listing;
 import net.dean.jraw.oauth.Credentials;
 import net.dean.jraw.oauth.OAuthHelper;
 import net.dean.jraw.pagination.BarebonesPaginator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +28,7 @@ public class RedditBot {
     private String lastSeen;
     private Predicate<Comment> commentFilter = c -> true;
     private long sleepDelay = 10000;
+    private Logger logger = LogManager.getLogger();
 
     private RedditBot(Credentials credentials, UserAgent userAgent) {
         this.credentials = credentials;
@@ -39,17 +42,17 @@ public class RedditBot {
     public void start() {
         if (!running && subReddit.trim().length() > 0) {
             running = true;
-            System.out.println("Starting bot");
+            logger.info("Starting bot");
             while (running) {
                 fetchComments();
                 try {
                     Thread.sleep(sleepDelay);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("Couldn't sleep :(", e);
                 }
             }
         } else {
-            System.out.println("Bot already running");
+            logger.info("Bot already running");
         }
     }
 
@@ -65,7 +68,7 @@ public class RedditBot {
      * Stops the bot
      */
     public void stop() {
-        System.out.println("Stopping bot");
+        logger.info("Stopping bot");
         running = false;
     }
 
@@ -79,7 +82,7 @@ public class RedditBot {
      * @return
      */
     private String getCommentId(Comment c){
-        return c.getUrl()+c.getId()+c.getCreated();
+        return c.getId();
     }
 
     /**
@@ -91,16 +94,16 @@ public class RedditBot {
 
         //if last seen doesn't exist, we just take the last comment and do nothing, just set last seen
         if (lastSeen == null) {
-            System.out.println("We don't have a last seen, getting most recent comment");
+            logger.info("We don't have a last seen, getting most recent comment");
             final BarebonesPaginator<Comment> lastComment = commentsBuilder.limit(1).build();
             final Listing<Comment> next = lastComment.next();
             if (next.size() > 0) {
                 Comment c = next.get(0);
                 lastSeen = getCommentId(c);
             }
-            System.out.println("last seen -> " + lastSeen);
+           logger.info("last seen -> {}", lastSeen);
         } else {
-            System.out.println("getting new comments");
+            logger.info("getting new comments");
             List<Comment> comments = new ArrayList<>();
             final BarebonesPaginator<Comment> build = commentsBuilder.limit(PAGE_SIZE).build();
             final Iterator<Listing<Comment>> iterator = build.iterator();
@@ -110,11 +113,9 @@ public class RedditBot {
                 while (iterator.hasNext()) {
                     final Listing<Comment> next = iterator.next();
                     for (Comment c : next) {
-                        System.out.println("Comparing "+lastSeen+" with "+getCommentId(c));
                         if (!getCommentId(c).equalsIgnoreCase(lastSeen)) {
                             comments.add(c);
                         } else {
-                            System.out.println("Seen all already");
                             break PROCESS_COMMENTS;
                         }
                     }
@@ -122,8 +123,8 @@ public class RedditBot {
                 }
             }
 
-            System.out.println(comments.size() + " Comments to process");
             if (comments.size() > 0) {
+                logger.info ("{} new comments to process, now filtering based on body filter", comments.size());
                 //when fetching, most recent comments come first
                 lastSeen = getCommentId(comments.get(0));
                 Collections.reverse(comments);

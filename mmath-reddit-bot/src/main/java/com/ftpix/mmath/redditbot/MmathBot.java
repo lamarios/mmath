@@ -56,12 +56,12 @@ public class MmathBot {
         Credentials oauthCreds = Credentials.script(username, password, clientId, secret);
 
 // Create a unique User-Agent for our bot
-        UserAgent userAgent = new UserAgent("bot", "science.mmathbro.bot", "1.0.0",username);
+        UserAgent userAgent = new UserAgent("linux-docker", "science.mmathbro.bot", "1.0.0", "/u/lamarios");
 
 //        logger.info("Creating reddit bot using account: {}, clientid:{} secret:{} password:{}", username, clientId, secret, password);
         bot = new RedditBot.Builder(oauthCreds, userAgent)
                 .followingSubReddit(subreddit)
-                .withPullDelay(10_000)
+                .withPullDelay(60_000)
                 .filterComments(c -> c.getBody().trim().matches(COMMENT_REGEX))
                 .onNewComment(this::processComment)
                 .build();
