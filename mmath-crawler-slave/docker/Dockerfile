@@ -1,4 +1,4 @@
-FROM openjdk:9-jre-slim
+FROM openjdk:9
 
 
 COPY ./*.jar /usr/src/app/app.jar

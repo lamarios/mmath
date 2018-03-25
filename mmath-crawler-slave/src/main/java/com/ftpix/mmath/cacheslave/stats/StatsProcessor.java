@@ -6,6 +6,7 @@ import com.ftpix.mmath.model.stats.StatsEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -32,11 +33,13 @@ public abstract class StatsProcessor {
         logger.info("Inserting {} entries for category {}", entries.size(), cat.getId());
 
         AtomicInteger rank = new AtomicInteger(0);
-        entries.forEach(e -> {
-            e.setCategory(cat);
-            e.setRank(rank.getAndIncrement());
-            dao.getStatsEntryDAO().insert(e);
-        });
+        entries.stream()
+                .sorted(Comparator.comparing(StatsEntry::getPercent).reversed())
+                .forEach(e -> {
+                    e.setCategory(cat);
+                    e.setRank(rank.getAndIncrement());
+                    dao.getStatsEntryDAO().insert(e);
+                });
 
         logger.info("{} done", cat.getId());
     }
