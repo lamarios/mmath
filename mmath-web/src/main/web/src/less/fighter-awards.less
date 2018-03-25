@@ -1,0 +1,68 @@
+.FighterAwards {
+
+  .award {
+    cursor: pointer;
+    display: inline-block;
+    @width: 100px;
+    position: relative;
+    width: @width;
+    height: @width;
+    margin: 10px 10px 20px 10px;
+    transition: all 0.2s;
+
+    .rank {
+      position: absolute;
+      top: 5px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 40px;
+      color: white;
+    }
+
+    .category {
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      right: 0;
+      margin: auto;
+      text-align: center;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .Laurel {
+
+      width: @width;
+      height: @width;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      g {
+        fill: white;
+      }
+
+    }
+
+    &.champ {
+      .rank, .category {
+        color: #FFD700;
+      }
+
+      .Laurel {
+        g {
+          fill: #FFD700;
+        }
+      }
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+  }
+
+}

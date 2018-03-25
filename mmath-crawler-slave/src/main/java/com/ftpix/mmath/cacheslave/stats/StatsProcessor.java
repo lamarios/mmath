@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class StatsProcessor {
     protected final MySQLDao dao;
@@ -29,8 +30,11 @@ public abstract class StatsProcessor {
         dao.getStatsEntryDAO().deleteByCategory(cat.getId());
 
         logger.info("Inserting {} entries for category {}", entries.size(), cat.getId());
+
+        AtomicInteger rank = new AtomicInteger(0);
         entries.forEach(e -> {
             e.setCategory(cat);
+            e.setRank(rank.getAndIncrement());
             dao.getStatsEntryDAO().insert(e);
         });
 

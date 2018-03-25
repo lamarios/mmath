@@ -1,6 +1,7 @@
 import React from 'react';
 import MmathService from './services/MmathService.jsx';
 import {NavLink} from 'react-router-dom';
+import FighterAwards from './fighter-awards.jsx';
 
 export default class FighterDetails extends React.Component {
 
@@ -55,7 +56,7 @@ export default class FighterDetails extends React.Component {
                     <p><label>Weight: </label> {fighter.weight}</p>
                     <p><label>Height: </label> {fighter.height}</p>
                 </div>
-
+                <FighterAwards fighter={fighter}/>
                 <div className="fights">
                     <h2>Fights</h2>
                     <div>

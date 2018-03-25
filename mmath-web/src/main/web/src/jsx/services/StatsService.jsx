@@ -14,4 +14,9 @@ export default class StatsService {
         return axios.get(API.STATS.GET_CATEGORY.format(category));
     }
 
+
+    getFighterStats(hash){
+        return axios.get(API.STATS.GET_FOR_FIGHTER.format(hash));
+    }
+
 }

@@ -10,7 +10,7 @@ public class StatsEntry {
     private long id;
 
     @Expose
-    private int percent;
+    private int percent, rank;
 
     @Expose
     private MmathFighter fighter;
@@ -75,5 +75,13 @@ public class StatsEntry {
 
     public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
     }
 }

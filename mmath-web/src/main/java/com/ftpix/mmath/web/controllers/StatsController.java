@@ -25,6 +25,22 @@ public class StatsController implements Controller {
         Spark.get("/api/stats", this::getCategories, gson::toJson);
         Spark.get("/api/stats/entries/:cat", this::getStatsForCategory, gson::toJson);
         Spark.get("/api/stats/:cat", this::getCategory, gson::toJson);
+        Spark.get("/api/stats/for-fighter/:hash", this::getFighterStats, gson::toJson);
+    }
+
+    /**
+     * Gets the stats of a single fighter
+     * @param request
+     * @param response
+     * @return
+     */
+    private List<StatsEntry> getFighterStats(Request request, Response response) {
+        return dao.getStatsEntryDAO().getForFighterHash(request.params(":hash"))
+                .stream()
+                .map(s -> {
+                    s.setCategory(dao.getStatsCategoryDAO().getById(s.getCategory().getId()));
+                    return s;
+                }).collect(Collectors.toList());
     }
 
     /**
