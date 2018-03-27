@@ -30,6 +30,7 @@ public class LongestCareer extends StatsProcessor {
         cat.setDescription("Longest amount of time between first and last fight");
         cat.setId("LONGEST_CAREER");
         cat.setName("Old dogs");
+        cat.setOrder(1);
         return cat;
     }
 

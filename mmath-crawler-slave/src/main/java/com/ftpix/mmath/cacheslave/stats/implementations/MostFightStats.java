@@ -21,6 +21,7 @@ public class MostFightStats extends StatsProcessor {
         cat.setId("MOST_FIGHTS");
         cat.setName("Warrior Spirit");
         cat.setDescription("Fighters with the most fights");
+        cat.setOrder(2);
         return cat;
     }
 

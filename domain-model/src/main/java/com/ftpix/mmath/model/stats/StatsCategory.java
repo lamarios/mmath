@@ -12,6 +12,8 @@ public class StatsCategory {
     @Expose
     private String name, description;
 
+    private int order;
+
     private LocalDateTime lastUpdate;
 
     public String getId() {
@@ -44,6 +46,14 @@ public class StatsCategory {
 
     public void setLastUpdate(LocalDateTime lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @ExposeMethodResult("lastUpdate")
