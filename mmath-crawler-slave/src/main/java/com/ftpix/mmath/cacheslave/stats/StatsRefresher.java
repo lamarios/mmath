@@ -21,12 +21,6 @@ public class StatsRefresher {
     }
 
     public void process() {
-        /*
-        logger.info("Refreshing fighter search rank");
-        dao.getFighterDAO().setAllFighterSearchRank();
-        logger.info("Fighter search rank updated");
-
-*/
 
         MostFightStats mostFightStats = new MostFightStats(dao);
         mostFightStats.process();
@@ -39,6 +33,12 @@ public class StatsRefresher {
         new KoWinsStats(dao).process();
         new DecisionWinsStats(dao).process();
         new SubmissionWinsStats(dao).process();
+
+
+
+        logger.info("Refreshing fighter search rank");
+        dao.getFighterDAO().setAllFighterSearchRank();
+        logger.info("Fighter search rank updated");
 
     }
 
