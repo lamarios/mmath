@@ -87,7 +87,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
 
     public List<MmathEvent> getIncoming(String organizations, Integer page) {
         LocalDateTime now = LocalDateTime.now().minusDays(2);
-        int limit = 4;
+        int limit = 20;
 
         if (page == null) {
             page = 1;
