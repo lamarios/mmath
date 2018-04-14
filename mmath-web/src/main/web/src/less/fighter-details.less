@@ -1,145 +1,173 @@
 .fighter-details {
-  padding: 10px;
+
   position: fixed;
-  margin: 50px auto;
-  width:750px;
-  top:0;
-  bottom:0;
-  left: 0px;
-  right: 0px;
-  border-radius: 5px;
-  background-color: black;
-  color: white;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
-
-  text-align: left;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-shadow: 5px 5px 10px black;
-
-  animation-name: fadeIn;
-  animation-duration: 0.25s;
-
-  .remove {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-
-    font-size: 30px;
-    cursor: pointer;
-  }
-
-  .picture {
-    width: 200px;
-    height: 300px;
-    float: left;
-    border-radius: 5px;
-    margin: 10px;
-    box-shadow: 5px 5px 40px black;
-  }
-
-  .title {
-    p {
-      font-size: 30px;
-      font-style: italic;
-    }
-  }
-
-  .info {
-    p {
-      margin-bottom: 0;
-
-      label {
-        font-weight: bold;
-        margin-bottom: 0;
-      }
-    }
-
-    margin-bottom: 20px;
-  }
-
-  .info:after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-
-  .fights {
-
-    tr td {
-      padding: 2px 7px;
-      a{
-        color:white;
-        font-weight: bold;
-      }
-    }
-
-    .win {
-      background-color: darken(rgb(67, 160, 71), 20%);
-    }
-    .loss {
-      background-color: darken(rgb(239, 83, 80), 20%);
-    }
-    .draw {
-      background-color: darken(rgb(33, 150, 243), 20%);
-    }
-  }
-
-  .background-picture {
+  background-color: rgba(0, 0, 0, 0.5);
+  .overlay {
     position: absolute;
     top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    z-index: -1;
-    filter: blur(30px);
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
-    transform: scale(1.5);
-    border-radius: 5px;
-    background-color:black;
+  }
 
-    opacity: 0.5;
-    .overlay{
-      display: none;
+  .details {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    position: absolute;
+
+    margin: 50px auto;
+    width: 750px;
+    border-radius: 5px;
+    background-color: black;
+    height: 90%;
+
+    .data {
+      color: white;
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
+      z-index: 1;
+
+      text-align: left;
+      padding: 10px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-shadow: 5px 5px 10px black;
+
+      animation-name: fadeIn;
+      animation-duration: 0.25s;
+
+      .remove {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+
+        font-size: 30px;
+        cursor: pointer;
+      }
+
+      .picture {
+        width: 200px;
+        height: 300px;
+        float: left;
+        border-radius: 5px;
+        margin: 10px;
+        box-shadow: 5px 5px 40px black;
+      }
+
+      .title {
+        p {
+          font-size: 30px;
+          font-style: italic;
+        }
+      }
+
+      .info {
+        p {
+          margin-bottom: 0;
+
+          label {
+            font-weight: bold;
+            margin-bottom: 0;
+          }
+        }
+
+        margin-bottom: 20px;
+      }
+
+      .info:after {
+        content: '';
+        display: block;
+        clear: both;
+      }
+
+      .fights {
+
+        tr td {
+          padding: 2px 7px;
+          a {
+            color: white;
+            font-weight: bold;
+          }
+        }
+
+        .win {
+          background-color: darken(rgb(67, 160, 71), 20%);
+        }
+        .loss {
+          background-color: darken(rgb(239, 83, 80), 20%);
+        }
+        .draw {
+          background-color: darken(rgb(33, 150, 243), 20%);
+        }
+      }
+    }
+
+    .background-picture {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      filter: blur(30px);
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      border-radius: 5px;
       background-color: black;
+
       opacity: 0.5;
+      .overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: black;
+        opacity: 0.5;
+      }
     }
   }
-
 }
 
 @media only screen and (max-width: @tabletBreakPoint) {
   .fighter-details {
-    padding-top: 0;
-    top: 0;
-    left: 0;
-    right: 0;
-    border-radius: 0;
-    width:auto;
-    margin:0;
+    .details {
+      padding-top: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      border-radius: 0;
+      width: auto;
+      margin: 0;
 
-    .remove {
-      position: relative;
-      text-align: right;
-    }
+      .remove {
+        position: relative;
+        text-align: right;
+      }
 
-    .picture {
-      display: none;
-    }
-
-    .fights table {
-      thead tr th:nth-child(4), thead tr th:nth-child(5), tbody tr td:nth-child(4), tbody tr td:nth-child(5) {
+      .picture {
         display: none;
       }
 
+      .fights table {
+        thead tr th:nth-child(4), thead tr th:nth-child(5), tbody tr td:nth-child(4), tbody tr td:nth-child(5) {
+          display: none;
+        }
+
+      }
     }
   }
 }

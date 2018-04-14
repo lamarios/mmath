@@ -61,10 +61,10 @@ export default class EventFilters extends React.Component {
                     return (
                         <label key={org.id}>
                             <input type="checkbox"
-                                   value={org.id}
-                                   name="organization"
+                                   value={this.state.selected[org.id]}
+                                   name={org.id}
                                    onChange={this.onChange}
-                                   checked={() => this.isSelected(org.id)}
+                                   defaultChecked={true}
                             />
                             {org.name}
                         </label>
