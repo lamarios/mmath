@@ -35,6 +35,7 @@ public abstract class StatsProcessor {
         AtomicInteger rank = new AtomicInteger(0);
         entries.stream()
                 .sorted(Comparator.comparing(StatsEntry::getPercent).reversed())
+                .limit(100)
                 .forEach(e -> {
                     e.setCategory(cat);
                     e.setRank(rank.getAndIncrement());
