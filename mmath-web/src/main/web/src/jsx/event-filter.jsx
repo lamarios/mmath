@@ -18,15 +18,12 @@ export default class EventFilters extends React.Component {
     componentDidMount() {
         this.service.getOrganizationsForFilter()
             .then(res => {
-                this.setState({organizations: res.data}, () => {
-                    //we want to select all by default
-                    var selected = {};
-                    this.state.organizations.map((org, index) => {
-                        selected[org.id] = true;
-                    });
-
-                    this.setState({selected: selected});
+                var selected = {};
+                res.data.forEach((org, index) => {
+                    selected[org.id] = true;
                 });
+
+                this.setState({organizations: res.data, selected});
             })
     }
 
@@ -64,7 +61,7 @@ export default class EventFilters extends React.Component {
                                    value={org.id}
                                    name="organization"
                                    onChange={this.onChange}
-                                   checked={() => this.isSelected(org.id)}
+                                   checked={this.state.selected[org.id]}
                             />
                             {org.name}
                         </label>
