@@ -13,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +30,7 @@ public class WebServer {
     private final Gson gson = GsonUtils.getGson();
 
 
-    public WebServer(int port,  S3Helper s3Helper) {
+    public WebServer(int port, S3Helper s3Helper) {
         this.port = port;
         this.s3Helper = s3Helper;
     }
@@ -37,8 +39,10 @@ public class WebServer {
         Spark.port(port);
 
         if (System.getProperty("dev", "false").equalsIgnoreCase("true")) {
-            logger.info("DEV MODE");
-            Spark.externalStaticFileLocation("/home/gz/IdeaProjects/mmath/mmath-web/src/main/resources/web/public");
+            Path path = Paths.get(".").resolve("mmath-web/src/main/resources/web/public").toAbsolutePath();
+//            path = Paths.get("/home/gz/IdeaProjects/mmath/mmath-web/src/main/resources/web/public");
+            logger.info("DEV MODE {}", path.toString());
+            Spark.externalStaticFileLocation(path.toString().replace("./",""));
 
         } else {
             Spark.staticFiles.location("/web/public");
@@ -115,8 +119,6 @@ public class WebServer {
     private void jsonRequest(Request request, Response response) {
         response.type("application/json");
     }
-
-
 
 
     private void logRequest(Request request, Response response) {

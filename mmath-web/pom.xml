@@ -13,7 +13,7 @@
         <web.src.folder>src/web</web.src.folder>
         <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
         <docker.image.name>gonzague/mmath-web</docker.image.name>
-        <docker.skip>false</docker.skip>
+        <docker.skip>true</docker.skip>
         <docker.skip.push>true</docker.skip.push>
     </properties>
 

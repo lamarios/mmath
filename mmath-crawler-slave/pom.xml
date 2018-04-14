@@ -16,7 +16,7 @@
         <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
         <docker.image.name>gonzague/mmath-crawler</docker.image.name>
         <docker.skip.push>true</docker.skip.push>
-        <docker.skip>false</docker.skip>
+        <docker.skip>true</docker.skip>
     </properties>
 
     <dependencies>
