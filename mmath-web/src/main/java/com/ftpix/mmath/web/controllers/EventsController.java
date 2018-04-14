@@ -3,6 +3,7 @@ package com.ftpix.mmath.web.controllers;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +28,19 @@ public class EventsController implements Controller {
     @Override
     public void declareEndPoints() {
         Spark.get("/api/events/incoming", this::getIncomingEvents, gson::toJson);
+        Spark.get("/api/events/organization-filters", this::getOrganizationFilter, gson::toJson);
         Spark.get("/api/events/:id/fights", this::getEventFights, gson::toJson);
         Spark.get("/api/events/:id", this::getEvent, gson::toJson);
+    }
+
+    /**
+     * Gets all the orgs that should appear in the search filter
+     * @param request
+     * @param response
+     * @return
+     */
+    private List<MmathOrganization> getOrganizationFilter(Request request, Response response) {
+        return dao.getOrganizationDAO().getOrganizationsInEventFilter();
     }
 
     private MmathEvent getEvent(Request request, Response response) {

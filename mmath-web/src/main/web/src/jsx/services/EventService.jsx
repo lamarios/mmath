@@ -16,4 +16,8 @@ export default class EventService{
         return axios.get(API.EVENTS.FIGHTS.format(id));
     }
 
+    getOrganizationsForFilter(){
+        return axios.get(API.EVENTS.EVENT_FILTERS);
+    }
+
 }

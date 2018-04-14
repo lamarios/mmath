@@ -27,13 +27,13 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
 
     @Override
     public void init() {
-        String createTable = "CREATE TABLE IF NOT EXISTS organizations\n" +
-                "(\n" +
-                "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
-                "    PRIMARY KEY,\n" +
-                "  lastUpdate DATETIME      NULL,\n" +
-                "  name       VARCHAR(255)  NULL\n" +
-                ")\n" +
+        String createTable = "CREATE TABLE IF NOT EXISTS organizations" +
+                "(" +
+                "  sherdogUrl VARCHAR(1000) NOT NULL" +
+                "    PRIMARY KEY," +
+                "  lastUpdate DATETIME      NULL," +
+                "  name       VARCHAR(255)  NULL" +
+                ")" +
                 "  ENGINE = InnoDB;";
 
         template.execute(createTable);
@@ -73,4 +73,16 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
     public boolean deleteById(String id) {
         return template.update("DELETE  FROM organizations WHERE sherdogUrl = ?", id) == 1;
     }
+
+
+    /**
+     *  Get all the organizations that should appear in the event filter`
+     * @return
+     */
+    public List<MmathOrganization> getOrganizationsInEventFilter(){
+        String query = "SELECT * FROM organizations WHERE sherdogUrl in ('http://www.sherdog.com/organizations/Ultimate-Fighting-Championship-UFC-2','http://www.sherdog.com/organizations/Bellator-MMA-1960','http://www.sherdog.com/organizations/Invicta-Fighting-Championships-4469','http://www.sherdog.com/organizations/One-Championship-3877')";
+
+        return template.query(query, rowMapper);
+    }
+
 }
