@@ -104,7 +104,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
         String orgsSQLIdentifier = Strings.repeat("?,", orgsArray.length);
         orgsSQLIdentifier = orgsSQLIdentifier.substring(0, orgsSQLIdentifier.length() - 1);
 
-        Object[] parameters = new Object[]{"2012-01-01"};
+        Object[] parameters = new Object[]{now.format(DAO.TIME_FORMAT)};
         parameters = ArrayUtils.addAll(parameters, orgsArray);
         parameters = ArrayUtils.add(parameters, offset);
         parameters = ArrayUtils.add(parameters, limit);
