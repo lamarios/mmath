@@ -40,7 +40,7 @@ public class NCPercentageStats extends StatsProcessor {
                             f.getNc()
                                     + " ("
                                     + String.valueOf((int) getNCPercentage(f))
-                                    + "%) no contest of total "
+                                    + "%) NC of total "
                                     + (int) getTotalFights(f)
                                     + " fights");
                     return stats;
