@@ -3,6 +3,7 @@ package com.ftpix.mmath.cacheslave.stats;
 import com.ftpix.mmath.cacheslave.stats.implementations.GlassCannonStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.LongestCareer;
 import com.ftpix.mmath.cacheslave.stats.implementations.MostFightStats;
+import com.ftpix.mmath.cacheslave.stats.implementations.drawpercentage.NCPercentageStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.winpercentage.DecisionWinsStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.winpercentage.KoWinsStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.winpercentage.SubmissionWinsStats;
@@ -33,7 +34,7 @@ public class StatsRefresher {
         new KoWinsStats(dao).process();
         new DecisionWinsStats(dao).process();
         new SubmissionWinsStats(dao).process();
-
+        new NCPercentageStats(dao).process();
 
 
         logger.info("Refreshing fighter search rank");

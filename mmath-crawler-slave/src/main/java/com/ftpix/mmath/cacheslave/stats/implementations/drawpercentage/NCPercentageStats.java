@@ -18,9 +18,9 @@ public class NCPercentageStats extends StatsProcessor {
     @Override
     protected StatsCategory getStatsCategory() {
         StatsCategory cat = new StatsCategory();
-        cat.setId("DRAW_PERCENTAGE");
-        cat.setDescription("Highest percentage of draws from total fights.");
-        cat.setName("Caught red handed");
+        cat.setId("NC_STAT");
+        cat.setDescription("Highest number of no contest fights.");
+        cat.setName("No fights");
         cat.setOrder(5);
         return cat;
     }
@@ -30,26 +30,30 @@ public class NCPercentageStats extends StatsProcessor {
         List<MmathFighter> fighters = dao.getFighterDAO().getAll().stream()
                 .filter(f -> getTotalFights(f) >= 10)
                 .collect(Collectors.toList());
-        double maxPercentage = getMaxDrawPercentage(fighters);
+        double maxNc = getMaxNC(fighters);
         return fighters.stream()
                 .map(f -> {
                     StatsEntry stats = new StatsEntry();
                     stats.setFighter(f);
-                    stats.setPercent((int) (getNCPercentage(f) / maxPercentage * 100));
-                    stats.setTextToShow(f.getNc() + " (" + String.valueOf((int) (getNCPercentage(f))) + "%) NCs of total fights");
+                    stats.setPercent((int) ((double) f.getNc() / maxNc * 100));
+                    stats.setTextToShow(
+                            f.getNc()
+                                    + " ("
+                                    + String.valueOf((int) getNCPercentage(f))
+                                    + "%) no contest of total "
+                                    + (int) getTotalFights(f)
+                                    + " fights");
                     return stats;
                 })
-                .sorted(Comparator.comparing(StatsEntry::getPercent)
-                        .thenComparing((se1, se2) -> Integer.compare(se2.getFighter().getNc(), se1.getFighter().getNc())))
+                .sorted((se1, se2) -> Integer.compare(se2.getFighter().getNc(), se1.getFighter().getNc()))
                 .collect(Collectors.toList());
     }
 
-    private Double getMaxDrawPercentage(List<MmathFighter> fighters) {
-        return fighters.stream()
-                .max(Comparator.comparingDouble(this::getNCPercentage))
-                .map(this::getNCPercentage)
+    private double getMaxNC(List<MmathFighter> fighters) {
+        return (double) fighters.stream()
+                .max(Comparator.comparingInt(MmathFighter::getNc))
+                .map(MmathFighter::getNc)
                 .get();
-
     }
 
     private double getNCPercentage(MmathFighter fighter) {
