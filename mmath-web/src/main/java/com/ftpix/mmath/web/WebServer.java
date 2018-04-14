@@ -122,7 +122,7 @@ public class WebServer {
 
 
     private void logRequest(Request request, Response response) {
-        logger.info("{} {}", request.requestMethod(), request.url());
+        logger.info("{} {} {}", request.requestMethod(), request.url(), request.queryParams());
 
     }
 

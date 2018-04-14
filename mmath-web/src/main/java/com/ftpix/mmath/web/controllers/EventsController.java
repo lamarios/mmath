@@ -52,12 +52,22 @@ public class EventsController implements Controller {
      * @return
      */
     private List<MmathEvent> getIncomingEvents(Request request, Response response) {
-        return dao.getEventDAO().getIncoming().stream()
+        String organizations = request.queryParams("organizations");
+        int page = 1;
+
+        try {
+            page = Integer.parseInt(request.queryParams("page"));
+        } catch (Exception e) {
+
+        }
+
+        return dao.getEventDAO().getIncoming(organizations, page).stream()
                 .map(e-> {
                     e.setOrganization(dao.getOrganizationDAO().getById(e.getOrganization().getSherdogUrl()));
                     return e;
                 }).collect(Collectors.toList());
+
+
+
     }
-
-
 }

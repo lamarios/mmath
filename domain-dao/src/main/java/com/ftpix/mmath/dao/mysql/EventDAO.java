@@ -2,6 +2,8 @@ package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
+import com.google.common.base.Strings;
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -83,14 +85,33 @@ public class EventDAO implements DAO<MmathEvent, String> {
         return template.query(query, rowMapper);
     }
 
-    public List<MmathEvent> getIncoming() {
+    public List<MmathEvent> getIncoming(String organizations, Integer page) {
         LocalDateTime now = LocalDateTime.now().minusDays(2);
-        LocalDateTime then = now.plusDays(9);
+        int limit = 4;
 
+        if (page == null) {
+            page = 1;
+        }
 
-        String query = "SELECT * FROM events WHERE `date` BETWEEN  ? and ? ORDER BY `date` ASC";
+        int offset = (page - 1) * limit;
 
-        return template.query(query, rowMapper, now.format(DAO.TIME_FORMAT), then.format(DAO.TIME_FORMAT));
+        if (organizations == null) {
+            organizations = "";
+        }
+
+        String[] orgsArray = organizations.split(",");
+
+        String orgsSQLIdentifier = Strings.repeat("?,", orgsArray.length);
+        orgsSQLIdentifier = orgsSQLIdentifier.substring(0, orgsSQLIdentifier.length() - 1);
+
+        Object[] parameters = new Object[]{"2012-01-01"};
+        parameters = ArrayUtils.addAll(parameters, orgsArray);
+        parameters = ArrayUtils.add(parameters, offset);
+        parameters = ArrayUtils.add(parameters, limit);
+
+        String query = "SELECT * FROM events WHERE `date` >= ? AND md5(organization_id) IN ("+orgsSQLIdentifier+") limit ?,?";
+
+        return template.query(query, rowMapper, parameters);
     }
 
 
