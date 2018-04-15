@@ -95,21 +95,28 @@ public class EventDAO implements DAO<MmathEvent, String> {
 
         int offset = (page - 1) * limit;
 
+        String[] orgsArray;
         if (organizations == null) {
-            organizations = "";
+            orgsArray = new String[0];
+        } else {
+            orgsArray = organizations.split(",");
+        }
+        String orgsSQLIdentifier = "";
+        if (orgsArray.length > 0) {
+            orgsSQLIdentifier = Strings.repeat("?,", orgsArray.length);
+            orgsSQLIdentifier = orgsSQLIdentifier.substring(0, orgsSQLIdentifier.length() - 1);
         }
 
-        String[] orgsArray = organizations.split(",");
-
-        String orgsSQLIdentifier = Strings.repeat("?,", orgsArray.length);
-        orgsSQLIdentifier = orgsSQLIdentifier.substring(0, orgsSQLIdentifier.length() - 1);
-
         Object[] parameters = new Object[]{now.format(DAO.TIME_FORMAT)};
-        parameters = ArrayUtils.addAll(parameters, orgsArray);
+
+        if (orgsArray.length > 0) {
+            parameters = ArrayUtils.addAll(parameters, orgsArray);
+        }
+
         parameters = ArrayUtils.add(parameters, offset);
         parameters = ArrayUtils.add(parameters, limit);
 
-        String query = "SELECT * FROM events WHERE `date` >= ? AND md5(organization_id) IN ("+orgsSQLIdentifier+") limit ?,?";
+        String query = "SELECT * FROM events WHERE `date` >= ? " + ((orgsArray.length > 0) ? "AND md5(organization_id) IN (" + orgsSQLIdentifier + ")" : "") + "ORDER BY `date`  LIMIT ?,?";
 
         return template.query(query, rowMapper, parameters);
     }

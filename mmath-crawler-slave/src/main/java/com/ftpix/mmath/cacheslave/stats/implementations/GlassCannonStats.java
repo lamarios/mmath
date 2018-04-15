@@ -20,7 +20,7 @@ public class GlassCannonStats extends StatsProcessor {
     @Override
     protected StatsCategory getStatsCategory() {
         StatsCategory category = new StatsCategory();
-        category.setName("Glass Cannons");
+        category.setName("Glass cannons");
         category.setId("GLASS_CANNON");
         category.setOrder(0);
         category.setDescription("Fighters with only (T)KO wins or losses");

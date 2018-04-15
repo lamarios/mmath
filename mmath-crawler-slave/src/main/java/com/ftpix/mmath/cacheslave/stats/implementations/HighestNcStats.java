@@ -1,4 +1,4 @@
-package com.ftpix.mmath.cacheslave.stats.implementations.drawpercentage;
+package com.ftpix.mmath.cacheslave.stats.implementations;
 
 import com.ftpix.mmath.cacheslave.stats.StatsProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
@@ -10,18 +10,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NCPercentageStats extends StatsProcessor {
-    public NCPercentageStats(MySQLDao dao) {
+public class HighestNcStats extends StatsProcessor {
+    public HighestNcStats(MySQLDao dao) {
         super(dao);
     }
 
     @Override
     protected StatsCategory getStatsCategory() {
         StatsCategory cat = new StatsCategory();
-        cat.setId("NC_STAT");
+        cat.setId("HIGH_NC");
         cat.setDescription("Highest number of no contest fights.");
-        cat.setName("No fights");
-        cat.setOrder(5);
+        cat.setName("No contests");
+        cat.setOrder(6);
         return cat;
     }
 
@@ -30,7 +30,9 @@ public class NCPercentageStats extends StatsProcessor {
         List<MmathFighter> fighters = dao.getFighterDAO().getAll().stream()
                 .filter(f -> getTotalFights(f) >= 10)
                 .collect(Collectors.toList());
+
         double maxNc = getMaxNC(fighters);
+
         return fighters.stream()
                 .map(f -> {
                     StatsEntry stats = new StatsEntry();
@@ -38,14 +40,13 @@ public class NCPercentageStats extends StatsProcessor {
                     stats.setPercent((int) ((double) f.getNc() / maxNc * 100));
                     stats.setTextToShow(
                             f.getNc()
-                                    + " ("
-                                    + String.valueOf((int) getNCPercentage(f))
-                                    + "%) NC of total "
+                                    + " NC of total "
                                     + (int) getTotalFights(f)
                                     + " fights");
                     return stats;
                 })
-                .sorted((se1, se2) -> Integer.compare(se2.getFighter().getNc(), se1.getFighter().getNc()))
+//                .sorted((se1, se2) -> Integer.compare(se2.getFighter().getNc(), se1.getFighter().getNc()))
+                .sorted(Comparator.comparingInt((StatsEntry s) -> s.getFighter().getNc()).reversed().thenComparing((o1, o2) -> Double.compare(getNCPercentage(o2.getFighter()), getNCPercentage(o1.getFighter()))))
                 .collect(Collectors.toList());
     }
 

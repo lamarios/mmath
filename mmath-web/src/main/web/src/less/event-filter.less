@@ -1,0 +1,22 @@
+.EventFilter {
+  label {
+    margin-left: 5px;
+    cursor: pointer;
+    input {
+      margin-right: 5px;
+    }
+
+    &.disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+@media only screen and (max-width: @tabletBreakPoint) {
+  .EventFilter {
+    label {
+      display: block;
+    }
+
+  }
+}

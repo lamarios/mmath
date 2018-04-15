@@ -1,22 +1,39 @@
 import axios from 'axios';
 
-export default class EventService{
+export default class EventService {
 
-    getUpcoming(){
-        return axios.get(API.EVENTS.INCOMING);
+    /**
+     *
+     * @param page
+     * @param orgs array of organization ids
+     * @returns {AxiosPromise}
+     */
+    getUpcoming(page, orgs) {
+        var query = '';
+        if (page === undefined) {
+            query += '?page=1';
+        } else {
+            query += '?page=' + page
+        }
+
+        if (orgs !== undefined && orgs !== null && orgs.length > 0) {
+            query += '&organizations=' + orgs.join(',');
+        }
+
+        return axios.get(API.EVENTS.INCOMING + query);
     }
 
 
-    getById(id){
+    getById(id) {
         return axios.get(API.EVENTS.BY_ID.format(id));
     }
 
 
-    getFights(id){
+    getFights(id) {
         return axios.get(API.EVENTS.FIGHTS.format(id));
     }
 
-    getOrganizationsForFilter(){
+    getOrganizationsForFilter() {
         return axios.get(API.EVENTS.EVENT_FILTERS);
     }
 

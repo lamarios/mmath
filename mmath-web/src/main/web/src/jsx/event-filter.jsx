@@ -6,13 +6,12 @@ export default class EventFilters extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {organizations: [], selected: {}};
+        this.state = {organizations: [], selected: {}, everythingElseDisabled: false};
 
         this.service = new EventService();
 
         this.isSelected = this.isSelected.bind(this);
         this.onChange = this.onChange.bind(this);
-        this.unselectAll = this.unselectAll.bind(this)
     }
 
     componentDidMount() {
@@ -23,27 +22,39 @@ export default class EventFilters extends React.Component {
                     selected[org.id] = true;
                 });
 
-                this.setState({organizations: res.data, selected});
+                selected['all'] = false;
+
+                this.setState({organizations: res.data, selected}, () => this.props.onChange(this.state.selected));
             })
     }
 
-    unselectAll(){
-        var selected = this.state.selected;
-        this.state.organizations.map((org, index) => {
-            selected[org.id] =false;
-        });
-
-        this.setState({selected: selected}, () => this.props.onChange(this.state.selected));
-
-    }
 
     onChange(e) {
-        console.log(e.target.value, ' -> ', e.target.checked);
+
         var selected = this.state.selected;
         selected[e.target.value] = e.target.checked;
-        this.setState({selected: selected}, () => this.props.onChange(this.state.selected));
+
+        var everythingElseDisabled = false;
+
+        // setting the state of everything else
+        this.state.organizations.forEach((org, index) => {
+            if (!selected[org.id]) {
+                everythingElseDisabled = true;
+            }
+        });
+
+        if(everythingElseDisabled){
+            selected['all'] = false;
+        }
+
+        this.setState({
+            selected: selected,
+            everythingElseDisabled: everythingElseDisabled
+        }, () => this.props.onChange(this.state.selected));
+
 
     }
+
 
     isSelected(id) {
         return this.state.selected[id];
@@ -51,7 +62,7 @@ export default class EventFilters extends React.Component {
 
     render() {
         return (<div className="EventFilter">
-            <p>Filter events</p>
+            <p>Select organizations</p>
 
             <div className="checkboxes">
                 {this.state.organizations.map((org, index) => {
@@ -67,7 +78,17 @@ export default class EventFilters extends React.Component {
                         </label>
                     );
                 })}
-                <a onClick={this.unselectAll}>Show all organizations</a>
+                <label className={this.state.everythingElseDisabled?"disabled":""}>
+                    <input type="checkbox"
+                           value="all"
+                           name="organizations"
+                           onChange={this.onChange}
+                           checked={this.state.selected['all']}
+                           disabled={this.state.everythingElseDisabled}
+                    />
+                    Everything else
+                </label>
+
             </div>
         </div>);
     }

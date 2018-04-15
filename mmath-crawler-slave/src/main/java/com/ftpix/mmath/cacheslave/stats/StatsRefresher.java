@@ -1,9 +1,9 @@
 package com.ftpix.mmath.cacheslave.stats;
 
 import com.ftpix.mmath.cacheslave.stats.implementations.GlassCannonStats;
+import com.ftpix.mmath.cacheslave.stats.implementations.HighestNcStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.LongestCareer;
 import com.ftpix.mmath.cacheslave.stats.implementations.MostFightStats;
-import com.ftpix.mmath.cacheslave.stats.implementations.drawpercentage.NCPercentageStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.winpercentage.DecisionWinsStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.winpercentage.KoWinsStats;
 import com.ftpix.mmath.cacheslave.stats.implementations.winpercentage.SubmissionWinsStats;
@@ -23,18 +23,13 @@ public class StatsRefresher {
 
     public void process() {
 
-        MostFightStats mostFightStats = new MostFightStats(dao);
-        mostFightStats.process();
-
-        GlassCannonStats glassCannonStats = new GlassCannonStats(dao);
-        glassCannonStats.process();
-
-        LongestCareer longestCareer = new LongestCareer(dao);
-        longestCareer.process();
+        new MostFightStats(dao).process();
+        new GlassCannonStats(dao).process();
+        new LongestCareer(dao).process();
         new KoWinsStats(dao).process();
         new DecisionWinsStats(dao).process();
         new SubmissionWinsStats(dao).process();
-        new NCPercentageStats(dao).process();
+        new HighestNcStats(dao).process();
 
 
         logger.info("Refreshing fighter search rank");
