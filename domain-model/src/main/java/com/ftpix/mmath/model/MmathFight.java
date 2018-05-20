@@ -2,13 +2,11 @@ package com.ftpix.mmath.model;
 
 import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
-import com.ftpix.utils.DateUtils;
+import com.ftpix.sherdogparser.models.FightType;
 import com.google.gson.annotations.Expose;
-import io.gsonfire.annotations.ExposeMethodResult;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 
 public class MmathFight {
@@ -40,6 +38,9 @@ public class MmathFight {
 
     @Expose
     private int winRound;
+
+    @Expose
+    private FightType fightType;
 
     @Expose
     private LocalDateTime lastUpdate = LocalDateTime.now();
@@ -124,6 +125,15 @@ public class MmathFight {
         this.lastUpdate = lastUpdate;
     }
 
+
+    public FightType getFightType() {
+        return fightType;
+    }
+
+    public void setFightType(FightType fightType) {
+        this.fightType = fightType;
+    }
+
     public static MmathFight fromSherdog(Fight fight) {
         MmathFight newFight = new MmathFight();
 
@@ -146,6 +156,7 @@ public class MmathFight {
         newFight.setWinRound(fight.getWinRound());
         newFight.setWinTime(fight.getWinTime());
 
+        newFight.setFightType(fight.getType());
 
         return newFight;
 

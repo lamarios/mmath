@@ -1,22 +1,15 @@
 package com.ftpix.mmath.sherdog;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ftpix.sherdogparser.PictureProcessor;
 import com.ftpix.sherdogparser.models.Fighter;
 import mmath.S3Helper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -34,7 +27,12 @@ public class PictureToS3 implements PictureProcessor {
     @Override
     public String process(String url, Fighter fighter) throws IOException {
 
-        try (InputStream input = new URL(url).openStream()) {
+        URL urlObject = new URL(url);
+        URLConnection connection = urlObject.openConnection();
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6");
+        connection.setRequestProperty("Referer", "https://www.google.com");
+
+        try (InputStream input = connection.getInputStream()) {
             String key = DigestUtils.md5Hex(fighter.getSherdogUrl())+".jpg";
             Path tempFile = Files.createTempFile(key, "").toAbsolutePath();
             Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING);

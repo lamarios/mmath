@@ -17,8 +17,9 @@ import java.util.concurrent.TimeUnit;
  * Created by gz on 17-Feb-17.
  */
 public class Receiver {
-    private final static int CORE_POOL_SIZE = 10, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 40, THREAD_TIMEOUT = 60;
+    private final static int CORE_POOL_SIZE = 10, MAX_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 10, THREAD_TIMEOUT = 60;
     private final ThreadPoolExecutor fightPool, eventPool, orgPool;
+    private final ThreadPoolExecutor otherProcessings;
     private final Processor fightProcessor, eventProcessor, orgProcessor;
 
 
@@ -27,12 +28,16 @@ public class Receiver {
         this.fightPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
         this.eventPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
         this.orgPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+        this.otherProcessings = new ThreadPoolExecutor(CORE_POOL_SIZE, CORE_POOL_SIZE, THREAD_TIMEOUT, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
 
         this.fightProcessor = new FighterProcessor(this, dao, sherdog);
         this.eventProcessor = new EventProcessor(this, dao, sherdog);
         this.orgProcessor = new OrganizationProcessor(this, dao, sherdog);
     }
 
+    public ThreadPoolExecutor getOtherProcessings() {
+        return otherProcessings;
+    }
 
     public void process(ProcessItem item) {
         ThreadPoolExecutor pool = null;

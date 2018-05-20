@@ -13,7 +13,6 @@
 
     <properties>
         <docker.image.name>gonzague/mmath-redditbot</docker.image.name>
-        <docker.skip.push>true</docker.skip.push>
         <docker.skip>true</docker.skip>
     </properties>
 
@@ -166,7 +165,7 @@
                         </goals>
                         <phase>install</phase>
                         <configuration>
-                            <skip>${docker.skip.push}</skip>
+                            <skip>${docker.skip}</skip>
                             <workingDirectory>${basedir}/target/docker</workingDirectory>
                             <executable>docker</executable>
                             <arguments>

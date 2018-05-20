@@ -4,6 +4,7 @@ import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.FightResult;
+import com.ftpix.sherdogparser.models.FightType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -56,6 +57,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
         f.setWinTime(rs.getString("winTime"));
         f.setWinRound(rs.getInt("winRound"));
         f.setLastUpdate(LocalDateTime.parse(rs.getString("lastUpdate"), DAO.TIME_FORMAT));
+        f.setFightType(FightType.fromString(rs.getString("fight_type")));
 
         return f;
     };
@@ -66,7 +68,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
     }
 
     @Override
-    public  void init() {
+    public void init() {
         String createTable = "CREATE TABLE IF NOT EXISTS fights\n" +
                 "(\n" +
                 "  id          BIGINT AUTO_INCREMENT\n" +
@@ -86,6 +88,13 @@ public class FightDAO implements DAO<MmathFight, Long> {
                 "  ENGINE = InnoDB;";
 
         template.execute(createTable);
+
+
+        try {
+            template.execute("ALTER TABLE fights ADD COLUMN fight_type VARCHAR(50) DEFAULT 'PRO'");
+        } catch (Exception e) {
+
+        }
     }
 
     @Override
@@ -104,7 +113,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
         return template.query(query, rowMapper);
     }
 
-    public List<MmathFight> getFightsForEventHash(String hash){
+    public List<MmathFight> getFightsForEventHash(String hash) {
         String query = "SELECT * FROM fights WHERE MD5(`event_id`) = ?";
 
         return template.query(query, rowMapper, hash);
@@ -115,8 +124,8 @@ public class FightDAO implements DAO<MmathFight, Long> {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         PreparedStatementCreator css = connection -> {
-            PreparedStatement s = connection.prepareStatement("INSERT  INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, lastUpdate)" +
-                    "VALUES  (?,?,?,?,?,?,?,?,NOW())",
+            PreparedStatement s = connection.prepareStatement("INSERT  INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, fight_type, lastUpdate)" +
+                            "VALUES  (?,?,?,?,?,?,?,?,?,NOW())",
                     Statement.RETURN_GENERATED_KEYS);
             setStatement(s, f);
             return s;
@@ -126,23 +135,24 @@ public class FightDAO implements DAO<MmathFight, Long> {
         template.update(css, keyHolder);
 
         return keyHolder.getKey().longValue();
-   }
+    }
 
     /**
      * Deletes all fights for the triple fighter1, fighter2, event. Done to be able to insert a new one with more updated results
+     *
      * @param fighter1 first fighter
      * @param fighter2 second fighter
-     * @param event event it happened
+     * @param event    event it happened
      * @return true if the delete query actually deleted something
      */
-    public boolean deleteExistingSimilarFight(String fighter1, String fighter2, String event){
-        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?)) AND event_id = ?",  fighter1, fighter2, fighter1, fighter2, event) > 0;
+    public boolean deleteExistingSimilarFight(String fighter1, String fighter2, String event) {
+        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?)) AND event_id = ?", fighter1, fighter2, fighter1, fighter2, event) > 0;
     }
 
     @Override
     public boolean update(MmathFight f) {
         PreparedStatementCreator css = connection -> {
-            PreparedStatement s = connection.prepareStatement("UPDATE fights SET fighter1_id = ?, fighter2_id = ?, event_id = ?, `date` = ?, result = ?, winMethod = ?, winTime = ?, winRound = ?, lastUpdate = NOW() WHERE id = ?");
+            PreparedStatement s = connection.prepareStatement("UPDATE fights SET fighter1_id = ?, fighter2_id = ?, event_id = ?, `date` = ?, result = ?, winMethod = ?, winTime = ?, winRound = ?, fight_type = ?, lastUpdate = NOW() WHERE id = ?");
             setStatement(s, f);
             s.setLong(9, f.getId());
             return s;
@@ -158,23 +168,23 @@ public class FightDAO implements DAO<MmathFight, Long> {
     }
 
 
-   public boolean deleteAllNotHappenedFights(){
+    public boolean deleteAllNotHappenedFights() {
         return template.update("DELETE FROM fights WHERE  result='NOT_HAPPENED'") >= 0;
-   }
+    }
 
     public List<MmathFight> getByFighter(String sherdogUrl) {
 
         String query = "SELECT * FROM fights WHERE fighter2_id = ? OR fighter1_id = ? ORDER BY `date` ASC";
 
         return template.query(query, rowMapper, sherdogUrl, sherdogUrl).stream()
-                .filter(f-> Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).isPresent() && Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).isPresent())
+                .filter(f -> Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).isPresent() && Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).isPresent())
                 .map(f -> {
                     //we need to swap
-                    if(f.getFighter2().getSherdogUrl().equalsIgnoreCase(sherdogUrl)){
+                    if (f.getFighter2().getSherdogUrl().equalsIgnoreCase(sherdogUrl)) {
                         f.getFighter2().setSherdogUrl(f.getFighter1().getSherdogUrl());
                         f.getFighter1().setSherdogUrl(sherdogUrl);
 
-                        switch (f.getResult()){
+                        switch (f.getResult()) {
                             case FIGHTER_1_WIN:
                                 f.setResult(FightResult.FIGHTER_2_WIN);
                                 break;
@@ -183,7 +193,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
                                 break;
                         }
                     }
-                    return  f;
+                    return f;
                 })
                 .collect(Collectors.toList());
     }
@@ -223,14 +233,15 @@ public class FightDAO implements DAO<MmathFight, Long> {
         s.setString(6, f.getWinMethod());
         s.setString(7, f.getWinTime());
         s.setInt(8, f.getWinRound());
+        s.setString(9, f.getFightType().toString());
 
     }
 
     public void replace(MmathFight f) {
 
         PreparedStatementCreator css = connection -> {
-            PreparedStatement s = connection.prepareStatement("REPLACE INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, lastUpdate)" +
-                            "VALUES  (?,?,?,?,?,?,?,?,NOW())",
+            PreparedStatement s = connection.prepareStatement("REPLACE INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, fight_type, lastUpdate)" +
+                            "VALUES  (?,?,?,?,?,?,?,?,?,NOW())",
                     Statement.RETURN_GENERATED_KEYS);
             setStatement(s, f);
             return s;

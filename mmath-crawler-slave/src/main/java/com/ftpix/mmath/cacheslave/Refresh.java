@@ -34,6 +34,8 @@ public class Refresh {
         final LocalDateTime today = LocalDateTime.now();
 
 
+//        receiver.process(new ProcessItem("https://www.sherdog.com/events/Invicta-FC-2-Baszler-vs-McMann-22035", ProcessType.EVENT));
+
         logger.info("Deleting all the fights that have not happened yet");
         dao.getFightDAO().deleteAllNotHappenedFights();
         dao.getEventDAO().deleteNotHappenedEvents();
@@ -59,8 +61,8 @@ public class Refresh {
 
                 });
 
-        logger.info("Job done");
 
+        logger.info("Job done");
 
     }
 

@@ -9,6 +9,8 @@ import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Event;
+import com.ftpix.sherdogparser.models.FightType;
+import com.ftpix.sherdogparser.parsers.ParserUtils;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.io.IOException;
@@ -16,7 +18,10 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 /**
  * Created by gz on 16-Sep-16.
@@ -75,6 +80,26 @@ public class EventProcessor extends Processor<MmathEvent> {
         Event event = sherdog.getEvent(url);
         MmathEvent e = MmathEvent.fromSherdog(event);
         e.setFights(new ArrayList<>());
+
+
+        //Getting all the fight types
+        List<Callable<Void>> tasks = event.getFights()
+                .stream()
+                .map(f ->
+                        (Callable<Void>) () -> {
+                            FightType type = ParserUtils.getFightType(sherdog, f);
+                            f.setType(type);
+                            return null;
+                        }
+                )
+                .collect(Collectors.toList());
+
+        try {
+            receiver.getOtherProcessings().invokeAll(tasks);
+        } catch (InterruptedException e1) {
+            logger.error("Couldn't get fight types", e);
+        }
+
         event.getFights().forEach(f -> {
             e.getFights().add(MmathFight.fromSherdog(f));
         });
