@@ -18,7 +18,7 @@ services:
    - "15678:15678"
  mmath_mysql:
   container_name: mmath_mysql
-  image: mysql
+  image: mysql:5.7
   command: --innodb_buffer_pool_size=4G
   volumes:
    - ./mmath/mysql:/var/lib/mysql
@@ -26,7 +26,7 @@ services:
    MYSQL_ROOT_PASSWORD: password
  mmath_orientdb:
   container_name: mmath_orientdb
-  image: orientdb
+  image: orientdb:2.2.35
   ports:
      - "12424:2424"
      - "12480:2480"
