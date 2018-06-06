@@ -1,6 +1,7 @@
 package com.ftpix.mmath.model;
 
 import com.ftpix.sherdogparser.models.FightResult;
+import com.ftpix.sherdogparser.models.FightType;
 import com.google.gson.annotations.Expose;
 
 import java.time.ZonedDateTime;
@@ -27,6 +28,8 @@ public class GsonFriendlyFight {
         setWinMethod(f.getWinMethod());
         setWinRound(f.getWinRound());
         setWinTime(f.getWinTime());
+        setType(f.getFightType());
+
     }
 
 
@@ -50,6 +53,9 @@ public class GsonFriendlyFight {
 
     @Expose
     private String winTime;
+
+    @Expose
+    private FightType type;
 
     @Expose
     private int winRound;
@@ -116,5 +122,14 @@ public class GsonFriendlyFight {
 
     public void setEventId(String eventId) {
         this.eventId = eventId;
+    }
+
+
+    public FightType getType() {
+        return type;
+    }
+
+    public void setType(FightType type) {
+        this.type = type;
     }
 }

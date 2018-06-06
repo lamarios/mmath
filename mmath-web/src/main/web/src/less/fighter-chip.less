@@ -10,20 +10,11 @@
   cursor: pointer;
   transition: all 0.2s;
 
-  .picture {
-    width: 100%;
-    height: @chipHeight;
-    background-image: url('../images/fighterPlaceHolder.gif');
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
-
   .name {
     display: block;
     transition: all 0.5s;
     color: black;
     font-size: 30px;
-    text-align: right;
     text-transform: uppercase;
     margin: 0 5px;
   }
@@ -52,7 +43,7 @@
 .fighter-chip:hover {
   @scale: 1.05;
   transform: scale(@scale);
-  background-color:#ddd;
+  background-color: #ddd;
 }
 
 @mobileChipHeight: 50px;
@@ -78,10 +69,13 @@
     .name {
       font-size: 17px;
       padding-top: 12px;
+      display: inline-block;
     }
 
     .record {
-      display: none;
+      display: inline-block;
+      font-style: italic;
+      font-size: smaller;
     }
   }
   .remove {
@@ -106,7 +100,9 @@
         padding-top: 12px;
       }
     }
-
+    .record {
+      display: none !important;
+    }
     .remove {
       padding-top: 13px;
     }

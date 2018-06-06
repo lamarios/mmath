@@ -25,9 +25,6 @@ export default class FighterChip extends React.Component {
      * @returns {XML}
      */
     render() {
-        var picture = {
-            backgroundImage: 'url(' + (this.props.unknown === undefined ? this.props.fighter.picture : '/pictures/default.jpg') + ')'
-        };
 
 
         var className = "fighter-chip small";
@@ -40,14 +37,12 @@ export default class FighterChip extends React.Component {
             <div className="fighter-chip-wrapper">
                 {this.props.unknown === undefined ?
                     <div className={className} onClick={this.toggleDetails}>
-                        <div className="picture" style={picture}></div>
                         <div className="info">
                             <p className="name">
                                 {this.props.fighter.name}
                             </p>
                             <p className="record">
-                                {this.props.fighter.wins} - {this.props.fighter.losses}
-                                - {this.props.fighter.draws} - {this.props.fighter.nc}
+                                {this.props.fighter.record}
                             </p>
                             {this.props.removable &&
                             <div className="remove" onClick={this.props.onClick}>
@@ -60,7 +55,6 @@ export default class FighterChip extends React.Component {
                     </div>
                     :
                     <div className={className}>
-                        <div className="picture" style={picture}></div>
                         <div className="info">
                             <p className="name">
                                 Unknown Fighter

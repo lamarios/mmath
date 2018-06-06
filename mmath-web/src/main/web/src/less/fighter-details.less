@@ -26,11 +26,11 @@
     margin: 50px auto;
     width: 750px;
     border-radius: 5px;
-    background-color: black;
     height: 90%;
+    background-color: white;
 
     .data {
-      color: white;
+      color: black;
       position: absolute;
       top: 0;
       left: 0;
@@ -91,26 +91,6 @@
         clear: both;
       }
 
-      .fights {
-
-        tr td {
-          padding: 2px 7px;
-          a {
-            color: white;
-            font-weight: bold;
-          }
-        }
-
-        .win {
-          background-color: darken(rgb(67, 160, 71), 20%);
-        }
-        .loss {
-          background-color: darken(rgb(239, 83, 80), 20%);
-        }
-        .draw {
-          background-color: darken(rgb(33, 150, 243), 20%);
-        }
-      }
     }
 
     .background-picture {
@@ -163,12 +143,6 @@
         display: none;
       }
 
-      .fights table {
-        thead tr th:nth-child(4), thead tr th:nth-child(5), tbody tr td:nth-child(4), tbody tr td:nth-child(5) {
-          display: none;
-        }
-
-      }
     }
   }
 }

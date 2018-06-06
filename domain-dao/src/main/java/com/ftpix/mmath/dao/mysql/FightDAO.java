@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class FightDAO implements DAO<MmathFight, Long> {
     private final JdbcTemplate template;
     private final RowMapper<MmathFight> rowMapper = (rs, i) -> {
+
         MmathFight f = new MmathFight();
         f.setId(rs.getLong("id"));
 
@@ -57,7 +58,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
         f.setWinTime(rs.getString("winTime"));
         f.setWinRound(rs.getInt("winRound"));
         f.setLastUpdate(LocalDateTime.parse(rs.getString("lastUpdate"), DAO.TIME_FORMAT));
-        f.setFightType(FightType.fromString(rs.getString("fight_type")));
+        f.setFightType(FightType.valueOf(rs.getString("fight_type")));
 
         return f;
     };
@@ -176,7 +177,9 @@ public class FightDAO implements DAO<MmathFight, Long> {
 
         String query = "SELECT * FROM fights WHERE fighter2_id = ? OR fighter1_id = ? ORDER BY `date` ASC";
 
-        return template.query(query, rowMapper, sherdogUrl, sherdogUrl).stream()
+        List<MmathFight> query1 = template.query(query, rowMapper, sherdogUrl, sherdogUrl);
+        List<MmathFight> fights = query1.stream()
+                .peek(f-> System.out.println(f.getFighter1()+" - "+f.getFighter2()))
                 .filter(f -> Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).isPresent() && Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).isPresent())
                 .map(f -> {
                     //we need to swap
@@ -196,6 +199,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
                     return f;
                 })
                 .collect(Collectors.toList());
+        return fights;
     }
 
 

@@ -9,7 +9,6 @@
       <module fileurl="file://$PROJECT_DIR$/build-quartz/build-quartz.iml" filepath="$PROJECT_DIR$/build-quartz/build-quartz.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-reddit/build-reddit.iml" filepath="$PROJECT_DIR$/build-reddit/build-reddit.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-retrofit/build-retrofit.iml" filepath="$PROJECT_DIR$/build-retrofit/build-retrofit.iml" />
-      <module fileurl="file://$PROJECT_DIR$/build-s3/build-s3.iml" filepath="$PROJECT_DIR$/build-s3/build-s3.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-sherdog/build-sherdog.iml" filepath="$PROJECT_DIR$/build-sherdog/build-sherdog.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-spark/build-spark.iml" filepath="$PROJECT_DIR$/build-spark/build-spark.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-spring/build-spring.iml" filepath="$PROJECT_DIR$/build-spring/build-spring.iml" />

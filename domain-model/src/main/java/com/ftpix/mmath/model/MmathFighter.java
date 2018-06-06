@@ -28,8 +28,6 @@ public class MmathFighter {
     @Expose
     private String name;
     @Expose
-    private String picture;
-    @Expose
     private LocalDate birthday;
     @Expose
     private int draws;
@@ -81,9 +79,6 @@ public class MmathFighter {
         this.birthday = birthday;
     }
 
-    public String getPicture() {
-        return picture;
-    }
 
     public void setDraws(int draws) {
         this.draws = draws;
@@ -110,9 +105,6 @@ public class MmathFighter {
         this.name = name;
     }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
-    }
 
     public void setWeight(String weight) {
         this.weight = weight;
@@ -146,6 +138,27 @@ public class MmathFighter {
         return nc;
     }
 
+
+    @ExposeMethodResult("record")
+    public String getRecord() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(wins).append("-").append(losses);
+
+        if (draws == 0 && nc > 0) {
+            sb.append("-0-" + nc);
+        } else if (draws > 0) {
+            sb.append("-");
+            sb.append(draws);
+
+            if (nc > 0) {
+                sb.append("-");
+                sb.append(nc);
+            }
+        }
+
+        return sb.toString();
+    }
+
     @ExposeMethodResult("id")
     public String getIdAsHash() {
         return DigestUtils.md5Hex(getSherdogUrl());
@@ -166,7 +179,6 @@ public class MmathFighter {
         fighter.setName(f.getName());
         fighter.setNickname(f.getNickname());
         fighter.setNc(f.getNc());
-        fighter.setPicture(f.getPicture());
 
         return fighter;
     }

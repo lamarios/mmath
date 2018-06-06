@@ -64,7 +64,7 @@
     <orderEntry type="library" name="Maven: com.ftpix:sherdog-parser:2.3" level="project" />
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.9.2" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
-    <orderEntry type="module" module-name="build-s3" />
+    <orderEntry type="library" name="Maven: com.ftpix:build-s3:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.amazonaws:aws-java-sdk-s3:1.11.280" level="project" />
     <orderEntry type="library" name="Maven: com.amazonaws:aws-java-sdk-kms:1.11.280" level="project" />
     <orderEntry type="library" name="Maven: com.amazonaws:aws-java-sdk-core:1.11.280" level="project" />

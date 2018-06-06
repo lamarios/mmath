@@ -1,7 +1,7 @@
 import React from 'react';
 import MmathService from './services/MmathService.jsx';
-import {NavLink} from 'react-router-dom';
 import FighterAwards from './fighter-awards.jsx';
+import FighterFights from "./fighter-fights.jsx";
 
 export default class FighterDetails extends React.Component {
 
@@ -10,6 +10,7 @@ export default class FighterDetails extends React.Component {
 
         this.mmathService = new MmathService();
         this.state = {fights: []};
+        this.groupBy = this.groupBy.bind(this);
     }
 
 
@@ -21,23 +22,26 @@ export default class FighterDetails extends React.Component {
                     fights: res.data
                 });
             });
-    }
+    };
+
+    groupBy(xs, key) {
+        return xs.reduce(function (rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+        }, {});
+    };
 
     render() {
         var fighter = this.props.fighter;
 
-
-        var picture = {
-            backgroundImage: 'url(' + fighter.picture + ')'
-        };
+        var sortedFights = this.groupBy(this.state.fights, 'type');
+        console.log('sorted fights', sortedFights);
 
         return (
             <div className="fighter-details">
                 <div className="overlay" onClick={this.props.onCloseClick}>
                 </div>
                 <div className={"details"}>
-                    <div className="background-picture" style={picture}>
-                    </div>
                     <div className="data">
                         <div className="remove" onClick={this.props.onCloseClick}>
                             <i className="fa fa-times" aria-hidden="true"></i>
@@ -50,9 +54,6 @@ export default class FighterDetails extends React.Component {
                             }
                         </div>
 
-                        <div className="picture" style={picture}>
-                        </div>
-
                         <div className="info">
                             <p>
                                 <label>Record:</label> {fighter.wins} - {fighter.losses} - {fighter.draws} - {fighter.nc}
@@ -63,50 +64,11 @@ export default class FighterDetails extends React.Component {
                         </div>
                         <FighterAwards fighter={fighter}/>
                         <div className="fights">
-                            <h2>Fights</h2>
-                            <div>
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th>Opponent</th>
-                                        <th>Event</th>
-                                        <th>Result</th>
-                                        <th>Round</th>
-                                        <th>Time</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {
-                                        //using slice to duplicate the array
-                                        this.state.fights.slice(0).reverse().map(
-                                            function (fight, i, arr) {
-                                                //row class
-                                                var rowClass = '';
-                                                if (fight.result === 'FIGHTER_1_WIN') {
-                                                    rowClass = 'win';
-                                                } else if (fight.result === 'FIGHTER_2_WIN') {
-                                                    rowClass = 'loss';
-                                                } else {
-                                                    rowClass = 'draw';
-                                                }
-
-
-                                                const key = fight.date + fight.opponent;
-                                                const eventLink = '/events/' + fight.eventId + "/fights";
-                                                return (
-                                                    <tr key={key} className={rowClass}>
-                                                        <td>{fight.opponent}</td>
-                                                        <td><NavLink to={eventLink}>{fight.event}</NavLink></td>
-                                                        <td>{fight.winMethod}</td>
-                                                        <td>{fight.winRound}</td>
-                                                        <td>{fight.winTime}</td>
-                                                    </tr>
-                                                )
-                                            })
-                                    }
-                                    </tbody>
-                                </table>
-                            </div>
+                            <FighterFights fights={sortedFights.UPCOMING} title="Upcoming Fights"/>
+                            <FighterFights fights={sortedFights.PRO} title="Pro Fights"/>
+                            <FighterFights fights={sortedFights.PRO_EXHIBITION} title="Pro Exhibition Fights"/>
+                            <FighterFights fights={sortedFights.AMATEUR} title="Amateur Fights"/>
+                            <FighterFights fights={sortedFights.EXHIBITION} title="Exhibition Fights"/>
                         </div>
                     </div>
                 </div>

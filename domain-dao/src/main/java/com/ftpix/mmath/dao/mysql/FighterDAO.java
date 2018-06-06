@@ -27,7 +27,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         f.setSherdogUrl(resultSet.getString("sherdogUrl"));
         f.setLastUpdate(LocalDateTime.parse(resultSet.getString("lastUpdate"), DAO.TIME_FORMAT));
         f.setName(resultSet.getString("name"));
-        f.setPicture(resultSet.getString("picture"));
+
         Optional.ofNullable(resultSet.getString("birthday")).ifPresent(s -> {
             f.setBirthday(LocalDate.parse(s, DAO.DATE_FORMAT));
         });
@@ -79,7 +79,13 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         try {
             template.execute("ALTER TABLE fighters ADD COLUMN search_rank INT(2) DEFAULT 99");
         } catch (Exception e) {
+            //probably already exist
+        }
 
+        try {
+            template.execute("ALTER TABLE fighters DROP COLUMN picture");
+        } catch (Exception e) {
+            //probably already removed
         }
     }
 
@@ -101,15 +107,15 @@ public class FighterDAO implements DAO<MmathFighter, String> {
 
     @Override
     public String insert(MmathFighter f) {
-        String sql = "INSERT INTO fighters (sherdogUrl, lastUpdate, name, picture, birthday, draws, losses, wins, weight, height, nickname, nc) VALUES (?,NOW(),?,?,?,?,?,?,?,?,?,?)";
-        template.update(sql, f.getSherdogUrl(), f.getName(), f.getPicture(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc());
+        String sql = "INSERT INTO fighters (sherdogUrl, lastUpdate, name,  birthday, draws, losses, wins, weight, height, nickname, nc) VALUES (?,NOW(),?,?,?,?,?,?,?,?,?)";
+        template.update(sql, f.getSherdogUrl(), f.getName(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc());
         return f.getSherdogUrl();
     }
 
     @Override
     public boolean update(MmathFighter f) {
-        String sql = "UPDATE fighters SET  lastUpdate = NOW(), name = ?, picture = ?, birthday = ?, draws = ?, losses = ?, wins = ?, weight = ?, height = ?, nickname = ?, nc = ? WHERE sherdogUrl = ?";
-        return 1 == template.update(sql, f.getName(), f.getPicture(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getSherdogUrl());
+        String sql = "UPDATE fighters SET  lastUpdate = NOW(), name = ?,  birthday = ?, draws = ?, losses = ?, wins = ?, weight = ?, height = ?, nickname = ?, nc = ? WHERE sherdogUrl = ?";
+        return 1 == template.update(sql, f.getName(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getSherdogUrl());
     }
 
     @Override
@@ -119,6 +125,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
 
     /**
      * Search fighter by their name and nickname
+     *
      * @param name
      * @return
      */
@@ -165,6 +172,7 @@ public class FighterDAO implements DAO<MmathFighter, String> {
 
     /**
      * Will give each fighter a search rank based on the organisation they fought on. so a fighter that fought in the UFC will appear first in results as users are most likely to search for them
+     *
      * @return
      */
     public boolean setAllFighterSearchRank() {
