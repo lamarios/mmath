@@ -6,11 +6,13 @@ import {theme} from './theme';
 import Title from './Title';
 import SearchBar from './SearchBar';
 import Session from "./Session";
+import TopTrains from "./TopTrains";
 
 const Content = styled.div`
   background-color: ${props => props.theme.colors.background};
   color: ${props => props.theme.colors.text};
   
+  font-family: 'Open Sans', sans-serif;
   display: grid;
   grid-template-areas: 
     'session'
@@ -31,6 +33,7 @@ export default class App extends React.Component {
                 <Session/>
                 <Title/>
                 <SearchBar/>
+                <TopTrains/>
             </Content>
         </ThemeProvider>);
     }

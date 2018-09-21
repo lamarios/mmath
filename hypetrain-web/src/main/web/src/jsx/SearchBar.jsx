@@ -4,12 +4,23 @@ import Service from './Service';
 
 const Div = styled.div`
   grid-area: search;
-`
+  text-align: center;
+`;
 
+const InputContainer = styled.div`
+  background-color: white;
+  width: 300px;
+  display: inline-block;
+  box-sizing: border-box;
+  padding:5px;
+`;
 
 const Input = styled.input`
   border: none;
-`
+  width: 100%;
+  box-sizing: border-box;
+  font-size:20px;
+`;
 
 export default class SearchBar extends React.Component {
 
@@ -45,7 +56,9 @@ export default class SearchBar extends React.Component {
     render() {
         return (
             <Div>
-                <Input type="text" placeholder="Search for fighter" onKeyUp={e => this.searchFighter(e)}/>
+                <InputContainer>
+                    <Input type="text" placeholder="Search for fighter" onKeyUp={e => this.searchFighter(e)}/>
+                </InputContainer>
             </Div>
         );
     }

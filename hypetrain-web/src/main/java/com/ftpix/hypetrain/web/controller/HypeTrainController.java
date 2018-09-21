@@ -2,8 +2,10 @@ package com.ftpix.hypetrain.web.controller;
 
 import com.ftpix.hypetrain.web.GsonTransformer;
 import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sparknnotation.annotations.SparkController;
+import com.ftpix.sparknnotation.annotations.SparkGet;
 import com.ftpix.sparknnotation.annotations.SparkPost;
 import com.ftpix.sparknnotation.annotations.SparkQueryParam;
 import org.apache.logging.log4j.LogManager;
@@ -29,5 +31,11 @@ public class HypeTrainController {
 
         List<MmathFighter> mmathFighters = dao.getFighterDAO().searchByName(name);
         return mmathFighters;
+    }
+
+
+    @SparkGet(value = "/api/top", transformer = GsonTransformer.class)
+    public List<AggregatedHypeTrain> getTopTrains(){
+        return dao.getHypeTrainDAO().getTop();
     }
 }

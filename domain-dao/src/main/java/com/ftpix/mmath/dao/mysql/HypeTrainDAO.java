@@ -1,5 +1,6 @@
 package com.ftpix.mmath.dao.mysql;
 
+import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrain;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -76,5 +77,29 @@ public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
         String query = "SELECT * FROM hype_trains WHERE MD5(fighter) = ?";
 
         return template.query(query, rowMapper, user);
+    }
+
+    /**
+     * Get top 10 hype train
+     *
+     * @return
+     */
+    public List<AggregatedHypeTrain> getTop() {
+
+        String sql = "SELECT t.fighter as fighter, f.name as name, count(*) as count from hype_trains t LEFT JOIN fighters f ON t.fighter = f.sherdogUrl GROUP BY fighter ORDER BY count DESC LIMIT 10";
+
+        RowMapper<AggregatedHypeTrain> mapper = (resultSet, i) -> {
+            AggregatedHypeTrain trains = new AggregatedHypeTrain();
+
+            trains.setCount(resultSet.getInt("count"));
+            trains.setFighter(resultSet.getString("fighter"));
+            trains.setName(resultSet.getString("name"));
+            return trains;
+        };
+
+
+        return template.query(sql, mapper);
+
+
     }
 }

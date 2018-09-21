@@ -1,12 +1,24 @@
 export default class Service {
 
-
+    /**
+     * Search for fighters by name
+     * @param name the query
+     * @returns {Promise<Response | never>}
+     */
     searchFighter(name) {
         let formData = new FormData();
         return fetch('/api/search', {
             body:new URLSearchParams("name="+name),
             method: 'post'
         }).then(resp => resp.json());
+    }
+
+    /**
+     * Gets the top hype trains
+     * @returns {Promise<Response | never>}
+     */
+    getTopTrains(){
+        return fetch('/api/top').then(res => res.json());
     }
 
 
