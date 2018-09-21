@@ -25,6 +25,7 @@
         <module>build-mysql</module>
         <module>build-reddit</module>
         <module>mmath-reddit-bot</module>
+        <module>hypetrain-web</module>
     </modules>
     <packaging>pom</packaging>
 

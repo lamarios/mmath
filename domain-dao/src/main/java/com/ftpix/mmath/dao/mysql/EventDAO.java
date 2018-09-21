@@ -2,7 +2,6 @@ package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
-import com.google.common.base.Strings;
 import org.apache.commons.lang.ArrayUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -103,7 +102,7 @@ public class EventDAO implements DAO<MmathEvent, String> {
         }
         String orgsSQLIdentifier = "";
         if (orgsArray.length > 0) {
-            orgsSQLIdentifier = Strings.repeat("?,", orgsArray.length);
+            orgsSQLIdentifier = new String(new char[orgsArray.length]).replace("\0", "?,");
             orgsSQLIdentifier = orgsSQLIdentifier.substring(0, orgsSQLIdentifier.length() - 1);
         }
 

@@ -14,7 +14,8 @@ public class MySQLDao {
     private final OrganizationDAO organizationDAO;
     private final StatsCategoryDAO statsCategoryDAO;
     private final StatsEntryDAO statsEntryDAO;
-    private JdbcTemplate template;
+    private final HypeTrainDAO hypeTrainDAO;
+    private final JdbcTemplate template;
 
     public MySQLDao(JdbcTemplate template) {
 
@@ -25,6 +26,8 @@ public class MySQLDao {
         organizationDAO = new OrganizationDAO(template);
         statsCategoryDAO = new StatsCategoryDAO(template);
         statsEntryDAO = new StatsEntryDAO(template);
+        hypeTrainDAO = new HypeTrainDAO(template);
+
         this.template = template;
 
         init();
@@ -69,6 +72,12 @@ public class MySQLDao {
             logger.warn("Init script failing, might be on purpose", e);
         }
 
+        try {
+            hypeTrainDAO.init();
+        } catch (Exception e) {
+            logger.warn("Init script failing, might be on purpose", e);
+        }
+
     }
 
     public FighterDAO getFighterDAO() {
@@ -89,6 +98,10 @@ public class MySQLDao {
 
     public StatsCategoryDAO getStatsCategoryDAO() {
         return statsCategoryDAO;
+    }
+
+    public HypeTrainDAO getHypeTrainDAO() {
+        return hypeTrainDAO;
     }
 
     public StatsEntryDAO getStatsEntryDAO() {

@@ -6,8 +6,6 @@ import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.web.controllers.EventsController;
 import com.ftpix.mmath.web.controllers.MmathController;
 import com.ftpix.mmath.web.controllers.StatsController;
-import mmath.S3Configuration;
-import mmath.S3Helper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
@@ -18,7 +16,7 @@ import org.springframework.context.annotation.*;
 
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import({DaoConfiguration.class, S3Configuration.class})
+@Import({DaoConfiguration.class})
 public class WebConfiguration {
 
     @Value("${web.port}")
@@ -52,8 +50,8 @@ public class WebConfiguration {
     }
 
     @Bean
-    WebServer server(S3Helper s3Helper) {
-        WebServer server = new WebServer(port, s3Helper);
+    WebServer server() {
+        WebServer server = new WebServer(port);
 
         server.startServer();
 

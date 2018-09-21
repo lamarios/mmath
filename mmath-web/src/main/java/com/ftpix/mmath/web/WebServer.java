@@ -2,7 +2,6 @@ package com.ftpix.mmath.web;
 
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
-import mmath.S3Helper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import spark.Request;
@@ -23,16 +22,12 @@ import java.util.stream.Collectors;
 public class WebServer {
 
     private final int port;
-
-    private final S3Helper s3Helper;
-
-    private Logger logger = LogManager.getLogger();
     private final Gson gson = GsonUtils.getGson();
+    private Logger logger = LogManager.getLogger();
 
 
-    public WebServer(int port, S3Helper s3Helper) {
+    public WebServer(int port) {
         this.port = port;
-        this.s3Helper = s3Helper;
     }
 
     public void startServer() {
@@ -42,7 +37,7 @@ public class WebServer {
             Path path = Paths.get(".").resolve("mmath-web/src/main/resources/web/public").toAbsolutePath();
 //            path = Paths.get("/home/gz/IdeaProjects/mmath/mmath-web/src/main/resources/web/public");
             logger.info("DEV MODE {}", path.toString());
-            Spark.externalStaticFileLocation(path.toString().replace("./",""));
+            Spark.externalStaticFileLocation(path.toString().replace("./", ""));
 
         } else {
             Spark.staticFiles.location("/web/public");
@@ -95,11 +90,7 @@ public class WebServer {
         response.raw().setHeader("Content-Disposition", "inline; filename=" + fighterHash);
 
         InputStream in;
-        if (fighterHash.equalsIgnoreCase("default.jpg")) {
-            in = getClass().getClassLoader().getResource("web/public/images/fighterPlaceHolder.gif").openStream();
-        } else {
-            in = s3Helper.getFile(fighterHash);
-        }
+        in = getClass().getClassLoader().getResource("web/public/images/fighterPlaceHolder.gif").openStream();
 
         try {
             byte[] buffer = new byte[1024];

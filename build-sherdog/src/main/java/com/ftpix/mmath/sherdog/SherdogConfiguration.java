@@ -1,11 +1,8 @@
 package com.ftpix.mmath.sherdog;
 
 import com.ftpix.sherdogparser.Sherdog;
-import mmath.S3Configuration;
-import mmath.S3Helper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -13,7 +10,6 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Configuration
 @PropertySource("classpath:config.properties")
-@Import(S3Configuration.class)
 public class SherdogConfiguration {
 
 
@@ -23,7 +19,7 @@ public class SherdogConfiguration {
     /////
 
     @Bean
-    Sherdog sherdog(S3Helper s3Helper) {
+    Sherdog sherdog() {
         return new Sherdog.Builder().build();
     }
 
