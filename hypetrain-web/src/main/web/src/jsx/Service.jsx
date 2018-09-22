@@ -8,7 +8,7 @@ export default class Service {
     searchFighter(name) {
         let formData = new FormData();
         return fetch('/api/search', {
-            body:new URLSearchParams("name="+name),
+            body: new URLSearchParams("name=" + name),
             method: 'post'
         }).then(resp => resp.json());
     }
@@ -17,9 +17,62 @@ export default class Service {
      * Gets the top hype trains
      * @returns {Promise<Response | never>}
      */
-    getTopTrains(){
+    getTopTrains() {
         return fetch('/api/top').then(res => res.json());
     }
+
+    /**
+     * Gets a single fighter using its id
+     * @param id
+     * @return {Promise<Response | never>}
+     */
+    getFighter(id) {
+        return fetch('/api/fighter/' + id).then(res => res.json());
+    }
+
+
+    /**
+     * Gets the user login status
+     * @return {Promise<Response>}
+     */
+    me(){
+        return fetch('/api/me').then(res => {
+            if(res.status === 200) {
+             return   res.text()
+            }else{
+                throw "Not logged Int";
+            }
+        });
+    }
+
+    /**
+     * Jump on board !
+     * @param fighter
+     * @return {Promise<boolean | never>}
+     */
+    jumpOn(fighter){
+        return fetch('/api/jumpOn/'+fighter).then(res => res.status === 200);
+    }
+
+    /**
+     * :(
+     * @param fighter
+     * @return {Promise<boolean | never>}
+     */
+    jumpOff(fighter){
+        return fetch('/api/jumpOff/'+fighter).then(res => res.status === 200);
+    }
+
+
+    /**
+     * Gets logged in user hype
+     * @return {Promise<Response | never>}
+     */
+    getMyHype(){
+        return fetch('/api/my-hype')
+            .then(res => res.json());
+    }
+
 
 
     postData(url = ``, data = {}) {

@@ -1,7 +1,16 @@
 package com.ftpix.mmath.model;
 
+import com.google.gson.annotations.Expose;
+import io.gsonfire.annotations.ExposeMethodResult;
+import org.apache.commons.codec.digest.DigestUtils;
+
 public class HypeTrain {
-    private String user, fighterId;
+    @Expose
+    private String user;
+    private String fighterId;
+
+    @Expose
+    private String fighterName;
 
     public HypeTrain(String user, String fighterId) {
         this.user = user;
@@ -22,5 +31,19 @@ public class HypeTrain {
 
     public void setFighterId(String fighterId) {
         this.fighterId = fighterId;
+    }
+
+
+    public String getFighterName() {
+        return fighterName;
+    }
+
+    public void setFighterName(String fighterName) {
+        this.fighterName = fighterName;
+    }
+
+    @ExposeMethodResult("id")
+    public String getIdAsHash() {
+        return DigestUtils.md5Hex(fighterId);
     }
 }
