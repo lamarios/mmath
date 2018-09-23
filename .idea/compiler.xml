@@ -33,7 +33,7 @@
       <module name="build-spring" target="1.9" />
       <module name="build-utils" target="1.9" />
       <module name="builds3" target="1.8" />
-      <module name="domain-dao" target="1.8" />
+      <module name="domain-dao" target="1.9" />
       <module name="domain-model" target="1.9" />
       <module name="domain-s3" target="1.8" />
       <module name="hypetrain-web" target="9" />

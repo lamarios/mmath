@@ -1,6 +1,7 @@
 package com.ftpix.hypetrain.web.controller;
 
 import com.ftpix.hypetrain.web.GsonTransformer;
+import com.ftpix.hypetrain.web.TrainGenerator;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrain;
@@ -14,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import spark.Request;
 import spark.Response;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -64,13 +64,13 @@ public class HypeTrainController {
 
 
     @SparkGet("/api/me")
-    public String getUsername(Request req, Response res){
+    public String getUsername(Request req, Response res) {
         String username = req.session().attribute(SESSION_USERNAME);
-        if(username != null){
+        if (username != null) {
             return username;
-        }else{
-           res.status(401);
-           return "Please Log in";
+        } else {
+            res.status(401);
+            return "Please Log in";
         }
     }
 
@@ -110,7 +110,7 @@ public class HypeTrainController {
                     .filter(s -> s.matches("u/\\w+"))
                     .map(s -> "/" + s);
 
-            if(username.isPresent()){
+            if (username.isPresent()) {
                 req.session().attribute(SESSION_USERNAME, username.get());
             }
 
@@ -136,7 +136,7 @@ public class HypeTrainController {
     public String me(Response res, Request req) throws IOException, URISyntaxException {
 
         String user = req.session().attribute(SESSION_USERNAME);
-        if(user == null){
+        if (user == null) {
             res.status(401);
             return "Please log in first";
         }
@@ -170,9 +170,9 @@ public class HypeTrainController {
         data.put("name", fighter.getName());
         data.put("loggedIn", user != null);
         data.put("count", dao.getHypeTrainDAO().countForFighter(fighter.getSherdogUrl()));
-        if(user != null) {
+        if (user != null) {
             data.put("onBoard", dao.getHypeTrainDAO().isOnBoard(user, fighter.getSherdogUrl()));
-        }else{
+        } else {
             data.put("onBoard", false);
         }
 
@@ -181,17 +181,17 @@ public class HypeTrainController {
 
 
     @SparkGet("/api/jumpOn/:fighter")
-    public String jumpOn(@SparkParam("fighter") String hash, Response res, Request req){
+    public String jumpOn(@SparkParam("fighter") String hash, Response res, Request req) {
         MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
 
         String user = req.session().attribute(SESSION_USERNAME);
 
-        if(user == null){
+        if (user == null) {
             res.status(401);
             return "Please Log in";
         }
 
-        if(fighter == null){
+        if (fighter == null) {
             res.status(404);
             return "Fighter doesn't exist";
         }
@@ -205,19 +205,18 @@ public class HypeTrainController {
     }
 
 
-
     @SparkGet("/api/jumpOff/:fighter")
-    public String jumpOff(@SparkParam("fighter") String hash, Response res, Request req){
+    public String jumpOff(@SparkParam("fighter") String hash, Response res, Request req) {
         MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
 
         String user = req.session().attribute(SESSION_USERNAME);
 
-        if(user == null){
+        if (user == null) {
             res.status(401);
             return "Please Log in";
         }
 
-        if(fighter == null){
+        if (fighter == null) {
             res.status(404);
             return "Fighter doesn't exists";
         }
@@ -227,19 +226,26 @@ public class HypeTrainController {
 
         dao.getHypeTrainDAO().deleteById(hypeTrain);
         res.status(200);
-        return  "OK";
+        return "OK";
     }
 
-    @SparkGet(value= "/api/my-hype", transformer = GsonTransformer.class)
-    public List<HypeTrain> myHype(Request req, Response res){
+    @SparkGet(value = "/api/my-hype", transformer = GsonTransformer.class)
+    public List<HypeTrain> myHype(Request req, Response res) {
 
         String user = req.session().attribute(SESSION_USERNAME);
 
-        if(user == null){
+        if (user == null) {
             res.status(401);
             return Collections.emptyList();
         }
 
         return dao.getHypeTrainDAO().getByUser(user);
+    }
+
+
+    @SparkGet("/train/:people")
+    public String getTrainForPeople(@SparkParam("people") int people, Response res) {
+        res.header("Content-Type", "image/svg+xml");
+        return TrainGenerator.withPeople(people);
     }
 }

@@ -38,21 +38,12 @@ export default class Train extends React.Component {
 
 
     render() {
-        const train = [];
 
         let total = this.props.total;
-        //let's count 20 people / car
-        // for (let i = 0; i < this.props.total / 20; i++) {
-        for (let i = 0; i < total / 20; i++) {
-            train.push(<Svg key={i} src={car}/>);
-        }
-
-        train.push(<Svg key={-1} src={front}/>);
-
         return (
             <Div>
                 <Tchoo>
-                    {this.props.total > 0 && train}
+                    {this.props.total > 0 && <Svg src={"/train/"+total} />}
                 </Tchoo>
             </Div>
         );
