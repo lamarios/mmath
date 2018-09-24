@@ -7,6 +7,7 @@ import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Fighter;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -105,7 +106,7 @@ public class FighterProcessor extends Processor<MmathFighter> {
     }*/
 
     @Override
-    protected MmathFighter getFromSherdog(String url) throws IOException, ParseException {
+    protected MmathFighter getFromSherdog(String url) throws IOException, ParseException, SherdogParserException {
         Fighter fighter = sherdog.getFighter(url);
 
         MmathFighter mmathFighter = MmathFighter.fromSherdong(fighter);

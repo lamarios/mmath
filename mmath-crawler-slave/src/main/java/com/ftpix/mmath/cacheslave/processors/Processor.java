@@ -4,6 +4,7 @@ import com.ftpix.mmath.cacheslave.Receiver;
 import com.ftpix.mmath.cacheslave.Refresh;
 import com.ftpix.mmath.cacheslave.models.ProcessItem;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.utils.DateUtils;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
@@ -93,7 +94,7 @@ public abstract class Processor<T> {
 
     protected abstract void updateToDao(T old, T fromSherdog) throws SQLException;
 
-    protected abstract T getFromSherdog(String url) throws IOException, ParseException;
+    protected abstract T getFromSherdog(String url) throws IOException, ParseException, SherdogParserException;
 
     protected abstract LocalDateTime getLastUpdate(T obj);
 

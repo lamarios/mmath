@@ -8,6 +8,7 @@ import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Event;
 import com.ftpix.sherdogparser.models.FightType;
 import com.ftpix.sherdogparser.parsers.ParserUtils;
@@ -76,7 +77,7 @@ public class EventProcessor extends Processor<MmathEvent> {
     }
 
     @Override
-    protected MmathEvent getFromSherdog(String url) throws IOException, ParseException {
+    protected MmathEvent getFromSherdog(String url) throws IOException, ParseException, SherdogParserException {
         Event event = sherdog.getEvent(url);
         MmathEvent e = MmathEvent.fromSherdog(event);
         e.setFights(new ArrayList<>());

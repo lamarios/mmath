@@ -41,7 +41,7 @@ public class Refresh {
         dao.getEventDAO().deleteNotHappenedEvents();
 
 
-        receiver.process(new ProcessItem("http://www.sherdog.com/fighter/Alistair-Overeem-461", ProcessType.FIGHTER));
+        receiver.process(new ProcessItem("https://www.sherdog.com/fighter/Alistair-Overeem-461", ProcessType.FIGHTER));
         receiver.process(new ProcessItem(Organizations.UFC.url, ProcessType.ORGANIZATION));
         receiver.process(new ProcessItem(Organizations.BELLATOR.url, ProcessType.ORGANIZATION));
         receiver.process(new ProcessItem(Organizations.INVICTA_FC.url, ProcessType.ORGANIZATION));

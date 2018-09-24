@@ -7,6 +7,7 @@ import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Organization;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -51,7 +52,7 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
     }
 
     @Override
-    protected MmathOrganization getFromSherdog(String url) throws IOException, ParseException {
+    protected MmathOrganization getFromSherdog(String url) throws IOException, ParseException, SherdogParserException {
         Organization organization = sherdog.getOrganization(url);
         MmathOrganization org = MmathOrganization.fromSherdog(organization);
 

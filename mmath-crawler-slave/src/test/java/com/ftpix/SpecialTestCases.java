@@ -4,6 +4,7 @@ import com.ftpix.mmath.DaoConfiguration;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class SpecialTestCases {
     MySQLDao dao;
 
     @Test
-    public void testSpecialCases() throws IOException, ParseException {
+    public void testSpecialCases() throws IOException, ParseException, SherdogParserException {
         Sherdog sherdog = new Sherdog.Builder().build();
 
         MmathFighter fighter = MmathFighter.fromSherdong(sherdog.getFighter("http://www.sherdog.com/fighter/Johil-de-Oliveira-6"));

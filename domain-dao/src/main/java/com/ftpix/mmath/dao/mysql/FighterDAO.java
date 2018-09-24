@@ -179,19 +179,19 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         template.update("UPDATE fighters fi\n" +
                 "SET search_rank = (\n" +
                 "  SELECT DISTINCT CASE e.organization_id\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/Ultimate-Fighting-Championship-UFC-2'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/Ultimate-Fighting-Championship-UFC-2'\n" +
                 "                    THEN 1\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/Dream-1357'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/Dream-1357'\n" +
                 "                    THEN 2\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/Strikeforce-716'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/Strikeforce-716'\n" +
                 "                    THEN 2\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/Pride-Fighting-Championships-3'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/Pride-Fighting-Championships-3'\n" +
                 "                    THEN 2\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/Bellator-MMA-1960'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/Bellator-MMA-1960'\n" +
                 "                    THEN 2\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/Invicta-Fighting-Championships-4469'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/Invicta-Fighting-Championships-4469'\n" +
                 "                    THEN 3\n" +
-                "                  WHEN 'http://www.sherdog.com/organizations/One-Championship-3877'\n" +
+                "                  WHEN 'https://www.sherdog.com/organizations/One-Championship-3877'\n" +
                 "                    THEN 3\n" +
                 "                  ELSE 99\n" +
                 "                  END AS rank\n" +
