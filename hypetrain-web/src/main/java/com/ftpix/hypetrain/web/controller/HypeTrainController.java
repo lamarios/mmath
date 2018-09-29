@@ -244,8 +244,9 @@ public class HypeTrainController {
 
 
     @SparkGet("/train/:people")
-    public String getTrainForPeople(@SparkParam("people") int people, Response res) {
+    public String getTrainForPeople(@SparkParam("people") int people, @SparkQueryParam("color") String color, Response res) {
         res.header("Content-Type", "image/svg+xml");
-        return TrainGenerator.withPeople(people);
+        color = color == null ? "#000" : "#" + color;
+        return TrainGenerator.withPeople(people, color);
     }
 }

@@ -1,8 +1,5 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.cacheslave.Receiver;
-import com.ftpix.mmath.cacheslave.models.ProcessItem;
-import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
@@ -13,6 +10,7 @@ import com.ftpix.sherdogparser.models.Event;
 import com.ftpix.sherdogparser.models.FightType;
 import com.ftpix.sherdogparser.parsers.ParserUtils;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jms.core.JmsTemplate;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -22,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -29,24 +29,21 @@ import java.util.stream.Collectors;
  */
 public class EventProcessor extends Processor<MmathEvent> {
 
-    private final MySQLDao dao;
+    private final ExecutorService exec = Executors.newFixedThreadPool(5);
 
-    public EventProcessor(Receiver receiver, MySQLDao dao, Sherdog sherdog) {
-        super(receiver, sherdog);
-
-        this.dao = dao;
+    public EventProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
+        super(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, OrganizationTopic);
     }
-
 
     @Override
     protected void propagate(MmathEvent event) {
         event.getFights().forEach(f -> {
-            receiver.process(new ProcessItem(f.getFighter1().getSherdogUrl(), ProcessType.FIGHTER));
-            receiver.process(new ProcessItem(f.getFighter2().getSherdogUrl(), ProcessType.FIGHTER));
+            jmsTemplate.convertAndSend(fighterTopic, f.getFighter1().getSherdogUrl());
+            jmsTemplate.convertAndSend(fighterTopic, f.getFighter2().getSherdogUrl());
             insertFight(f);
         });
 
-        receiver.process(new ProcessItem(event.getOrganization().getSherdogUrl(), ProcessType.ORGANIZATION));
+        jmsTemplate.convertAndSend(organizationTopic, event.getOrganization().getSherdogUrl());
     }
 
     private void insertFight(MmathFight f) {
@@ -96,7 +93,7 @@ public class EventProcessor extends Processor<MmathEvent> {
                 .collect(Collectors.toList());
 
         try {
-            receiver.getOtherProcessings().invokeAll(tasks);
+            exec.invokeAll(tasks);
         } catch (InterruptedException e1) {
             logger.error("Couldn't get fight types", e);
         }

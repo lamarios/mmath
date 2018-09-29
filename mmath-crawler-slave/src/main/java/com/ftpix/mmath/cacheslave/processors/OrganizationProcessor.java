@@ -1,8 +1,5 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.cacheslave.Receiver;
-import com.ftpix.mmath.cacheslave.models.ProcessItem;
-import com.ftpix.mmath.cacheslave.models.ProcessType;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
@@ -10,6 +7,7 @@ import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Organization;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jms.core.JmsTemplate;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -23,17 +21,15 @@ import java.util.Optional;
  */
 public class OrganizationProcessor extends Processor<MmathOrganization> {
 
-    private final MySQLDao dao;
 
-    public OrganizationProcessor(Receiver receiver, MySQLDao dao, Sherdog sherdog) {
-        super(receiver, sherdog);
-        this.dao = dao;
+    public OrganizationProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
+        super(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, OrganizationTopic);
     }
 
     @Override
     protected void propagate(MmathOrganization obj) {
         obj.getEvents().forEach(e -> {
-            receiver.process(new ProcessItem(e.getSherdogUrl(), ProcessType.EVENT));
+            jmsTemplate.convertAndSend(eventTopic, e.getSherdogUrl());
         });
     }
 
@@ -41,7 +37,7 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
     protected void insertToDao(MmathOrganization obj) throws SQLException {
         try {
             dao.getOrganizationDAO().insert(obj);
-        }catch (DuplicateKeyException e){
+        } catch (DuplicateKeyException e) {
             logger.info("Organization already exists, skipping insert");
         }
     }
@@ -73,47 +69,4 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
         return Optional.ofNullable(dao.getOrganizationDAO().getById(url));
     }
 
-    /*public void receiveMessage(String message) {
-        logger.info("Organization receiver:{}", message);
-
-        try {
-
-            Optional<MmathOrganization> optOrg = orgDao.getByUrl(message);
-
-            Optional<MmathOrganization> toParse = null;
-
-            if (optOrg.isPresent()) {
-                logger.info("[{}] Organization already exists...", message);
-                LocalDate now = LocalDate.now();
-                MmathFighter fighter = optFighter.get();
-
-                long daysbetween = ChronoUnit.DAYS.between(fighter.getLastUpdate(), now);
-
-                if(daysbetween >= 5){
-                    logger.info("[{}] Info is too old, need to update", message);
-                    MmathFighter updated = getFromSherdog(message);
-                    updated.setLastUpdate(now);
-                    updated.setLastCountUpdate(fighter.getLastCountUpdate());
-                    updated.setBetterThan(fighter.getBetterThan());
-                    updated.setWeakerThan(fighter.getWeakerThan());
-
-                    fighterDao.update(updated);
-                    toParse = Optional.of(updated);
-                }
-
-            } else {
-                logger.info("[{}] doesn't exist, need to update", message);
-
-                MmathFighter fighter = getFromSherdog(message);
-                fighterDao.insert(fighter);
-                toParse = Optional.of(fighter);
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-    }*/
 }

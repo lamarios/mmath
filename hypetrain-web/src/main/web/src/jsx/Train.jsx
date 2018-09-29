@@ -1,8 +1,6 @@
 import React from 'react';
 import styled, {keyframes} from 'styled-components';
-
-import front from '../images/train-main.svg';
-import car from '../images/train-wagon.svg';
+import {theme} from './theme';
 
 const animation = keyframes`
   0%{
@@ -38,12 +36,12 @@ export default class Train extends React.Component {
 
 
     render() {
-
         let total = this.props.total;
+        let color = theme.colors.accent.slice(1,7);
         return (
             <Div>
                 <Tchoo>
-                    {this.props.total > 0 && <Svg src={"/train/"+total} />}
+                    {this.props.total > 0 && <Svg src={"/train/"+total+"?color="+color} />}
                 </Tchoo>
             </Div>
         );

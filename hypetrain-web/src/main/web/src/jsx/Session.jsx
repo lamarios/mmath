@@ -30,6 +30,8 @@ const Login = styled.button`
 
 const LoggedInLink = styled(NavLink)`
   text-decoration: none;
+  border: none;
+  outline:0;
   p {
   margin:0 10px;
   font-size: 13px;

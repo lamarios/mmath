@@ -4,16 +4,19 @@ public class TrainGenerator {
 
     private static final int PEOPLE_PER_CAR = 20, FRONT_CAR_WIDTH = 1280, CAR_WIDTH = 1280;
 
-    public static String withCars(int cars) {
+    public static String withCars(int cars, String color) {
+
+        color = color == null ? "#000000" : color;
+
         StringBuilder sb = new StringBuilder();
 
         sb.append(getSvgHeader(cars));
 
-        sb.append("<g transform=\"scale(-1,1) translate("+-getTrainWidth(cars)+", 0)\">");
-        sb.append(getFrontCar());
+        sb.append("<g transform=\"scale(-1,1) translate(" + -getTrainWidth(cars) + ", 0)\">");
+        sb.append(getFrontCar(color));
 
         for (int i = 1; i <= cars; i++) {
-            sb.append(getCar(i));
+            sb.append(getCar(i, color));
         }
 
         sb.append("</g>");
@@ -21,10 +24,10 @@ public class TrainGenerator {
         return sb.toString();
     }
 
-    private static String getCar(int i) {
+    private static String getCar(int i, String color) {
         int x = i * CAR_WIDTH;
         return "    <g transform=\"translate(" + x + ",1086) scale(0.100000,-0.100000)\"\n" +
-                "       fill=\"#303f9f\" stroke=\"none\">\n" +
+                "       fill=\"" + color + "\" stroke=\"none\">\n" +
                 "        <path d=\"M3920 10565 l0 -295 335 0 335 0 0 -800 0 -800 -1807 -2 -1808 -3 -3\n" +
                 "-297 -2 -298 325 0 325 0 0 -2355 0 -2355 -415 0 -415 0 0 -175 0 -175 -395 0\n" +
                 "-395 0 0 -85 0 -85 393 -2 392 -3 5 -307 5 -308 658 3 c361 1 657 1 657 0 0\n" +
@@ -46,14 +49,14 @@ public class TrainGenerator {
                 "    </g>";
     }
 
-    public static String withPeople(int people) {
-        return withCars(Math.max(1, people / PEOPLE_PER_CAR));
+    public static String withPeople(int people, String color) {
+        return withCars(Math.max(1, people / PEOPLE_PER_CAR), color);
     }
 
 
-    private static String getFrontCar() {
+    private static String getFrontCar(String color) {
         return "    <g transform=\"translate(0.000000,1119.000000) scale(0.100000,-0.100000)\"\n" +
-                "       fill=\"#303f9f\" stroke=\"none\">\n" +
+                "       fill=\"" + color + "\" stroke=\"none\">\n" +
                 "        <path d=\"M5840 10710 l0 -480 255 0 255 0 0 -1450 0 -1450 -1860 0 -1860 0 0\n" +
                 "549 0 549 53 30 c71 40 152 129 187 204 42 90 52 175 48 416 -3 187 -5 213\n" +
                 "-21 229 -17 17 -61 18 -711 21 -690 2 -693 2 -719 -19 l-27 -20 0 -233 c0\n" +

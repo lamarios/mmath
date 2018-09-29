@@ -8,6 +8,8 @@ const Div = styled(NavLink)`
   text-align: center;
   margin-bottom:20px;
   text-decoration: none;
+  border: none;
+  outline:0;
 `;
 
 

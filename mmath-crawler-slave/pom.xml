@@ -15,7 +15,6 @@
         <java.version>1.8</java.version>
         <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
         <docker.image.name>gonzague/mmath-crawler</docker.image.name>
-        <docker.skip>true</docker.skip>
     </properties>
 
     <dependencies>
@@ -39,6 +38,7 @@
             <artifactId>domain-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.ftpix</groupId>
@@ -80,6 +80,11 @@
             <version>5.0.4.RELEASE</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>domain-mq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 
@@ -89,8 +94,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.9</source>
-                    <target>1.9</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
@@ -110,17 +115,18 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <!-- add Main-Class to manifest file -->
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.ftpix.mmath.cacheslave.Application</mainClass>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.ftpix.mmath.cacheslave.CrawlerSlaveConfiguration</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
 
 
             <!-- DOCKER -->

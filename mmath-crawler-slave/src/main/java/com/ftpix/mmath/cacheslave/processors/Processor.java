@@ -1,67 +1,80 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.cacheslave.Receiver;
-import com.ftpix.mmath.cacheslave.Refresh;
-import com.ftpix.mmath.cacheslave.models.ProcessItem;
+import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
-import com.ftpix.utils.DateUtils;
-import com.ftpix.utils.GsonUtils;
-import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.jms.core.JmsTemplate;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Optional;
 
 /**
  * Created by gz on 16-Sep-16.
  */
-public abstract class Processor<T> {
+public abstract class Processor<T> implements MessageListener {
 
     protected Logger logger = LogManager.getLogger();
-    protected final Receiver receiver;
 
+    protected final JmsTemplate jmsTemplate;
     protected final Sherdog sherdog;
+    protected final String fighterTopic;
+    protected final String eventTopic;
+    protected final String organizationTopic;
+    protected final MySQLDao dao;
 
 
-    private Gson gson = GsonUtils.getGson();
+    @Override
+    public void onMessage(Message message) {
+        try {
+            String msg = ((TextMessage) message).getText();
+            this.process(msg);
+        } catch (JMSException e) {
+            logger.error("Couldn't convert message to url");
+        }
+    }
 
-
-    public Processor(Receiver receiver, Sherdog sherdog) {
+    public Processor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
+        this.dao = dao;
+        this.jmsTemplate = jmsTemplate;
         this.sherdog = sherdog;
-        this.receiver = receiver;
+        this.fighterTopic = fighterTopic;
+        this.eventTopic = eventTopic;
+        organizationTopic = OrganizationTopic;
     }
 
 
-    public void process(ProcessItem item) {
+    public void process(String url) {
 
-        logger.info("{} received:{}", this.getClass().getName(), item.getUrl());
+        logger.info("{} received:{}", this.getClass().getName(), url);
 
         try {
 
 
-            Optional<T> opt = getFromDao(item.getUrl());
+            Optional<T> opt = getFromDao(url);
 
             Optional<T> toParse = Optional.empty();
 
             if (opt.isPresent()) {
-                logger.info("[{}] already exists...", item.getUrl());
+                logger.info("[{}] already exists...", url);
                 LocalDateTime now = LocalDateTime.now();
                 T optResult = opt.get();
 
                 LocalDateTime date = getLastUpdate(optResult);
                 long daysbetween = ChronoUnit.DAYS.between(date, now);
 
-                if (daysbetween >= Refresh.RATE) {
-                    logger.info("[{}] Info is too old, need to update", item.getUrl());
-                    T updated = getFromSherdog(item.getUrl());
+                if (daysbetween >= 1) {
+                    logger.info("[{}] Info is too old, need to update", url);
+                    T updated = getFromSherdog(url);
 
 
                     updateToDao(optResult, updated);
@@ -71,9 +84,9 @@ public abstract class Processor<T> {
                 }
 
             } else {
-                logger.info("[{}] doesn't exist, need to get and insert", item.getUrl());
+                logger.info("[{}] doesn't exist, need to get and insert", url);
 
-                T obj = getFromSherdog(item.getUrl());
+                T obj = getFromSherdog(url);
                 insertToDao(obj);
                 toParse = Optional.ofNullable(obj);
             }
