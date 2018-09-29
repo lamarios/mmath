@@ -22,6 +22,7 @@ public class HypeTrainConfiguration {
     @Value("${hypetrain.port}")
     private int port;
 
+    public static boolean DEV_MODE = System.getProperty("dev", "false").equalsIgnoreCase("true");
 
     @Bean
     HypeTrainController hypeTrainController(MySQLDao dao) {
@@ -32,7 +33,7 @@ public class HypeTrainConfiguration {
     HypeTrainWeb hypeTrainWeb(HypeTrainController hypeTrainController) {
         Spark.port(port);
 
-        if (System.getProperty("dev", "false").equalsIgnoreCase("true")) {
+        if (DEV_MODE) {
             Path path = Paths.get(".").resolve("hypetrain-web/src/main/resources/web/public").toAbsolutePath();
 //            path = Paths.get("/home/gz/IdeaProjects/mmath/mmath-web/src/main/resources/web/public");
             logger.info("DEV MODE {}", path.toString());

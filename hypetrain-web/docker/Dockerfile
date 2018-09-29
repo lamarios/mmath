@@ -8,4 +8,4 @@ WORKDIR /usr/src/app
 
 EXPOSE 15678
 
-CMD java -jar app.jar
+CMD ["sh", "-c", "java  -Dreddit.secret=${REDDIT_SECRET} -Dreddit.client.id=${REDDIT_CLIENT_ID}  -Dbase.url=${BASE_URL} -jar app.jar"]

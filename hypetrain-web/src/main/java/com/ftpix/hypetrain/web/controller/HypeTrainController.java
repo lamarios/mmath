@@ -1,6 +1,7 @@
 package com.ftpix.hypetrain.web.controller;
 
 import com.ftpix.hypetrain.web.GsonTransformer;
+import com.ftpix.hypetrain.web.HypeTrainConfiguration;
 import com.ftpix.hypetrain.web.TrainGenerator;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
@@ -15,12 +16,11 @@ import org.apache.logging.log4j.Logger;
 import spark.Request;
 import spark.Response;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public class HypeTrainController {
     private static final String REDDIT_USER_AGENT = "web:com.mmathypetrain:1.0 (by /u/lamarios)";
     private static final String SESSION_USERNAME = "username";
 
-    private final String REDIRECT_URL = "http://localhost:15679/post-login";
+    private final String REDIRECT_URL = System.getProperty("base.url", "http://localhost:15679") + "/post-login";
     private final String redditSecret;
     private final String redditClientId;
 
@@ -48,6 +48,14 @@ public class HypeTrainController {
         redditSecret = Optional.ofNullable(System.getProperty("reddit.secret")).orElseThrow(InvalidParameterException::new);
     }
 
+
+    @SparkBefore("/*")
+    public void redirectNonWww(Request req, Response rep){
+        logger.info("Req host: {} path:{}", req.host(), req.pathInfo());
+        if(!HypeTrainConfiguration.DEV_MODE && !req.host().startsWith("www")){
+           rep.redirect("www"+req.host()+"/"+req.pathInfo(), 301);
+        }
+    }
 
     @SparkGet("/login")
     public void redditLogin(Request req, Response res) {
@@ -125,10 +133,12 @@ public class HypeTrainController {
 
     @SparkGet("/fighter/:fighter")
     public String serveIndex() throws URISyntaxException, IOException {
-        URL index = HypeTrainController.class
-                .getClassLoader().getResource("web/public/index.html");
-        Path p = Paths.get(index.toURI());
-        return Files.lines(p).collect(Collectors.joining());
+        try (
+                InputStream inputStream = getClass().getClassLoader().getResource("web/public/index.html").openStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            return reader.lines().collect(Collectors.joining(""));
+        }
     }
 
 
