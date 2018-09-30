@@ -187,7 +187,7 @@ public class CronConfiguration {
 
         CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
         trigger.setJobDetail(hypeStatsJobDetail);
-        trigger.setCronExpression("00 * * * * ?");
+        trigger.setCronExpression("00 0 * * * ?");
         trigger.setName("weekly_hype_stats");
 
         trigger.afterPropertiesSet();
