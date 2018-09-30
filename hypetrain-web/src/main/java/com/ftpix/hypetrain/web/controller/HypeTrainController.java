@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -50,10 +52,10 @@ public class HypeTrainController {
 
 
     @SparkBefore("/*")
-    public void redirectNonWww(Request req, Response rep){
+    public void redirectNonWww(Request req, Response rep) {
         logger.info("Req host: {} path:{}", req.host(), req.pathInfo());
-        if(!HypeTrainConfiguration.DEV_MODE && !req.host().startsWith("www")){
-           rep.redirect("www"+req.host()+"/"+req.pathInfo(), 301);
+        if (!HypeTrainConfiguration.DEV_MODE && !req.host().startsWith("www")) {
+            rep.redirect("www" + req.host() + "/" + req.pathInfo(), 301);
         }
     }
 
@@ -258,5 +260,34 @@ public class HypeTrainController {
         res.header("Content-Type", "image/svg+xml");
         color = color == null ? "#000" : "#" + color;
         return TrainGenerator.withPeople(people, color);
+    }
+
+
+    @SparkGet(value = "/api/history/:fighter", transformer = GsonTransformer.class)
+    public Map<String, Integer> getFighterHistory(@SparkParam("fighter") String fighter, @SparkQueryParam("count") int count) {
+        if (count <= 5) {
+            count = 5;
+        }
+
+        Function<LocalDate, String> dateToString = localDate -> localDate.getYear() + "-" + String.format("%02d", localDate.getMonthValue());
+
+        Map<String, Integer> results = new TreeMap<>();
+
+
+        //Initializing date map
+        LocalDate date = LocalDate.now();
+
+        for (int i = 0; i < count; i++) {
+            results.put(dateToString.apply(date.minusMonths(i)), 0);
+        }
+
+        dao.getHypeTrainDAO().getStats(fighter, count)
+                .stream()
+                .forEach(s -> {
+                    results.put(s.getMonth(), s.getCount());
+                });
+
+
+        return results;
     }
 }

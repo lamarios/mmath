@@ -4,6 +4,7 @@ import Service from './Service';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faTrain, faAngry} from '@fortawesome/free-solid-svg-icons'
 import Train from './Train';
+import FighterGraph from "./FighterGraph";
 
 const Div = styled.div`
   grid-area: content;
@@ -59,7 +60,7 @@ export default class Fighter extends React.Component {
 
     getFighter() {
         this.service.getFighter(this.props.match.params.fighter)
-            .then(res => this.setState({fighter: res}));
+            .then(fighterInfo => this.setState({fighter: fighterInfo}));
     }
 
     /**
@@ -105,6 +106,8 @@ export default class Fighter extends React.Component {
                     {!this.state.fighter.loggedIn && <p>
                         Log in to jump on board
                     </p>}
+
+                    <FighterGraph fighter={this.props.match.params.fighter}/>
                 </Content>
             )}
         </Div>);

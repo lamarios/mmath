@@ -31,6 +31,7 @@ public abstract class Processor<T> implements MessageListener {
     protected final String eventTopic;
     protected final String organizationTopic;
     protected final MySQLDao dao;
+    public static int RATE = 1;
 
 
     @Override
@@ -72,7 +73,7 @@ public abstract class Processor<T> implements MessageListener {
                 LocalDateTime date = getLastUpdate(optResult);
                 long daysbetween = ChronoUnit.DAYS.between(date, now);
 
-                if (daysbetween >= 1) {
+                if (daysbetween >= RATE) {
                     logger.info("[{}] Info is too old, need to update", url);
                     T updated = getFromSherdog(url);
 

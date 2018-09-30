@@ -11,27 +11,14 @@ import TopTrains from "./TopTrains";
 import Fighter from './Fighter';
 import Me from "./Me";
 
-import background from "../images/background.jpeg";
+import background from "../images/background-gimp.jpeg";
 
 const Background = styled.div`
-
-  height: 100vh;
-  overflow-y: auto;
-  
-   &:after{
-  background-color: ${props => props.theme.colors.background};
-      content:"";
+      background-color: ${props => props.theme.colors.background};
       background-image: url("${background}");
       background-size: cover;
       background-repeat: no-repeat;
-      position:absolute;
-      top:0;
-      left:0;
-      right:0;
-      bottom:0;
-      z-index: -1;
-      opacity:0.3;
-    }
+      min-height: 100vh;
 `;
 const Content = styled.div`
   color: ${props => props.theme.colors.text};
@@ -47,7 +34,7 @@ const Content = styled.div`
   ;
   padding:10px;
  
- max-width: 500px; 
+    max-width: 500px; 
     margin:0 auto;
     overflow-x: hidden;
 `

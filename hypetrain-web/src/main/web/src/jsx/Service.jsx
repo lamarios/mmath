@@ -63,6 +63,9 @@ export default class Service {
         return fetch('/api/jumpOff/'+fighter).then(res => res.status === 200);
     }
 
+    getFighterStats(fighter, count){
+        return fetch('/api/history/'+fighter+'?count='+count).then(res => res.json());
+    }
 
     /**
      * Gets logged in user hype

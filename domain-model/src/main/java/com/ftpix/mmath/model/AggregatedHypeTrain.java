@@ -13,8 +13,12 @@ public class AggregatedHypeTrain {
 
 
     @ExposeMethodResult("fighter")
-    public String getFighter() {
+    public String getMd5Fighter() {
         return DigestUtils.md5Hex(fighter);
+    }
+
+    public String getFighter() {
+        return fighter;
     }
 
     public void setFighter(String fighter) {

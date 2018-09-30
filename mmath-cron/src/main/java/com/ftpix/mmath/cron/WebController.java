@@ -39,6 +39,12 @@ public class WebController {
     }
 
 
+    /**
+     * Gets active mq queue size so we can use that endpoint to autoscale the slaves
+     * @param request
+     * @param response
+     * @return
+     */
     private int getQueueSize(Request request, Response response) {
         String username = "admin";
         String password = "admin";
@@ -53,12 +59,10 @@ public class WebController {
 
             return document.select("queues queue")
                     .stream()
-                    .filter(q -> q.attr("name").equalsIgnoreCase("fighters"))
                     .map(q -> q.select("stats"))
-                    .map(s -> s.attr("enqueueCount"))
-                    .map(s -> Integer.parseInt(s))
-                    .findFirst()
-                    .orElse(0);
+                    .map(s -> s.attr("size"))
+                    .mapToInt(s -> Integer.parseInt(s))
+                    .sum();
 
 
         } catch (IOException e) {

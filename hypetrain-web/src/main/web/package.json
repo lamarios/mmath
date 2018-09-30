@@ -15,16 +15,19 @@
     "@fortawesome/free-brands-svg-icons": "^5.3.1",
     "@fortawesome/free-solid-svg-icons": "^5.3.1",
     "@fortawesome/react-fontawesome": "^0.1.3",
+    "chartist": "^0.11.0",
     "react": "^16.5.2",
+    "react-chartist": "^0.13.1",
     "react-dom": "^16.5.2",
     "react-router-dom": "^4.3.1",
     "styled-components": "^3.4.9"
   },
   "devDependencies": {
-    "parceljs": "0.0.1",
-    "parcel-bundler": "^1.9.7",
     "babel-core": "^6.26.3",
     "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.24.1"
+    "babel-preset-react": "^6.24.1",
+    "less": "^3.8.1",
+    "parcel-bundler": "^1.9.7",
+    "parceljs": "0.0.1"
   }
 }

@@ -2,6 +2,7 @@ package com.ftpix.mmath.cron;
 
 import com.ftpix.mmath.DaoConfiguration;
 import com.ftpix.mmath.cron.graph.GraphGenerator;
+import com.ftpix.mmath.cron.hypetrain.HypeTrainStatsGeneration;
 import com.ftpix.mmath.cron.stats.StatsRefresher;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
@@ -17,6 +18,7 @@ import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import java.text.ParseException;
+import java.util.concurrent.Executors;
 
 @Configuration
 @PropertySource("classpath:config.properties")
@@ -57,7 +59,7 @@ public class CronConfiguration {
         CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
         trigger.setJobDetail(jobDetail);
         trigger.setCronExpression("0 0 0 ? * TUE");
-        // trigger.setCronExpression("00 * * * * ?");
+//         trigger.setCronExpression("00 * * * * ?");
         trigger.setName("weekly");
 
         trigger.afterPropertiesSet();
@@ -68,18 +70,7 @@ public class CronConfiguration {
 
     @Bean
     Scheduler schedulerFactory(Trigger cronTrigger, JobDetail jobDetail) throws Exception {
-
-        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-        scheduler.setJobDetails(jobDetail);
-        scheduler.setTriggers(cronTrigger);
-        scheduler.setAutoStartup(true);
-
-
-        scheduler.afterPropertiesSet();
-
-        Scheduler result = scheduler.getObject();
-        result.start();
-        return result;
+        return prepareScheduler(cronTrigger, jobDetail);
     }
 
     ///////////////////GRAPH JOBS
@@ -113,18 +104,7 @@ public class CronConfiguration {
 
     @Bean
     Scheduler graphSchedulerFactory(Trigger graphCronTrigger, JobDetail graphJobDetail) throws Exception {
-
-        SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-        scheduler.setJobDetails(graphJobDetail);
-        scheduler.setTriggers(graphCronTrigger);
-        scheduler.setAutoStartup(true);
-
-
-        scheduler.afterPropertiesSet();
-
-        Scheduler result = scheduler.getObject();
-        result.start();
-        return result;
+        return prepareScheduler(graphCronTrigger, graphJobDetail);
     }
 
 
@@ -177,12 +157,63 @@ public class CronConfiguration {
 
     @Bean
     Scheduler statsSchedulerFactory(Trigger statsCronTrigger, JobDetail statsJobDetail) throws Exception {
+        return prepareScheduler(statsCronTrigger, statsJobDetail);
+    }
 
+
+    /////// Hype train cron
+
+    @Bean
+    HypeTrainStatsGeneration hypeTrainStatsGeneration(MySQLDao dao) {
+        return new HypeTrainStatsGeneration(dao);
+    }
+
+
+    @Bean
+    JobDetail hypeStatsJobDetail(HypeTrainStatsGeneration hypeTrainStatsGeneration) throws Exception {
+        MethodInvokingJobDetailFactoryBean job = new MethodInvokingJobDetailFactoryBean();
+        job.setTargetObject(hypeTrainStatsGeneration);
+        job.setTargetMethod("process");
+        job.setName("refresh_hype_stats");
+        job.setConcurrent(false);
+
+        job.afterPropertiesSet();
+
+        return job.getObject();
+    }
+
+    @Bean
+    Trigger hypeStatsCronTrigger(JobDetail hypeStatsJobDetail) throws ParseException {
+
+        CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
+        trigger.setJobDetail(hypeStatsJobDetail);
+        trigger.setCronExpression("00 * * * * ?");
+        trigger.setName("weekly_hype_stats");
+
+        trigger.afterPropertiesSet();
+
+        return trigger.getObject();
+    }
+
+    @Bean
+    Scheduler hypeStatsSchedulerFactory(Trigger hypeStatsCronTrigger, JobDetail hypeStatsJobDetail) throws Exception {
+        return prepareScheduler(hypeStatsCronTrigger, hypeStatsJobDetail);
+    }
+
+    /**
+     * Creates a scheduler
+     *
+     * @param statsCronTrigger
+     * @param statsJobDetail
+     * @return
+     * @throws Exception
+     */
+    private Scheduler prepareScheduler(Trigger statsCronTrigger, JobDetail statsJobDetail) throws Exception {
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
         scheduler.setJobDetails(statsJobDetail);
         scheduler.setTriggers(statsCronTrigger);
         scheduler.setAutoStartup(true);
-
+        scheduler.setTaskExecutor(Executors.newSingleThreadExecutor());
 
         scheduler.afterPropertiesSet();
 
