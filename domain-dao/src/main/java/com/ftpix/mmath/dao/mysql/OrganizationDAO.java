@@ -1,6 +1,8 @@
 package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathOrganization;
+import com.ftpix.sherdogparser.Sherdog;
+import com.ftpix.sherdogparser.models.Organizations;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -80,7 +82,7 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
      * @return
      */
     public List<MmathOrganization> getOrganizationsInEventFilter(){
-        String query = "SELECT * FROM organizations WHERE sherdogUrl in ('https://www.sherdog.com/organizations/Ultimate-Fighting-Championship-UFC-2','https://www.sherdog.com/organizations/Bellator-MMA-1960','https://www.sherdog.com/organizations/Invicta-Fighting-Championships-4469','https://www.sherdog.com/organizations/One-Championship-3877')";
+        String query = "SELECT * FROM organizations WHERE sherdogUrl in ('http://www.sherdog.com/organizations/Ultimate-Fighting-Championship-UFC-2','http://www.sherdog.com/organizations/Bellator-MMA-1960','http://www.sherdog.com/organizations/Invicta-Fighting-Championships-4469','http://www.sherdog.com/organizations/One-Championship-3877')";
 
         return template.query(query, rowMapper);
     }
