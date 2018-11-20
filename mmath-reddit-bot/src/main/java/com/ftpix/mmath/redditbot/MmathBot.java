@@ -2,6 +2,7 @@ package com.ftpix.mmath.redditbot;
 
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
+import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
 import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.models.Comment;
@@ -18,31 +19,35 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MmathBot {
     private final MySQLDao dao;
     private final OrientDBDao orientDBDao;
-    private final String subreddit;
-    private final Pattern pattern;
+    private final Pattern mmathPattern, hypetrainPatter;
     private RedditBot bot;
     private final ExecutorService exec = Executors.newFixedThreadPool(4);
 
-
-    private final static String COMMENT_REGEX = "^( )*!mmath( )+(([a-zA-Z. ])+)( )+vs( )+(([a-zA-Z. ])+)( )*$";
+    private final static String HYPETRAIN_PATTERN = "^(?:.*)(!onboard|!offboard)(?: +)([a-zA-Z. ]+)(?:.*)$";
+    private final static String MMATH_PATTERN = "^(?:.*)!mmath(?: )+([a-zA-Z. ]+)(?: +)vs(?: +)([a-zA-Z. ]+)(?:.*)$";
+    private final static String PATTERN = MMATH_PATTERN + "|" + HYPETRAIN_PATTERN;
     private final static String NEW_LINE = "%0A";
-    private final static String BOT_REPLY = "MmathBot \n\n " +
-            "[**%s** vs. **%s**](https://mmathbro.science/%s/vs/%s) \n\n " +
+    private final static String MMATH_BOT_REPLY = "[**%s** vs. **%s**](https://mmathbro.science/%s/vs/%s) \n\n " +
             "* %s \n\n " +
             "* %s \n\n\n\n\n\n ";
-
+    private final static String HYPE_TRAIN_ONBOARD_REPLY = "You jumped on board the [**%s**](https://www.mmahypetrain.com/fighter/%s) train, you're **%s** on board ! \n\n " +
+            "[Manage your hype](https://www.mmahypetrain.com)";
+    private final static String HYPE_TRAIN_OFFBOARD_REPLY = "You jumped off the [**%s**](https://www.mmahypetrain.com/fighter/%s) train, **%s** left on board. \n\n " +
+            "[Manage your hype](https://www.mmahypetrain.com)";
+    private final static String FIGHTER_NOT_FOUND_REPLY = "Couldn't find fighter \"%s\"";
     private Logger logger = LogManager.getLogger();
 
-    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao, String subreddit) {
+    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao) {
         this.dao = dao;
         this.orientDBDao = orientDBDao;
-        this.subreddit = subreddit;
 
-        pattern = Pattern.compile(COMMENT_REGEX);
+        mmathPattern = Pattern.compile(MMATH_PATTERN);
+        hypetrainPatter = Pattern.compile(HYPETRAIN_PATTERN);
 
         startBot();
     }
@@ -52,17 +57,19 @@ public class MmathBot {
         String password = Optional.ofNullable(System.getProperty("reddit.password")).orElseThrow(InvalidParameterException::new);
         String clientId = Optional.ofNullable(System.getProperty("reddit.client.id")).orElseThrow(InvalidParameterException::new);
         String secret = Optional.ofNullable(System.getProperty("reddit.secret")).orElseThrow(InvalidParameterException::new);
+        String subreddit = Optional.ofNullable(System.getProperty("reddit.sub")).orElseThrow(InvalidParameterException::new);
+        String owner = Optional.ofNullable(System.getProperty("reddit.bot.owner")).orElseThrow(InvalidParameterException::new);
 
         Credentials oauthCreds = Credentials.script(username, password, clientId, secret);
 
 // Create a unique User-Agent for our bot
-        UserAgent userAgent = new UserAgent("linux-docker", "science.mmathbro.bot", "1.0.0", "/u/lamarios");
+        UserAgent userAgent = new UserAgent("linux-docker", "science.mmathbro.bot", "1.0.0", owner);
 
 //        logger.info("Creating reddit bot using account: {}, clientid:{} secret:{} password:{}", username, clientId, secret, password);
         bot = new RedditBot.Builder(oauthCreds, userAgent)
                 .followingSubReddit(subreddit)
                 .withPullDelay(60_000)
-                .filterComments(c -> c.getBody().trim().matches(COMMENT_REGEX))
+                .filterComments(c -> c.getBody().trim().matches(PATTERN))
                 .onNewComment(this::processComment)
                 .build();
 
@@ -70,12 +77,77 @@ public class MmathBot {
     }
 
     private void processComment(Comment comment) {
+        if (comment.getBody().trim().matches(MMATH_PATTERN)) {
+            processMMathComment(comment);
+        } else if (comment.getBody().trim().matches(HYPETRAIN_PATTERN)) {
+            processHypeTrainComment(comment);
+        }
+    }
+
+    /**
+     * Processes a Hypetrain comment
+     *
+     * @param comment
+     */
+    private void processHypeTrainComment(Comment comment) {
+        try {
+
+            Matcher match = hypetrainPatter.matcher(comment.getBody().trim());
+            if (match.matches()) {
+                String onOff = match.group(1);
+                String fighter = match.group(2);
+                String user = "/u/" + comment.getAuthor();
+                Optional<MmathFighter> fighterOpt = getFirstFighterForName(fighter);
+
+                String reply = "";
+                if (fighterOpt.isPresent()) {
+                    MmathFighter mmathFighter = fighterOpt.get();
+                    HypeTrain hypeTrain = new HypeTrain(user, mmathFighter.getSherdogUrl());
+                    switch (onOff) {
+                        case "!onboard":
+                            dao.getHypeTrainDAO().insert(hypeTrain);
+                            reply = HYPE_TRAIN_ONBOARD_REPLY;
+                            break;
+                        case "!offboard":
+                            dao.getHypeTrainDAO().deleteById(hypeTrain);
+                            reply = HYPE_TRAIN_OFFBOARD_REPLY;
+                            break;
+                    }
+
+                    Long count = Optional.ofNullable(dao.getHypeTrainDAO().countForFighter(mmathFighter.getSherdogUrl()))
+                            .orElse(0L);
+
+                    reply = String.format(reply, mmathFighter.getName(), mmathFighter.getIdAsHash(), count);
+
+                } else {
+                    reply = String.format(FIGHTER_NOT_FOUND_REPLY, fighter);
+                }
+
+
+                if (reply.length() > 0) {
+                    logger.info("Replying {}", reply);
+                    bot.getClient().comment(comment.getId()).reply(reply);
+                }
+
+
+            }
+        } catch (Exception e) {
+            logger.error("Couldn't proceed to calculation of comment: [{}]", comment.getBody(), e);
+        }
+    }
+
+    /**
+     * Processes an !mmath comment
+     *
+     * @param comment
+     */
+    private void processMMathComment(Comment comment) {
         try {
             logger.info("Got comment: {}", comment.getBody());
-            Matcher match = pattern.matcher(comment.getBody().trim());
+            Matcher match = mmathPattern.matcher(comment.getBody().trim());
             if (match.matches()) {
-                String fighter1 = match.group(3);
-                String fighter2 = match.group(7);
+                String fighter1 = match.group(1);
+                String fighter2 = match.group(2);
                 logger.info("{} vs {}", fighter1, fighter2);
 
                 Future<Optional<MmathFighter>> mmathFighter1Future = exec.submit(() -> getFirstFighterForName(fighter1));
@@ -113,11 +185,22 @@ public class MmathBot {
                         f2Vsf1Result = f2.getName() + " can't beat " + f1.getName();
                     }
 
-                    String reply = String.format(BOT_REPLY, f1.getName(), f2.getName(), f1.getIdAsHash(), f2.getIdAsHash(), f1Vsf2Result, f2Vsf1Result).replace("\n", NEW_LINE);
+                    String reply = String.format(MMATH_BOT_REPLY, f1.getName(), f2.getName(), f1.getIdAsHash(), f2.getIdAsHash(), f1Vsf2Result, f2Vsf1Result).replace("\n", NEW_LINE);
                     logger.info("Replying {}", reply);
                     bot.getClient().comment(comment.getId()).reply(reply);
 
                 } else {
+                    String reply = "";
+                    if (!mmathFighter1.isPresent()) {
+                        reply = String.format(FIGHTER_NOT_FOUND_REPLY, fighter1);
+                    } else if (!mmathFighter2.isPresent()) {
+                        reply = String.format(FIGHTER_NOT_FOUND_REPLY, fighter2);
+                    }
+
+                    if (reply.length() > 0) {
+                        logger.info("Replying {}", reply);
+                        bot.getClient().comment(comment.getId()).reply(reply);
+                    }
                     logger.info("No fighters...");
                 }
 

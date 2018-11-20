@@ -11,13 +11,11 @@ import org.springframework.context.annotation.*;
 @PropertySource("classpath:config.properties")
 @Import({DaoConfiguration.class})
 public class RedditBotConfiguration {
-    @Value("${reddit.sub}")
-    private String subreddit;
 
 
     @Bean
     MmathBot mmathBot(MySQLDao dao, OrientDBDao orientDBDao) {
-        return new MmathBot(dao, orientDBDao, subreddit);
+        return new MmathBot(dao, orientDBDao);
     }
 
 

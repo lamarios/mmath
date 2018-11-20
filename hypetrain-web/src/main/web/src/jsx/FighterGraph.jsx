@@ -59,6 +59,7 @@ export default class FighterGraph extends React.Component {
         this.refreshGraph = this.refreshGraph.bind(this);
         this.decreaseCount = this.decreaseCount.bind(this);
         this.increaseCount = this.increaseCount.bind(this);
+        this.getPrettyTimeSpan = this.getPrettyTimeSpan.bind(this);
     }
 
 
@@ -111,6 +112,32 @@ export default class FighterGraph extends React.Component {
 
     }
 
+    /**
+     * Displays time in years months instead of like 13 months
+     */
+    getPrettyTimeSpan() {
+        const years = Math.floor(this.state.count / 12);
+        const month = this.state.count % 12;
+
+        let text = "";
+
+        if (years === 1) {
+            text += years + ' year';
+        }else if(years > 1){
+            text += years + ' years';
+
+        }
+
+        if (text.length > 0 && month > 0) {
+            text += "" +
+                " ";
+        }
+
+        if (month > 0) {
+            text += month +' month';
+        }
+        return text;
+    }
 
     render() {
         let options = {
@@ -128,6 +155,7 @@ export default class FighterGraph extends React.Component {
             }
         };
         console.table(this.state.stats);
+
         return (
             <GraphContainer>
                 <Title>Trend</Title>
@@ -135,7 +163,7 @@ export default class FighterGraph extends React.Component {
                     <ChartistGraph className={'ct-chart'} data={this.state.stats} type={'Line'} options={options}/>
                     <ActionBar>
                         <ActionButton icon={faMinus} onClick={() => this.decreaseCount()}/>
-                        <span>{this.state.count} months</span>
+                        <span>{this.getPrettyTimeSpan()}</span>
                         <ActionButton icon={faPlus} onClick={() => this.increaseCount()}/>
 
                     </ActionBar>

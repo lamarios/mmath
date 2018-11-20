@@ -1,5 +1,10 @@
 package com.ftpix.hypetrain.web.controller;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ftpix.hypetrain.web.GsonTransformer;
 import com.ftpix.hypetrain.web.HypeTrainConfiguration;
 import com.ftpix.hypetrain.web.TrainGenerator;
@@ -33,9 +38,11 @@ public class HypeTrainController {
 
     private static final String SESSION_LOGIN_STRING = "loginString";
     private static final String REDDIT_USER_AGENT = "web:com.mmathypetrain:1.0 (by /u/lamarios)";
-    private static final String SESSION_USERNAME = "username";
+    private static final String SESSION_TOKEN = "token";
+    private static final String JWT_TOKEN_ISSUER = "mmath";
 
     private final String REDIRECT_URL = System.getProperty("base.url", "http://localhost:15679") + "/post-login";
+    private final static String JWT_SALT = System.getProperty("jwt.salt");
     private final String redditSecret;
     private final String redditClientId;
 
@@ -75,7 +82,7 @@ public class HypeTrainController {
 
     @SparkGet("/api/me")
     public String getUsername(Request req, Response res) {
-        String username = req.session().attribute(SESSION_USERNAME);
+        String username = getUserFromToken(req.session().attribute(SESSION_TOKEN));
         if (username != null) {
             return username;
         } else {
@@ -121,7 +128,12 @@ public class HypeTrainController {
                     .map(s -> "/" + s);
 
             if (username.isPresent()) {
-                req.session().attribute(SESSION_USERNAME, username.get());
+                Algorithm algorithmHS = Algorithm.HMAC256(JWT_SALT);
+                String token = JWT.create()
+                        .withIssuer(JWT_TOKEN_ISSUER)
+                        .withSubject(username.get())
+                        .sign(algorithmHS);
+                req.session().attribute(SESSION_TOKEN, token);
             }
 
             res.redirect("/me");
@@ -146,9 +158,13 @@ public class HypeTrainController {
 
     @SparkGet("/me")
     public String me(Response res, Request req) throws IOException, URISyntaxException {
-
-        String user = req.session().attribute(SESSION_USERNAME);
-        if (user == null) {
+        try {
+            String user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
+            if (user == null) {
+                res.status(401);
+                return "Please log in first";
+            }
+        } catch (JWTVerificationException e) {
             res.status(401);
             return "Please log in first";
         }
@@ -173,11 +189,15 @@ public class HypeTrainController {
     public Map<String, Object> getFighter(@SparkParam("fighter") String hash, Request req) {
 
         MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
-
-        String user = req.session().attribute(SESSION_USERNAME);
-
-
         Map<String, Object> data = new HashMap<>();
+        String user = null;
+        try {
+            user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
+        } catch (JWTVerificationException e) {
+            //not logged in user remains null
+        }
+
+
         data.put("id", fighter.getIdAsHash());
         data.put("name", fighter.getName());
         data.put("loggedIn", user != null);
@@ -196,7 +216,7 @@ public class HypeTrainController {
     public String jumpOn(@SparkParam("fighter") String hash, Response res, Request req) {
         MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
 
-        String user = req.session().attribute(SESSION_USERNAME);
+        String user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
 
         if (user == null) {
             res.status(401);
@@ -221,7 +241,7 @@ public class HypeTrainController {
     public String jumpOff(@SparkParam("fighter") String hash, Response res, Request req) {
         MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
 
-        String user = req.session().attribute(SESSION_USERNAME);
+        String user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
 
         if (user == null) {
             res.status(401);
@@ -244,7 +264,7 @@ public class HypeTrainController {
     @SparkGet(value = "/api/my-hype", transformer = GsonTransformer.class)
     public List<HypeTrain> myHype(Request req, Response res) {
 
-        String user = req.session().attribute(SESSION_USERNAME);
+        String user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
 
         if (user == null) {
             res.status(401);
@@ -289,5 +309,17 @@ public class HypeTrainController {
 
 
         return results;
+    }
+
+    private String getUserFromToken(String token) throws JWTVerificationException {
+        if (token == null) {
+            return null;
+        }
+        Algorithm algorithm = Algorithm.HMAC256(JWT_SALT);
+        JWTVerifier verifier = JWT.require(algorithm)
+                .withIssuer(JWT_TOKEN_ISSUER)
+                .build(); //Reusable verifier instance
+        DecodedJWT jwt = verifier.verify(token);
+        return jwt.getSubject();
     }
 }
