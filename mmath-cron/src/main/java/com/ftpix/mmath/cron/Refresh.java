@@ -1,6 +1,8 @@
 package com.ftpix.mmath.cron;
 
 import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.model.Utils;
+import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organizations;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,17 +41,16 @@ public class Refresh {
         final LocalDateTime today = LocalDateTime.now();
 
 
-
         logger.info("Deleting all the fights that have not happened yet");
         dao.getFightDAO().deleteAllNotHappenedFights();
         dao.getEventDAO().deleteNotHappenedEvents();
 
-        jmsTemplate.convertAndSend(fighterTopic, "https://www.sherdog.com/fighter/Alistair-Overeem-461");
-        jmsTemplate.convertAndSend(organizationTopic, Organizations.UFC.url);
-        jmsTemplate.convertAndSend(organizationTopic, Organizations.BELLATOR.url);
-        jmsTemplate.convertAndSend(organizationTopic, Organizations.INVICTA_FC.url);
-        jmsTemplate.convertAndSend(organizationTopic, Organizations.ONE_FC.url);
-        jmsTemplate.convertAndSend(organizationTopic, Organizations.WSOF.url);
+        jmsTemplate.convertAndSend(fighterTopic, "fighter/Alistair-Overeem-461");
+        jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.UFC.url));
+        jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.BELLATOR.url));
+        jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.INVICTA_FC.url));
+        jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.ONE_FC.url));
+        jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.WSOF.url));
 
         dao.getFighterDAO().getAll().parallelStream()
                 .forEach(f -> {

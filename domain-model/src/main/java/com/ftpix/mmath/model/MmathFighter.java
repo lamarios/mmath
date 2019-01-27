@@ -167,7 +167,7 @@ public class MmathFighter {
     public static MmathFighter fromSherdong(Fighter f) {
         MmathFighter fighter = new MmathFighter();
 
-        fighter.setSherdogUrl(f.getSherdogUrl());
+        fighter.setSherdogUrl(Utils.cleanUrl(f.getSherdogUrl()));
         Optional.ofNullable(f.getBirthday()).ifPresent(bd -> {
             fighter.setBirthday(DateUtils.toLocalDate(bd));
         });

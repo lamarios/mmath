@@ -99,10 +99,10 @@ public class MmathEvent {
         newEvent.setDate(event.getDate());
         newEvent.setLocation(event.getLocation());
         newEvent.setName(event.getName());
-        newEvent.setSherdogUrl(event.getSherdogUrl());
+        newEvent.setSherdogUrl(Utils.cleanUrl(event.getSherdogUrl()));
 
         MmathOrganization org = new MmathOrganization();
-        org.setSherdogUrl(event.getOrganization().getSherdogUrl());
+        org.setSherdogUrl(Utils.cleanUrl(event.getOrganization().getSherdogUrl()));
 
         newEvent.setOrganization(org);
 

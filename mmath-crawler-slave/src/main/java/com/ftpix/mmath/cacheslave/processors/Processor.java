@@ -31,7 +31,7 @@ public abstract class Processor<T> implements MessageListener {
     protected final String eventTopic;
     protected final String organizationTopic;
     protected final MySQLDao dao;
-    public static int RATE = 1;
+    public static int RATE = 0;
 
 
     @Override
@@ -54,19 +54,19 @@ public abstract class Processor<T> implements MessageListener {
     }
 
 
-    public void process(String url) {
+    public void process(String id) {
 
-        logger.info("{} received:{}", this.getClass().getName(), url);
+        logger.info("{} received:{}", this.getClass().getName(), id);
 
         try {
+            String fullUrl = Sherdog.BASE_URL + id;
 
-
-            Optional<T> opt = getFromDao(url);
+            Optional<T> opt = getFromDao(id);
 
             Optional<T> toParse = Optional.empty();
 
             if (opt.isPresent()) {
-                logger.info("[{}] already exists...", url);
+                logger.info("[{}] already exists...", id);
                 LocalDateTime now = LocalDateTime.now();
                 T optResult = opt.get();
 
@@ -74,8 +74,8 @@ public abstract class Processor<T> implements MessageListener {
                 long daysbetween = ChronoUnit.DAYS.between(date, now);
 
                 if (daysbetween >= RATE) {
-                    logger.info("[{}] Info is too old, need to update", url);
-                    T updated = getFromSherdog(url);
+                    logger.info("[{}] Info is too old, need to update", id);
+                    T updated = getFromSherdog(fullUrl);
 
 
                     updateToDao(optResult, updated);
@@ -85,9 +85,9 @@ public abstract class Processor<T> implements MessageListener {
                 }
 
             } else {
-                logger.info("[{}] doesn't exist, need to get and insert", url);
+                logger.info("[{}] doesn't exist, need to get and insert", id);
 
-                T obj = getFromSherdog(url);
+                T obj = getFromSherdog(fullUrl);
                 insertToDao(obj);
                 toParse = Optional.ofNullable(obj);
             }

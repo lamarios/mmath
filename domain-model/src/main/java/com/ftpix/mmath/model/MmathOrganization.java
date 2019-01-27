@@ -62,7 +62,7 @@ public class MmathOrganization {
 
     public static MmathOrganization fromSherdog(Organization o) {
         MmathOrganization org = new MmathOrganization();
-        org.setSherdogUrl(o.getSherdogUrl());
+        org.setSherdogUrl(Utils.cleanUrl(o.getSherdogUrl()));
         org.setName(o.getName());
         return org;
     }

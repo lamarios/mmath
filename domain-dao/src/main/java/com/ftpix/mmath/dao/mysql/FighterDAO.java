@@ -1,6 +1,7 @@
 package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.sherdogparser.Sherdog;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 

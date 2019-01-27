@@ -140,13 +140,13 @@ public class MmathFight {
         newFight.setDate(fight.getDate());
 
         MmathEvent event = new MmathEvent();
-        event.setSherdogUrl(fight.getEvent().getSherdogUrl());
+        event.setSherdogUrl(Utils.cleanUrl(fight.getEvent().getSherdogUrl()));
         newFight.setEvent(event);
 
         MmathFighter fighter1 = new MmathFighter(), fighter2 = new MmathFighter();
 
-        fighter1.setSherdogUrl(fight.getFighter1().getSherdogUrl());
-        fighter2.setSherdogUrl(fight.getFighter2().getSherdogUrl());
+        fighter1.setSherdogUrl(Utils.cleanUrl(fight.getFighter1().getSherdogUrl()));
+        fighter2.setSherdogUrl(Utils.cleanUrl(fight.getFighter2().getSherdogUrl()));
 
         newFight.setFighter1(fighter1);
         newFight.setFighter2(fighter2);
