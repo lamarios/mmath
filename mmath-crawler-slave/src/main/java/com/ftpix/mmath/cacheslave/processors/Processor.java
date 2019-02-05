@@ -31,7 +31,7 @@ public abstract class Processor<T> implements MessageListener {
     protected final String eventTopic;
     protected final String organizationTopic;
     protected final MySQLDao dao;
-    public static int RATE = 0;
+    public static int RATE = 1;
 
 
     @Override
