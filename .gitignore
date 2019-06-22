@@ -105,3 +105,5 @@ buildNumber.properties
 # Exclude maven wrapper
 !/.mvn/wrapper/maven-wrapper.jar
 
+/hypetrain-web/src/main/resources/web/
+/local.env
