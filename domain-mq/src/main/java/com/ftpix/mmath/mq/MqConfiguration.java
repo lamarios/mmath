@@ -9,18 +9,17 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
-@PropertySource("classpath:config.properties")
 public class MqConfiguration {
-    @Value("${mq.url}")
+    @Value("${MQ_URL:tcp://mmath:61616}")
     String brokerUrl;
 
-    @Value("${mq.fighters}")
+    @Value("${MQ_FIGHTERS:fighters}")
     String fighterTopic;
 
-    @Value("${mq.events}")
+    @Value("${MQ_EVENTS:events}")
     String eventTopic;
 
-    @Value("${mq.orgs}")
+    @Value("${MQ_ORGS:orgs}")
     String organizationTopic;
 
 

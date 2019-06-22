@@ -11,7 +11,7 @@ import TopTrains from "./TopTrains";
 import Fighter from './Fighter';
 import Me from "./Me";
 
-import background from "../images/background-gimp.jpeg";
+import background from "../images/background.jpeg";
 
 const Background = styled.div`
       background-color: ${props => props.theme.colors.background};

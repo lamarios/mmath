@@ -9,7 +9,6 @@ import org.springframework.context.annotation.PropertySource;
  * Created by gz on 24-Sep-16.
  */
 @Configuration
-@PropertySource("classpath:config.properties")
 public class SherdogConfiguration {
 
 

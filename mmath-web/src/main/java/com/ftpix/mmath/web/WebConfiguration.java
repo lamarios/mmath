@@ -15,11 +15,10 @@ import org.springframework.context.annotation.*;
  */
 
 @Configuration
-@PropertySource("classpath:config.properties")
 @Import({DaoConfiguration.class})
 public class WebConfiguration {
 
-    @Value("${web.port}")
+    @Value("${MMATH_PORT:15678}")
     private int port;
 
 

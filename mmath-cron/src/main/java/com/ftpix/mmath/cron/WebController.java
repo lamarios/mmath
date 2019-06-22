@@ -19,14 +19,16 @@ public class WebController {
     private final Refresh refresh;
     private final GraphGenerator graphGenerator;
     private final StatsRefresher statsRefresher;
+    private final String mqAdminUrl;
 
     private AtomicBoolean graphRunning = new AtomicBoolean(false);
     private AtomicBoolean statsRunning = new AtomicBoolean(false);
 
-    public WebController(Refresh refresh, GraphGenerator graphGenerator, StatsRefresher statsRefresher) {
+    public WebController(Refresh refresh, GraphGenerator graphGenerator, StatsRefresher statsRefresher, String mqAdminUrl) {
         this.refresh = refresh;
         this.graphGenerator = graphGenerator;
         this.statsRefresher = statsRefresher;
+        this.mqAdminUrl = mqAdminUrl;
 
         init();
     }
@@ -53,7 +55,7 @@ public class WebController {
 
         try {
             Document document = Jsoup
-                    .connect("http://mmath-mq:8161/admin/xml/queues.jsp")
+                    .connect("http://"+mqAdminUrl+"/admin/xml/queues.jsp")
                     .header("Authorization", "Basic " + base64login)
                     .get();
 

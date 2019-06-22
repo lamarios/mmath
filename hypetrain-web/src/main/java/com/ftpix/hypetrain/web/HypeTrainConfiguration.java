@@ -14,19 +14,33 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Configuration
-@PropertySource("classpath:config.properties")
 @Import({DaoConfiguration.class})
 public class HypeTrainConfiguration {
 
     private Logger logger = LogManager.getLogger();
-    @Value("${hypetrain.port}")
+    @Value("${HYPETRAIN_PORT:15679}")
     private int port;
 
     public static boolean DEV_MODE = System.getProperty("dev", "false").equalsIgnoreCase("true");
 
+    @Value("${HYPETRAIN_JWT_SALT:somesupersalt}")
+    private String jwtSalt;
+
+    @Value("${REDDIT_CLIENT_ID}")
+    private String redditClientId;
+
+
+    @Value("${REDDIT_SECRET}")
+    private String redditSecret;
+
+
+
+    @Value("${REDDIT_REDIRECT_URL:http://localhost:15679}")
+    private String redditRedirectUrl;
+
     @Bean
     HypeTrainController hypeTrainController(MySQLDao dao) {
-        return new HypeTrainController(dao);
+        return new HypeTrainController(dao, redditClientId, redditSecret, jwtSalt, redditRedirectUrl+"/post-login");
     }
 
     @Bean

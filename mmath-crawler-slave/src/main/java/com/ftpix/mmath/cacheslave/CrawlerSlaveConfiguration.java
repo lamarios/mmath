@@ -18,7 +18,6 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
  * Created by gz on 16-Sep-16.
  */
 @Configuration
-@PropertySource("classpath:config.properties")
 @Import({DaoConfiguration.class, MqConfiguration.class})
 public class CrawlerSlaveConfiguration {
     //Receiver

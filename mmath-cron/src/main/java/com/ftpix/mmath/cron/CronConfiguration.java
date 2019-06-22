@@ -10,6 +10,7 @@ import com.ftpix.mmath.mq.MqConfiguration;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -21,9 +22,11 @@ import java.text.ParseException;
 import java.util.concurrent.Executors;
 
 @Configuration
-@PropertySource("classpath:config.properties")
 @Import({DaoConfiguration.class, MqConfiguration.class})
 public class CronConfiguration {
+
+    @Value("${MQ_ADMIN:mmath-mq:8161}")
+    private String mqAdmin;
 
     @Bean
     Refresh refresh(JmsTemplate jmsTemplate, MySQLDao dao, String fighterTopic, String eventTopic, String organizationTopic) {
@@ -110,7 +113,7 @@ public class CronConfiguration {
 
     @Bean
     WebController web(Refresh refresh, GraphGenerator graphGenerator, StatsRefresher statsRefresher) {
-        return new WebController(refresh, graphGenerator, statsRefresher);
+        return new WebController(refresh, graphGenerator, statsRefresher, mqAdmin);
 
     }
 

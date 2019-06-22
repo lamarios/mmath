@@ -10,7 +10,6 @@ import net.dean.jraw.oauth.Credentials;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +18,6 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MmathBot {
     private final MySQLDao dao;
@@ -42,9 +40,18 @@ public class MmathBot {
     private final static String FIGHTER_NOT_FOUND_REPLY = "Couldn't find fighter \"%s\"";
     private Logger logger = LogManager.getLogger();
 
-    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao) {
+
+    private final String redditUsername, redditPassword, redditClientId, redditSecret, subreddit, redditBotOwner;
+
+    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao, String redditUsername, String redditPassword, String redditClientId, String redditSecret, String subreddit, String redditBotOwner) {
         this.dao = dao;
         this.orientDBDao = orientDBDao;
+        this.redditUsername = redditUsername;
+        this.redditPassword = redditPassword;
+        this.redditClientId = redditClientId;
+        this.redditSecret = redditSecret;
+        this.subreddit = subreddit;
+        this.redditBotOwner = redditBotOwner;
 
         mmathPattern = Pattern.compile(MMATH_PATTERN);
         hypetrainPatter = Pattern.compile(HYPETRAIN_PATTERN);
@@ -53,19 +60,12 @@ public class MmathBot {
     }
 
     private void startBot() {
-        String username = Optional.ofNullable(System.getProperty("reddit.username")).orElseThrow(InvalidParameterException::new);
-        String password = Optional.ofNullable(System.getProperty("reddit.password")).orElseThrow(InvalidParameterException::new);
-        String clientId = Optional.ofNullable(System.getProperty("reddit.client.id")).orElseThrow(InvalidParameterException::new);
-        String secret = Optional.ofNullable(System.getProperty("reddit.secret")).orElseThrow(InvalidParameterException::new);
-        String subreddit = Optional.ofNullable(System.getProperty("reddit.sub")).orElseThrow(InvalidParameterException::new);
-        String owner = Optional.ofNullable(System.getProperty("reddit.bot.owner")).orElseThrow(InvalidParameterException::new);
-
-        Credentials oauthCreds = Credentials.script(username, password, clientId, secret);
+        Credentials oauthCreds = Credentials.script(redditUsername, redditPassword, redditClientId, redditSecret);
 
 // Create a unique User-Agent for our bot
-        UserAgent userAgent = new UserAgent("linux-docker", "science.mmathbro.bot", "1.0.0", owner);
+        UserAgent userAgent = new UserAgent("linux-docker", "science.mmathbro.bot", "1.0.0", redditBotOwner);
 
-//        logger.info("Creating reddit bot using account: {}, clientid:{} secret:{} password:{}", username, clientId, secret, password);
+//        logger.info("Creating reddit bot using account: {}, clientid:{} redditSecret:{} redditPassword:{}", redditUsername, redditClientId, redditSecret, redditPassword);
         bot = new RedditBot.Builder(oauthCreds, userAgent)
                 .followingSubReddit(subreddit)
                 .withPullDelay(60_000)

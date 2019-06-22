@@ -25,36 +25,36 @@ import java.sql.SQLException;
  * Created by gz on 18-Sep-16.
  */
 @Configuration
-@PropertySource("classpath:config.properties")
 @Import(SherdogConfiguration.class)
 public class DaoConfiguration {
 
 
-    @Value("${db.url}")
+    @Value("${DB_URL:jdbc:mysql://mmath/}")
     private String dbUrl;
 
-    @Value("${db.name}")
+    @Value("${DB_NAME:mmath}")
     private String dbName;
 
-    @Value("${db.username}")
+    @Value("${DB_USER:root}")
     private String username;
 
-    @Value("${db.password}")
+    @Value("${DB_PASSWORD:password}")
     private String password;
 
-    @Value("${db.options}")
+    @Value("${DB_OPTIONS:?autoReconnect=true&useSSL=false}")
     private String options;
 
 
-    @Value("${orientdb.url}")
+    @Value("${ORIENTDB_URL:remote:mmath/}")
     private String orientdbUrl;
 
-    @Value("${orientdb.user}")
+    @Value("${ORIENTDB_USER:root}")
     private String orientdbUsername;
 
-    @Value("${orientdb.dbname}")
+    @Value("${ORIENTDB_DB_NAME:mmath}")
     private String orientdbName;
-    @Value("${orientdb.password}")
+
+    @Value("${ORIENTDB_PASSWORD:password}")
     private String orientdbPassword;
 
     public DaoConfiguration() {

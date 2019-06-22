@@ -6,43 +6,37 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="build-sherdog" />
-        <module name="build-utils" />
-        <module name="builds3" />
-        <module name="domain-dao" />
-        <module name="domain-model" />
-        <module name="domain-mq" />
         <module name="hypetrain-web" />
-        <module name="mmath-config" />
-        <module name="mmath-crawler-slave" />
-        <module name="mmath-cron" />
         <module name="mmath-reddit-bot" />
+        <module name="mmath-crawler-slave" />
+        <module name="domain-model" />
+        <module name="build-sherdog" />
+        <module name="mmath-cron" />
+        <module name="domain-dao" />
+        <module name="mmath-config" />
+        <module name="domain-mq" />
+        <module name="build-utils" />
         <module name="mmath-web" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="build-gson" target="11" />
       <module name="build-logs" target="11" />
-      <module name="build-mongodb" target="1.8" />
       <module name="build-mq" target="11" />
       <module name="build-mysql" target="11" />
       <module name="build-orientdb" target="11" />
       <module name="build-quartz" target="11" />
       <module name="build-reddit" target="11" />
       <module name="build-retrofit" target="11" />
-      <module name="build-s3" target="1.9" />
       <module name="build-sherdog" target="11" />
       <module name="build-spark" target="11" />
       <module name="build-spring" target="11" />
       <module name="build-utils" target="11" />
-      <module name="builds3" target="1.8" />
       <module name="domain-dao" target="11" />
       <module name="domain-model" target="11" />
       <module name="domain-mq" target="11" />
-      <module name="domain-s3" target="1.8" />
       <module name="hypetrain-web" target="11" />
       <module name="mmath" target="11" />
-      <module name="mmath-calculator" target="1.8" />
       <module name="mmath-config" target="11" />
       <module name="mmath-crawler-slave" target="1.8" />
       <module name="mmath-cron" target="11" />

@@ -7,10 +7,6 @@ import Events from './events.jsx';
 import Event from './event.jsx';
 import Stats from './stats/stats.jsx';
 
-
-let images = require.context("../images/", true, /^\.\/.*\.(jpg|png|gif|svg)/);
-
-
 String.prototype.format = function () {
     let s = this,
         i = arguments.length;

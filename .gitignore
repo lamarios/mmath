@@ -107,3 +107,4 @@ buildNumber.properties
 
 /hypetrain-web/src/main/resources/web/
 /local.env
+/mmath-web/src/main/resources/web/

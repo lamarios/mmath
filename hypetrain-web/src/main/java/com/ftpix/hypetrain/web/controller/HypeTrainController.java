@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -41,21 +40,26 @@ public class HypeTrainController {
     private static final String SESSION_TOKEN = "token";
     private static final String JWT_TOKEN_ISSUER = "mmath";
 
-    private final String REDIRECT_URL = System.getProperty("base.url", "http://localhost:15679") + "/post-login";
-    private final static String JWT_SALT = System.getProperty("jwt.salt");
+    private final String redditRedirectUrl;
+    private final  String jwtSalt;
     private final String redditSecret;
-    private final String redditClientId;
 
     private Logger logger = LogManager.getLogger();
 
     private final MySQLDao dao;
 
-    public HypeTrainController(MySQLDao dao) {
-        this.dao = dao;
+    private String redditClientId;
 
-        redditClientId = Optional.ofNullable(System.getProperty("reddit.client.id")).orElseThrow(InvalidParameterException::new);
-        redditSecret = Optional.ofNullable(System.getProperty("reddit.secret")).orElseThrow(InvalidParameterException::new);
+
+    public HypeTrainController(MySQLDao dao, String redditClientId, String redditSecret, String jwtSalt, String redditRedirectUrl) {
+        this.dao = dao;
+        this.redditClientId = redditClientId;
+        this.redditSecret = redditSecret;
+        this.jwtSalt = jwtSalt;
+        this.redditRedirectUrl = redditRedirectUrl;
     }
+
+
 
 
     @SparkBefore("/*")
@@ -74,7 +78,7 @@ public class HypeTrainController {
         String random = UUID.randomUUID().toString();
         req.session().attribute(SESSION_LOGIN_STRING, random);
 
-        String url = "https://www.reddit.com/api/v1/authorize.compact?client_id=" + redditClientId + "&response_type=code&state=" + random + "&redirect_uri=" + REDIRECT_URL + "&duration=temporary&scope=identity";
+        String url = "https://www.reddit.com/api/v1/authorize.compact?client_id=" + redditClientId + "&response_type=code&state=" + random + "&redirect_uri=" +  redditRedirectUrl+ "&duration=temporary&scope=identity";
 
         res.redirect(url);
     }
@@ -104,7 +108,7 @@ public class HypeTrainController {
                     .header("User-Agent", REDDIT_USER_AGENT)
                     .field("grant_type", "authorization_code")
                     .field("code", code)
-                    .field("redirect_uri", REDIRECT_URL)
+                    .field("redirect_uri", redditRedirectUrl)
                     .asJson().getBody();
 
             Optional<String> username = Optional.ofNullable(body.getObject().getString("access_token"))
@@ -128,7 +132,7 @@ public class HypeTrainController {
                     .map(s -> "/" + s);
 
             if (username.isPresent()) {
-                Algorithm algorithmHS = Algorithm.HMAC256(JWT_SALT);
+                Algorithm algorithmHS = Algorithm.HMAC256(jwtSalt);
                 String token = JWT.create()
                         .withIssuer(JWT_TOKEN_ISSUER)
                         .withSubject(username.get())
@@ -315,7 +319,7 @@ public class HypeTrainController {
         if (token == null) {
             return null;
         }
-        Algorithm algorithm = Algorithm.HMAC256(JWT_SALT);
+        Algorithm algorithm = Algorithm.HMAC256(jwtSalt);
         JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer(JWT_TOKEN_ISSUER)
                 .build(); //Reusable verifier instance
