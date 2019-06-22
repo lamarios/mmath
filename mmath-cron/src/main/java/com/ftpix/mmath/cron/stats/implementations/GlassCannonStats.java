@@ -6,6 +6,7 @@ import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
+import com.ftpix.sherdogparser.models.FightType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ public class GlassCannonStats extends StatsProcessor {
 
         dao.getFightDAO().getAll()
                 .stream()
+                .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
                 .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
                 .forEach(f -> {
                     boolean hasFighter1 = f.getFighter1() != null;

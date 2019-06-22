@@ -7,6 +7,7 @@ import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
+import com.ftpix.sherdogparser.models.FightType;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -42,6 +43,7 @@ public class LongestCareer extends StatsProcessor {
 
         dao.getFightDAO().getAll()
                 .stream()
+                .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
                 .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
                 .forEach(f -> {
                     ZonedDateTime date;

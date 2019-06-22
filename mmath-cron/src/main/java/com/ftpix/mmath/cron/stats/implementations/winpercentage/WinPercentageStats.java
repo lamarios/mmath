@@ -7,6 +7,7 @@ import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
+import com.ftpix.sherdogparser.models.FightType;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -47,6 +48,7 @@ public abstract class WinPercentageStats extends StatsProcessor {
 
         dao.getFightDAO().getAll()
                 .stream()
+                .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
                 .forEach(f -> {
                     Optional<String> fighter1 = Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl);
                     Optional<String> fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl);
