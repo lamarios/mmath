@@ -61,15 +61,6 @@ public class HypeTrainController {
 
 
 
-
-    @SparkBefore("/*")
-    public void redirectNonWww(Request req, Response rep) {
-        logger.info("Req host: {} path:{}", req.host(), req.pathInfo());
-        if (!HypeTrainConfiguration.DEV_MODE && !req.host().startsWith("www")) {
-            rep.redirect("www" + req.host() + "/" + req.pathInfo(), 301);
-        }
-    }
-
     @SparkGet("/login")
     public void redditLogin(Request req, Response res) {
         req.session(true);
