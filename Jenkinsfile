@@ -5,6 +5,7 @@ pipeline {
       agent {
         docker {
           image 'gonzague/maven-nodejs'
+          args '-v ".maven:/root/.m2"'
         }
 
       }
