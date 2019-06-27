@@ -4,8 +4,8 @@ pipeline {
     stage('build') {
       agent {
         docker {
-          image 'gonzague/maven-nodejs'
           args '-v "/maven:/root/.m2"'
+          image 'gonzague/maven-nodejs:latest'
         }
 
       }
