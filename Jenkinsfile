@@ -5,7 +5,7 @@ pipeline {
       agent {
         docker {
           image 'gonzague/maven-nodejs:latest'
-          args '-v "/maven:/root/.m2" --pull'
+          args '-v /build-cache/maven:/root/.m2'
         }
 
       }
