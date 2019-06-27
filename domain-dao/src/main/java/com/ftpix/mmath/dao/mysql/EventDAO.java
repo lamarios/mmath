@@ -84,6 +84,13 @@ public class EventDAO implements DAO<MmathEvent, String> {
         return template.query(query, rowMapper);
     }
 
+    @Override
+    public List<MmathEvent> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM events LIMI ?,?";
+
+        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+    }
+
     public List<MmathEvent> getIncoming(String organizations, Integer page) {
         LocalDateTime now = LocalDateTime.now().minusDays(2);
         int limit = 20;

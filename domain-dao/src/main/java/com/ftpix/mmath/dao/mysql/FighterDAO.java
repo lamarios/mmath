@@ -40,6 +40,13 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         f.setNickname(resultSet.getString("nickname"));
         f.setNc(resultSet.getInt("nc"));
         f.setSearchRank(resultSet.getInt("search_rank"));
+
+        f.setSearchRank(resultSet.getInt("winKo"));
+        f.setSearchRank(resultSet.getInt("winSub"));
+        f.setSearchRank(resultSet.getInt("winDec"));
+        f.setSearchRank(resultSet.getInt("lossKo"));
+        f.setSearchRank(resultSet.getInt("lossDec"));
+        f.setSearchRank(resultSet.getInt("lossSub"));
         return f;
     };
 
@@ -88,6 +95,17 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         } catch (Exception e) {
             //probably already removed
         }
+
+        try {
+            template.execute("ALTER TABLE fighters ADD COLUMN winKo INT(4) DEFAULT 0");
+            template.execute("ALTER TABLE fighters ADD COLUMN winSub INT(4) DEFAULT 0");
+            template.execute("ALTER TABLE fighters ADD COLUMN winDec INT(4) DEFAULT 0");
+            template.execute("ALTER TABLE fighters ADD COLUMN lossKo INT(4) DEFAULT 0");
+            template.execute("ALTER TABLE fighters ADD COLUMN lossSub INT(4) DEFAULT 0");
+            template.execute("ALTER TABLE fighters ADD COLUMN lossDec INT(4) DEFAULT 0");
+        } catch (Exception e) {
+            //probably already exists
+        }
     }
 
     @Override
@@ -106,17 +124,24 @@ public class FighterDAO implements DAO<MmathFighter, String> {
         return template.query(query, rowMapper);
     }
 
+    public List<MmathFighter> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM fighters LIMIT ?,?";
+
+        return template.query(query, new Object[]{offset, limit}, rowMapper);
+    }
+
+
     @Override
     public String insert(MmathFighter f) {
-        String sql = "INSERT INTO fighters (sherdogUrl, lastUpdate, name,  birthday, draws, losses, wins, weight, height, nickname, nc) VALUES (?,NOW(),?,?,?,?,?,?,?,?,?)";
-        template.update(sql, f.getSherdogUrl(), f.getName(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc());
+        String sql = "INSERT INTO fighters (sherdogUrl, lastUpdate, name,  birthday, draws, losses, wins, weight, height, nickname, nc, winKo, winSub, winDec, lossKo, lossSub, lossDec) VALUES (?,NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        template.update(sql, f.getSherdogUrl(), f.getName(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getWinKo(), f.getWinSub(), f.getWinDec(), f.getLossKo(), f.getLossSub(), f.getLossDec());
         return f.getSherdogUrl();
     }
 
     @Override
     public boolean update(MmathFighter f) {
-        String sql = "UPDATE fighters SET  lastUpdate = NOW(), name = ?,  birthday = ?, draws = ?, losses = ?, wins = ?, weight = ?, height = ?, nickname = ?, nc = ? WHERE sherdogUrl = ?";
-        return 1 == template.update(sql, f.getName(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getSherdogUrl());
+        String sql = "UPDATE fighters SET  lastUpdate = NOW(), name = ?,  birthday = ?, draws = ?, losses = ?, wins = ?, weight = ?, height = ?, nickname = ?, nc = ?, winKo = ?, winSub = ? , winDec = ?, lossKo = ?, lossSub= ? , lossDec = ?  WHERE sherdogUrl = ?";
+        return 1 == template.update(sql, f.getName(), f.getBirthday() == null ? null : DAO.DATE_FORMAT.format(f.getBirthday()), f.getDraws(), f.getLosses(), f.getWins(), f.getWeight(), f.getHeight(), f.getNickname(), f.getNc(), f.getSherdogUrl(), f.getWinKo(), f.getWinSub(), f.getWinDec(), f.getLossKo(), f.getLossSub(), f.getLossDec());
     }
 
     @Override

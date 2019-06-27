@@ -1,16 +1,16 @@
 package com.ftpix.mmath.cron.stats.implementations;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GlassCannonStats extends StatsProcessor {
@@ -35,55 +35,71 @@ public class GlassCannonStats extends StatsProcessor {
 
     @Override
     protected List<StatsEntry> generateEntries() {
-        Set<String> fightersWithKO = new HashSet<>();
-        Set<String> fightersWithOthers = new HashSet<>();
+        List<MmathFighter> top100 = new ArrayList<>();
 
-        dao.getFightDAO().getAll()
-                .stream()
-                .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
-                .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
-                .forEach(f -> {
-                    boolean hasFighter1 = f.getFighter1() != null;
-                    boolean hasFighter2 = f.getFighter2() != null;
+        BatchProcessor.forClass(MmathFight.class, 100)
+                .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                .withProcessor(fights -> {
 
-                    if (f.getWinMethod().toLowerCase().contains("ko")) {
-                        if (hasFighter1) {
-                            logger.info("Adding {} to fightersWithKo", f.getFighter1().getSherdogUrl());
-                            fightersWithKO.add(f.getFighter1().getSherdogUrl());
-                        }
+                    Set<String> fightersWithKO = new HashSet<>();
+                    Set<String> fightersWithOthers = new HashSet<>();
 
-                        if (hasFighter2) {
-                            logger.info("Adding {} to fightersWithKo", f.getFighter2().getSherdogUrl());
-                            fightersWithKO.add(f.getFighter2().getSherdogUrl());
-                        }
 
-                    } else {
-                        if (hasFighter1) {
-                            logger.info("Adding {} to fighterWithOthers", f.getFighter1().getSherdogUrl());
-                            fightersWithOthers.add(f.getFighter1().getSherdogUrl());
-                        }
+                    fights.stream()
+                            .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
+                            .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
+                            .forEach(f -> {
+                                boolean hasFighter1 = f.getFighter1() != null;
+                                boolean hasFighter2 = f.getFighter2() != null;
 
-                        if (hasFighter2) {
-                            logger.info("Adding {} to fighterWithOthers", f.getFighter2().getSherdogUrl());
-                            fightersWithOthers.add(f.getFighter2().getSherdogUrl());
-                        }
-                    }
-                });
+                                if (f.getWinMethod().toLowerCase().contains("ko")) {
+                                    if (hasFighter1) {
+                                        logger.info("Adding {} to fightersWithKo", f.getFighter1().getSherdogUrl());
+                                        fightersWithKO.add(f.getFighter1().getSherdogUrl());
+                                    }
 
-        logger.info("{} fighters with KO,  {} with decisions", fightersWithKO.size(), fightersWithOthers.size());
+                                    if (hasFighter2) {
+                                        logger.info("Adding {} to fightersWithKo", f.getFighter2().getSherdogUrl());
+                                        fightersWithKO.add(f.getFighter2().getSherdogUrl());
+                                    }
 
-        fightersWithKO.removeIf(fightersWithOthers::contains);
+                                } else {
+                                    if (hasFighter1) {
+                                        logger.info("Adding {} to fighterWithOthers", f.getFighter1().getSherdogUrl());
+                                        fightersWithOthers.add(f.getFighter1().getSherdogUrl());
+                                    }
 
-        logger.info("Found {} fighters with KO or TKO only", fightersWithKO.size());
+                                    if (hasFighter2) {
+                                        logger.info("Adding {} to fighterWithOthers", f.getFighter2().getSherdogUrl());
+                                        fightersWithOthers.add(f.getFighter2().getSherdogUrl());
+                                    }
+                                }
+                            });
 
-        List<MmathFighter> top100 = fightersWithKO.stream()
-                .map(f -> dao.getFighterDAO().getById(f))
-                .filter(f -> f != null)
-                .sorted((f1, f2) -> {
-                    return Integer.compare(countFighterFights(f2), countFighterFights(f1));
-                })
-                .limit(100)
-                .collect(Collectors.toList());
+                    logger.info("{} fighters with KO,  {} with decisions", fightersWithKO.size(), fightersWithOthers.size());
+
+                    fightersWithKO.removeIf(fightersWithOthers::contains);
+
+                    logger.info("Found {} fighters with KO or TKO only", fightersWithKO.size());
+
+                    top100.addAll(fightersWithKO.stream()
+                            .map(f -> dao.getFighterDAO().getById(f))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList())
+                    );
+
+                    List<MmathFighter> newTop100 =
+                            top100.stream()
+                                    .sorted((f1, f2) -> Integer.compare(countFighterFights(f2), countFighterFights(f1)))
+                                    .limit(100)
+                                    .collect(Collectors.toList());
+
+
+                    top100.clear();
+                    top100.addAll(newTop100);
+
+                }).start();
+
 
         long reference = countFighterFights(top100.get(0));
 

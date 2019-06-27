@@ -1,5 +1,6 @@
 package com.ftpix.mmath.cron.graph;
 
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.model.MmathFight;
@@ -45,11 +46,14 @@ public class GraphGenerator {
             orientDb.deleteAllFighters();
 
             logger.info("Getting all the processable fights");
-            dao.getFightDAO().getAll()
-                    .stream()
-                    .filter(f -> f.getFighter2() != null && f.getFighter1() != null && (f.getResult() == FightResult.FIGHTER_1_WIN || f.getResult() == FightResult.FIGHTER_2_WIN))
-                    .filter(f -> !graphFights.containsKey(f.getId()))
-                    .forEach(f -> addFightToGraph(f, graph, graphFights, graphFighters));
+            BatchProcessor.forClass(MmathFight.class, 100)
+                    .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                    .withProcessor(fights -> fights
+                            .stream()
+                            .filter(f -> f.getFighter2() != null && f.getFighter1() != null && (f.getResult() == FightResult.FIGHTER_1_WIN || f.getResult() == FightResult.FIGHTER_2_WIN))
+                            .filter(f -> !graphFights.containsKey(f.getId()))
+                            .forEach(f -> addFightToGraph(f, graph, graphFights, graphFighters))
+                    ).start();
         } finally {
             logger.info("Graph job done");
             graph.shutdown();

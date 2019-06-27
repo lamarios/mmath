@@ -1,6 +1,7 @@
 package com.ftpix.mmath.cron.stats.implementations.winpercentage;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
@@ -8,6 +9,7 @@ import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
+import com.mysql.cj.mysqla.authentication.MysqlClearPasswordPlugin;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -44,60 +46,76 @@ public abstract class WinPercentageStats extends StatsProcessor {
 
     @Override
     protected List<StatsEntry> generateEntries() {
-        Map<String, FighterStat> stats = new HashMap<>();
+        List<FighterStat> top100 = new ArrayList<>();
 
-        dao.getFightDAO().getAll()
-                .stream()
-                .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
-                .forEach(f -> {
-                    Optional<String> fighter1 = Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl);
-                    Optional<String> fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl);
+        BatchProcessor.forClass(MmathFight.class, 100)
+                .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                .withProcessor(fights -> {
 
+                    Map<String, FighterStat> stats = new HashMap<>();
 
-                    if (fighter1.isPresent() && !stats.containsKey(fighter1.get())) {
-                        stats.put(fighter1.get(), new FighterStat(fighter1.get()));
-                    }
-                    if (fighter2.isPresent() && !stats.containsKey(fighter2.get())) {
-                        stats.put(fighter2.get(), new FighterStat(fighter2.get()));
-                    }
+                    fights.stream()
+                            .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
+                            .forEach(f -> {
+                                Optional<String> fighter1 = Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl);
+                                Optional<String> fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl);
 
 
-                    fighter1.ifPresent(fighter -> {
-                        if (f.getResult() == FightResult.FIGHTER_1_WIN) {
-                            stats.get(fighter).fightWinCount++;
-                            if (condition.predicate.test(f)) {
-                                stats.get(fighter).fightMatching++;
-                            }
-                        }
-                    });
-
-                    fighter2.ifPresent(fighter -> {
-                        if (f.getResult() == FightResult.FIGHTER_2_WIN) {
-                            stats.get(fighter).fightWinCount++;
-                            if (condition.predicate.test(f)) {
-                                stats.get(fighter).fightMatching++;
-                            }
-                        }
-                    });
+                                if (fighter1.isPresent() && !stats.containsKey(fighter1.get())) {
+                                    stats.put(fighter1.get(), new FighterStat(fighter1.get()));
+                                }
+                                if (fighter2.isPresent() && !stats.containsKey(fighter2.get())) {
+                                    stats.put(fighter2.get(), new FighterStat(fighter2.get()));
+                                }
 
 
-                });
+                                fighter1.ifPresent(fighter -> {
+                                    if (f.getResult() == FightResult.FIGHTER_1_WIN) {
+                                        stats.get(fighter).fightWinCount++;
+                                        if (condition.predicate.test(f)) {
+                                            stats.get(fighter).fightMatching++;
+                                        }
+                                    }
+                                });
+
+                                fighter2.ifPresent(fighter -> {
+                                    if (f.getResult() == FightResult.FIGHTER_2_WIN) {
+                                        stats.get(fighter).fightWinCount++;
+                                        if (condition.predicate.test(f)) {
+                                            stats.get(fighter).fightMatching++;
+                                        }
+                                    }
+                                });
 
 
-        List<FighterStat> fighterstats = stats.values()
-                .stream()
-                .filter(fs -> fs.fighter.trim().length() > 0)
-                .filter(fs -> fs.fightWinCount >= 10)
-                .sorted(Comparator.comparing(FighterStat::getPercentage).reversed().thenComparing((fs1, fs2) -> Double.compare(fs2.fightWinCount, fs1.fightWinCount)))
-                .limit(100)
-                .peek(fs-> logger.info("{} -> {}/{} -> {}%", fs.fighter, fs.fightMatching, fs.fightWinCount, fs.getPercentage()))
-                .collect(Collectors.toList());
+                            });
 
-        if (fighterstats.size() > 0) {
-            int reference = fighterstats.get(0).getPercentage();
+                    List<FighterStat> fighterstats = stats.values()
+                            .stream()
+                            .filter(fs -> fs.fighter.trim().length() > 0)
+                            .filter(fs -> fs.fightWinCount >= 10)
+                            .peek(fs -> logger.info("{} -> {}/{} -> {}%", fs.fighter, fs.fightMatching, fs.fightWinCount, fs.getPercentage()))
+                            .collect(Collectors.toList());
+
+                    top100.addAll(fighterstats);
+
+                    List<FighterStat> newTop100 = top100.stream()
+                            .sorted(Comparator.comparing(FighterStat::getPercentage).reversed().thenComparing((fs1, fs2) -> Double.compare(fs2.fightWinCount, fs1.fightWinCount)))
+                            .limit(100)
+                            .collect(Collectors.toList());
+
+                    top100.clear();
+                    top100.addAll(newTop100);
+
+                })
+                .start();
 
 
-            return fighterstats.stream()
+        if (top100.size() > 0) {
+            int reference = top100.get(0).getPercentage();
+
+
+            return top100.stream()
                     .map(fs -> {
                         StatsEntry entry = new StatsEntry();
 

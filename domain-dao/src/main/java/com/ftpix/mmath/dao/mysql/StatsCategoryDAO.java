@@ -75,6 +75,15 @@ public class StatsCategoryDAO implements DAO<StatsCategory, String> {
     }
 
     @Override
+    public List<StatsCategory> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM stats_categories ORDER BY `order` LIMIT ?,?";
+
+        List<StatsCategory> query1 = template.query(query, new Integer[]{offset, limit}, rowMapper);
+
+        return query1;
+    }
+
+    @Override
     public String insert(StatsCategory cat) {
         template.update("REPLACE INTO  stats_categories (id, `name`, description, `order`, lastUpdate) VALUES (?,?,?,?, NOW())",
                 cat.getId(),

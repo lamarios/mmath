@@ -1,6 +1,9 @@
 package com.ftpix.mmath.cron;
 
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.FighterDAO;
+import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.Utils;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organizations;
@@ -52,19 +55,20 @@ public class Refresh {
         jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.ONE_FC.url));
         jmsTemplate.convertAndSend(organizationTopic, Utils.cleanUrl(Organizations.WSOF.url));
 
-        dao.getFighterDAO().getAll().parallelStream()
-                .forEach(f -> {
-                    //refreshing the count for each fighter
+
+        BatchProcessor.forClass(MmathFighter.class, 100)
+                .withSupplier((batch, batchSize, offset) -> dao.getFighterDAO().getBatch(offset, batchSize))
+                .withProcessor(fighters -> fighters
+                        .parallelStream()
+                        .forEach(f -> {
+                            //refreshing the count for each fighter
+                            if (DAYS.between(f.getLastUpdate(), today) >= RATE) {
+//                                logger.info("Sending {} for refresh", f.getName());
+                                jmsTemplate.convertAndSend(fighterTopic, f.getSherdogUrl());
+                            }
 
 
-                    if (DAYS.between(f.getLastUpdate(), today) >= RATE) {
-                        logger.info("Sending {} for refresh", f.getName());
-                        jmsTemplate.convertAndSend(fighterTopic, f.getSherdogUrl());
-                    }
-
-
-                });
-
+                        })).start();
 
         logger.info("Job done");
 

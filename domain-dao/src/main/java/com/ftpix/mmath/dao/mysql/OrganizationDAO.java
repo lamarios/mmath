@@ -5,6 +5,7 @@ import com.ftpix.mmath.model.Utils;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organizations;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mysql.cj.x.protobuf.MysqlxCrud;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -64,6 +65,13 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
         String query = "SELECT * FROM organizations";
 
         return template.query(query, rowMapper);
+    }
+
+    @Override
+    public List<MmathOrganization> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM organizations LIMIT ?,?";
+
+        return template.query(query, new Integer[]{offset, limit}, rowMapper);
     }
 
     @Override

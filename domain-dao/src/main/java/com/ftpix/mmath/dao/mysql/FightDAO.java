@@ -114,6 +114,13 @@ public class FightDAO implements DAO<MmathFight, Long> {
         return template.query(query, rowMapper);
     }
 
+    @Override
+    public List<MmathFight> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM fights LIMIT ?,?";
+
+        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+    }
+
     public List<MmathFight> getFightsForEventHash(String hash) {
         String query = "SELECT * FROM fights WHERE MD5(`event_id`) = ?";
 
@@ -179,7 +186,7 @@ public class FightDAO implements DAO<MmathFight, Long> {
 
         List<MmathFight> query1 = template.query(query, rowMapper, sherdogUrl, sherdogUrl);
         List<MmathFight> fights = query1.stream()
-                .peek(f-> System.out.println(f.getFighter1()+" - "+f.getFighter2()))
+                .peek(f -> System.out.println(f.getFighter1() + " - " + f.getFighter2()))
                 .filter(f -> Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).isPresent() && Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).isPresent())
                 .map(f -> {
                     //we need to swap

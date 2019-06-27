@@ -14,6 +14,7 @@ public interface DAO<T, R> {
     T getById(R id);
 
     List<T> getAll();
+    List<T> getBatch(int offset, int limiy);
 
     R insert(T object);
 

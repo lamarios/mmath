@@ -1,6 +1,8 @@
 package com.ftpix.mmath.cron.hypetrain;
 
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrainStats;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,21 +25,23 @@ public class HypeTrainStatsGeneration {
 
         String statsDate = date.getYear() + "-" + String.format("%02d", date.getMonthValue());
 
+        BatchProcessor.forClass(AggregatedHypeTrain.class, 100)
+                .withSupplier((batch, batchSize, offset) -> dao.getHypeTrainDAO().getAllCounts(offset, batchSize))
+                .withProcessor(trains -> trains
+                        .stream()
+                        .map(s -> {
+                            HypeTrainStats stats = new HypeTrainStats();
+                            stats.setMonth(statsDate);
+                            stats.setFighter(s.getFighter());
+                            stats.setCount(s.getCount());
 
-        dao.getHypeTrainDAO().getAllCounts(Integer.MAX_VALUE)
-                .stream()
-                .map(s -> {
-                    HypeTrainStats stats = new HypeTrainStats();
-                    stats.setMonth(statsDate);
-                    stats.setFighter(s.getFighter());
-                    stats.setCount(s.getCount());
 
+                            logger.info("Inserting stats for fighter [{}] month:[{}] count [{}]", stats.getFighter(), stats.getMonth(), stats.getCount());
+                            return stats;
 
-                    logger.info("Inserting stats for fighter [{}] month:[{}] count [{}]", stats.getFighter(), stats.getMonth(), stats.getCount());
-                    return stats;
-
-                })
-                .forEach(dao.getHypeTrainDAO()::insertStats);
+                        })
+                        .forEach(dao.getHypeTrainDAO()::insertStats)
+                ).start();
     }
 
 }

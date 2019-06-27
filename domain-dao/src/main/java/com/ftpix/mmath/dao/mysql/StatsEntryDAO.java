@@ -73,7 +73,7 @@ public class StatsEntryDAO implements DAO<StatsEntry, Long> {
         try {
             String addRankQuery = "ALTER TABLE stats_entries ADD COLUMN rank INT NOT NULL DEFAULT  0 AFTER percent";
             template.execute(addRankQuery);
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.warn("Column probably already exist", e);
         }
 
@@ -97,12 +97,22 @@ public class StatsEntryDAO implements DAO<StatsEntry, Long> {
         return query1;
     }
 
+    @Override
+    public List<StatsEntry> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM stats_entries  LIMIT ?,?";
+
+        List<StatsEntry> query1 = template.query(query, new Integer[]{offset, limit}, rowMapper);
+
+        return query1;
+    }
+
     /**
      * Gets all the stats entries for a specific fighter, for the award feature
+     *
      * @param hash the hash of the fighter's url
      * @return the list of stats entries
      */
-    public List<StatsEntry> getForFighterHash(String hash){
+    public List<StatsEntry> getForFighterHash(String hash) {
         return template.query("SELECT * FROM stats_entries WHERE MD5(fighter_id) = ? ORDER BY rank ASC", rowMapper, hash);
     }
 

@@ -1,11 +1,13 @@
 package com.ftpix.mmath.cron.stats.implementations;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,19 +34,28 @@ public class MostFightStats extends StatsProcessor {
     @Override
     protected List<StatsEntry> generateEntries() {
 
+        List<MmathFighter> top100 = new ArrayList<>();
 
-        List<MmathFighter> fighters = dao.getFighterDAO().getAll().stream()
-                .sorted((f1, f2) -> {
-                    return Integer.compare(countFighterFights(f2), countFighterFights(f1));
-                })
-                .limit(100)
-                .collect(Collectors.toList());
+        BatchProcessor.forClass(MmathFighter.class, 100)
+                .withSupplier((batch, batchSize, offset) -> dao.getFighterDAO().getBatch(offset, batchSize))
+                .withProcessor(fighters -> {
+                    top100.addAll(fighters);
+                    List<MmathFighter> newTop100 = top100.stream()
+                            .sorted((f1, f2) -> Integer.compare(countFighterFights(f2), countFighterFights(f1)))
+                            .limit(100)
+                            .collect(Collectors.toList());
 
-        int reference = countFighterFights(fighters.get(0));
+
+                    top100.clear();
+                    top100.addAll(newTop100);
+                }).start();
+
+
+        int reference = countFighterFights(top100.get(0));
 
         //now creating our stats entries
 
-        return fighters.stream()
+        return top100.stream()
                 .map(f -> {
                     StatsEntry e = new StatsEntry();
                     e.setFighter(f);

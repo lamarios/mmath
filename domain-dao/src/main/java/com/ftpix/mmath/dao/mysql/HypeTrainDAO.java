@@ -5,6 +5,7 @@ import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.HypeTrainStats;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator;
 
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,13 @@ public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
     }
 
     @Override
+    public List<HypeTrain> getBatch(int offset, int limit) {
+        String query = "SELECT * FROM hype_trains LIMIT ?,?";
+
+        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+    }
+
+    @Override
     public HypeTrain insert(HypeTrain object) {
 
         String sql = "REPLACE INTO hype_trains(user, fighter) VALUES (?,?)";
@@ -113,11 +121,11 @@ public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
      * @return
      */
     public List<AggregatedHypeTrain> getTop() {
-        return getAllCounts(20);
+        return getAllCounts(0, 20);
     }
 
-    public List<AggregatedHypeTrain> getAllCounts(int topLimit){
-        String sql = "SELECT t.fighter as fighter, f.name as name, count(*) as count from hype_trains t LEFT JOIN fighters f ON t.fighter = f.sherdogUrl GROUP BY fighter ORDER BY count DESC LIMIT ?";
+    public List<AggregatedHypeTrain> getAllCounts(int offset, int topLimit) {
+        String sql = "SELECT t.fighter as fighter, f.name as name, count(*) as count from hype_trains t LEFT JOIN fighters f ON t.fighter = f.sherdogUrl GROUP BY fighter ORDER BY count DESC LIMIT ?,?";
 
         RowMapper<AggregatedHypeTrain> mapper = (resultSet, i) -> {
             AggregatedHypeTrain trains = new AggregatedHypeTrain();
@@ -129,7 +137,7 @@ public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
         };
 
 
-        return template.query(sql, mapper, topLimit);
+        return template.query(sql, mapper,  offset, topLimit);
 
     }
 
@@ -169,19 +177,20 @@ public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
     }
 
     /**
-     *  gets the stats for a fighter
-      * @param fighterHash to get stats from
-     * @param monthCount how many month we want
+     * gets the stats for a fighter
+     *
+     * @param fighterHash to get stats from
+     * @param monthCount  how many month we want
      * @return
      */
-    public List<HypeTrainStats> getStats(String fighterHash, int monthCount){
+    public List<HypeTrainStats> getStats(String fighterHash, int monthCount) {
         String sql = "SELECT * FROM hype_trains_stats WHERE MD5(fighter) = ? ORDER BY `month` DESC LIMIT ?";
 
         return template.query(sql, statsRowMapper, fighterHash, monthCount);
     }
 
 
-    public HypeTrainStats insertStats(HypeTrainStats stats){
+    public HypeTrainStats insertStats(HypeTrainStats stats) {
         String sql = "REPLACE INTO hype_trains_stats(`month`, fighter, `count`) VALUES (?,?,?)";
         template.update(sql, stats.getMonth(), stats.getFighter(), stats.getCount());
         return stats;

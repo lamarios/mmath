@@ -45,6 +45,10 @@ public class MmathFighter {
     private int nc;
 
 
+    @Expose
+    private int winKo, winSub, winDec, lossKo, lossDec, lossSub;
+
+
     private int searchRank;
 
     public LocalDateTime getLastUpdate() {
@@ -139,6 +143,54 @@ public class MmathFighter {
     }
 
 
+    public int getWinKo() {
+        return winKo;
+    }
+
+    public void setWinKo(int winKo) {
+        this.winKo = winKo;
+    }
+
+    public int getWinSub() {
+        return winSub;
+    }
+
+    public void setWinSub(int winSub) {
+        this.winSub = winSub;
+    }
+
+    public int getWinDec() {
+        return winDec;
+    }
+
+    public void setWinDec(int winDec) {
+        this.winDec = winDec;
+    }
+
+    public int getLossKo() {
+        return lossKo;
+    }
+
+    public void setLossKo(int lossKo) {
+        this.lossKo = lossKo;
+    }
+
+    public int getLossDec() {
+        return lossDec;
+    }
+
+    public void setLossDec(int lossDec) {
+        this.lossDec = lossDec;
+    }
+
+    public int getLossSub() {
+        return lossSub;
+    }
+
+    public void setLossSub(int lossSub) {
+        this.lossSub = lossSub;
+    }
+
     @ExposeMethodResult("record")
     public String getRecord() {
         StringBuilder sb = new StringBuilder();
@@ -179,6 +231,12 @@ public class MmathFighter {
         fighter.setName(f.getName());
         fighter.setNickname(f.getNickname());
         fighter.setNc(f.getNc());
+        fighter.setWinKo(f.getWinsKo());
+        fighter.setWinDec(f.getWinsDec());
+        fighter.setWinSub(f.getWinsSub());
+        fighter.setLossKo(f.getLossesKo());
+        fighter.setLossSub(f.getLossesSub());
+        fighter.setLossDec(f.getLossesDec());
 
         return fighter;
     }

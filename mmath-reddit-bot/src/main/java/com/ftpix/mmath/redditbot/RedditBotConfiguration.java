@@ -27,11 +27,11 @@ public class RedditBotConfiguration {
     private String redditPassword;
 
 
-    @Value("${REDDOT+SUB}")
+    @Value("${REDDIT_SUB}")
     private String subreddit;
 
 
-    @Value("${REDDIT_BOT_OWWNER}")
+    @Value("${REDDIT_BOT_OWNER}")
     private String redditOwner;
 
 

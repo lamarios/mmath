@@ -1,7 +1,6 @@
 package com.ftpix.mmath.cron.stats;
 
 import com.ftpix.mmath.cron.stats.implementations.GlassCannonStats;
-import com.ftpix.mmath.cron.stats.implementations.HighestNcStats;
 import com.ftpix.mmath.cron.stats.implementations.LongestCareer;
 import com.ftpix.mmath.cron.stats.implementations.MostFightStats;
 import com.ftpix.mmath.cron.stats.implementations.winpercentage.DecisionWinsStats;
@@ -23,17 +22,16 @@ public class StatsRefresher {
 
     public void process() {
 
-        new MostFightStats(dao).process();
-        new GlassCannonStats(dao).process();
-        new LongestCareer(dao).process();
+//        new MostFightStats(dao).process();
+//        new GlassCannonStats(dao).process();// to fix
+//        new LongestCareer(dao).process();
         new KoWinsStats(dao).process();
-        new DecisionWinsStats(dao).process();
-        new SubmissionWinsStats(dao).process();
-        new HighestNcStats(dao).process();
+//        new DecisionWinsStats(dao).process();
+//        new SubmissionWinsStats(dao).process();
 
 
         logger.info("Refreshing fighter search rank");
-        dao.getFighterDAO().setAllFighterSearchRank();
+//        dao.getFighterDAO().setAllFighterSearchRank();
         logger.info("Fighter search rank updated");
 
     }

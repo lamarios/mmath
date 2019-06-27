@@ -1,8 +1,10 @@
 package com.ftpix.mmath.cron.stats.implementations;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
+import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathEvent;
+import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
@@ -11,10 +13,7 @@ import com.ftpix.sherdogparser.models.FightType;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -37,77 +36,86 @@ public class LongestCareer extends StatsProcessor {
 
     @Override
     protected List<StatsEntry> generateEntries() {
-        Map<String, ZonedDateTime> earliestFight = new HashMap<>();
-        Map<String, ZonedDateTime> mostRecentFight = new HashMap<>();
-        Map<String, MmathEvent> eventCache = new HashMap<>();
 
-        dao.getFightDAO().getAll()
-                .stream()
-                .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
-                .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
-                .forEach(f -> {
-                    ZonedDateTime date;
-                    if (eventCache.containsKey(f.getEvent().getSherdogUrl())) {
-                        date = eventCache.get(f.getEvent().getSherdogUrl()).getDate();
-                    } else {
-                        MmathEvent event = dao.getEventDAO().getById(f.getEvent().getSherdogUrl());
-                        date = event.getDate();
-                        eventCache.put(event.getSherdogUrl(), event);
-                    }
+        Map<String, Long> top100 = new LinkedHashMap<>();
 
-                    Consumer<String> processFighter = fighter -> {
-                        if (earliestFight.containsKey(fighter)) {
-                            if (date.isBefore(earliestFight.get(fighter))) {
-                                earliestFight.put(fighter, date);
-                            }
-                        } else {
-                            earliestFight.put(fighter, date);
-                        }
+        BatchProcessor.forClass(MmathFight.class, 100)
+                .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                .withProcessor(fights -> {
+                    Map<String, ZonedDateTime> earliestFight = new HashMap<>();
+                    Map<String, ZonedDateTime> mostRecentFight = new HashMap<>();
 
 
-                        if (mostRecentFight.containsKey(fighter)) {
-                            if (date.isAfter(mostRecentFight.get(fighter))) {
-                                mostRecentFight.put(fighter, date);
-                            }
-                        } else {
-                            mostRecentFight.put(fighter, date);
-                        }
-                    };
+                    fights.stream()
+                            .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
+                            .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
+                            .forEach(f -> {
+                                ZonedDateTime date;
+                                MmathEvent event = dao.getEventDAO().getById(f.getEvent().getSherdogUrl());
+                                date = event.getDate();
 
-                    Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl)
-                            .filter(s -> s.length() > 0)
-                            .ifPresent(processFighter);
+                                Consumer<String> processFighter = fighter -> {
+                                    if (earliestFight.containsKey(fighter)) {
+                                        if (date.isBefore(earliestFight.get(fighter))) {
+                                            earliestFight.put(fighter, date);
+                                        }
+                                    } else {
+                                        earliestFight.put(fighter, date);
+                                    }
 
-                    Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl)
-                            .filter(s -> s.length() > 0)
-                            .ifPresent(processFighter);
-                });
 
-        Map<String, Long> careerLengths = new HashMap<>();
+                                    if (mostRecentFight.containsKey(fighter)) {
+                                        if (date.isAfter(mostRecentFight.get(fighter))) {
+                                            mostRecentFight.put(fighter, date);
+                                        }
+                                    } else {
+                                        mostRecentFight.put(fighter, date);
+                                    }
+                                };
 
-        earliestFight.forEach((f, earliest) -> {
-            Optional.ofNullable(mostRecentFight.get(f)).ifPresent(latest -> {
-                careerLengths.put(f, Math.abs(ChronoUnit.DAYS.between(earliest, latest)));
-            });
-        });
+                                Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl)
+                                        .filter(s -> s.length() > 0)
+                                        .ifPresent(processFighter);
 
-        List<String> top100 = careerLengths.keySet().stream()
-                .sorted((f1, f2) -> {
-                    return Long.compare(careerLengths.get(f2), careerLengths.get(f1));
+                                Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl)
+                                        .filter(s -> s.length() > 0)
+                                        .ifPresent(processFighter);
+                            });
+
+
+                    earliestFight.forEach((f, earliest) -> {
+                        Optional.ofNullable(mostRecentFight.get(f)).ifPresent(latest -> {
+                            top100.put(f, Math.abs(ChronoUnit.DAYS.between(earliest, latest)));
+                        });
+                    });
+
+
+                    Map<String, Long> newTop100 = new LinkedHashMap<>();
+
+                    top100.keySet().stream()
+                            .sorted((f1, f2) -> Long.compare(top100.get(f2), top100.get(f1)))
+                            .limit(100)
+                            .forEach(key -> newTop100.put(key, top100.get(key)));
+
+
+                    top100.clear();
+                    top100.putAll(newTop100);
+
+
                 })
-                .limit(100)
-                .collect(Collectors.toList());
+                .start();
 
-        long reference = careerLengths.get(top100.get(0));
 
-        return top100.stream()
+        long reference = top100.entrySet().iterator().next().getValue();
+
+        return top100.keySet().stream()
                 .map(f -> {
                     StatsEntry e = new StatsEntry();
                     MmathFighter fighter = dao.getFighterDAO().getById(f);
 
                     e.setFighter(fighter);
 
-                    long days = careerLengths.get(f);
+                    long days = top100.get(f);
                     int percent = (int) Math.ceil(((double) days / (double) reference) * 100);
                     e.setPercent(percent);
 
