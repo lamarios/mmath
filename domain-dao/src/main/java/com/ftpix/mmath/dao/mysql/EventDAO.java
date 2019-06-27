@@ -3,16 +3,26 @@ package com.ftpix.mmath.dao.mysql;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
 import org.apache.commons.lang.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public class EventDAO implements DAO<MmathEvent, String> {
-    private final JdbcTemplate template;
+
+@Component
+public class EventDAO extends DAO<MmathEvent, String> {
+
+
+    @Autowired
+    private JdbcTemplate template;
+
+
     private RowMapper<MmathEvent> rowMapper = (rs, i) -> {
         MmathEvent e = new MmathEvent();
         e.setSherdogUrl(rs.getString("sherdogUrl"));
@@ -33,12 +43,9 @@ public class EventDAO implements DAO<MmathEvent, String> {
     };
 
 
-    public EventDAO(JdbcTemplate template) {
-
-        this.template = template;
-    }
 
     @Override
+    @PostConstruct
     public void init() {
 
 

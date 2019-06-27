@@ -1,11 +1,13 @@
 package com.ftpix.mmath.cron.stats.implementations.winpercentage;
 
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.stats.StatsCategory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SubmissionWinsStats extends WinPercentageStats {
-    public SubmissionWinsStats(MySQLDao dao) {
-        super(dao, Condition.SUBMISSION);
+
+    public SubmissionWinsStats() {
+        condition = Condition.SUBMISSION;
     }
 
     @Override

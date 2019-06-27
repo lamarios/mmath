@@ -1,31 +1,24 @@
 package com.ftpix.mmath;
 
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.sherdog.SherdogConfiguration;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.orientechnologies.orient.core.exception.OSchemaException;
-import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.tinkerpop.blueprints.impls.orient.OrientEdgeType;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
-import com.tinkerpop.blueprints.impls.orient.OrientVertexType;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * Created by gz on 18-Sep-16.
  */
 @Configuration
 @Import(SherdogConfiguration.class)
+@ComponentScan("com.ftpix")
 public class DaoConfiguration {
 
 
@@ -43,22 +36,6 @@ public class DaoConfiguration {
 
     @Value("${DB_OPTIONS:?autoReconnect=true&useSSL=false}")
     private String options;
-
-
-    @Value("${ORIENTDB_URL:remote:mmath/}")
-    private String orientdbUrl;
-
-    @Value("${ORIENTDB_USER:root}")
-    private String orientdbUsername;
-
-    @Value("${ORIENTDB_DB_NAME:mmath}")
-    private String orientdbName;
-
-    @Value("${ORIENTDB_PASSWORD:password}")
-    private String orientdbPassword;
-
-    public DaoConfiguration() {
-    }
 
     @Bean
     public DataSource source() throws SQLException, PropertyVetoException {
@@ -92,24 +69,28 @@ public class DaoConfiguration {
     }
 
     @Bean
+    public LocalSessionFactoryBean sessionFactory() throws PropertyVetoException, SQLException {
+        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+        sessionFactory.setDataSource(source());
+        sessionFactory.setPackagesToScan(new String[] { "com.ftpix.mmath.model" });
+        sessionFactory.setHibernateProperties(hibernateProperties());
+        return sessionFactory;
+    }
+
+    private Properties hibernateProperties() {
+        Properties properties = new Properties();
+        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
+        properties.put("hibernate.show_sql", true);
+        properties.put("hibernate.format_sql", true);
+        return properties;
+    }
+
+    @Bean
     JdbcTemplate template(DataSource source) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         jdbcTemplate.setDataSource(source);
 
-
         return jdbcTemplate;
     }
 
-    @Bean
-    public MySQLDao dao(JdbcTemplate template) {
-        return new MySQLDao(template);
-    }
-
-    @Bean
-    public OrientDBDao orientDBDao() {
-        OrientDBDao dao = new OrientDBDao(orientdbUrl, orientdbUsername, orientdbPassword, orientdbName);
-
-
-        return dao;
-    }
 }

@@ -2,20 +2,25 @@ package com.ftpix.mmath.cron.stats.implementations.winpercentage;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
 import com.ftpix.mmath.cron.utils.BatchProcessor;
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
-import com.mysql.cj.mysqla.authentication.MysqlClearPasswordPlugin;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Component
 public abstract class WinPercentageStats extends StatsProcessor {
+
+    protected WinPercentageStats() {
+    }
 
     public enum Condition {
         KO(f -> f.getWinMethod() != null && f.getWinMethod().contains("KO"), "%d (%d%%) wins by KO/TKO", ""),
@@ -34,12 +39,10 @@ public abstract class WinPercentageStats extends StatsProcessor {
     }
 
 
-    private final Condition condition;
+    protected Condition condition;
 
-    protected WinPercentageStats(MySQLDao dao, Condition condition) {
-        super(dao);
-        this.condition = condition;
-    }
+    @Autowired
+    private FightDAO fightDAO;
 
     @Override
     protected abstract StatsCategory getStatsCategory();
@@ -49,7 +52,7 @@ public abstract class WinPercentageStats extends StatsProcessor {
         List<FighterStat> top100 = new ArrayList<>();
 
         BatchProcessor.forClass(MmathFight.class, 100)
-                .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                .withSupplier((batch, batchSize, offset) -> fightDAO.getBatch(offset, batchSize))
                 .withProcessor(fights -> {
 
                     Map<String, FighterStat> stats = new HashMap<>();

@@ -15,18 +15,31 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertexType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+
+@Component
 public class OrientDBDao {
-    private final String dbUrl;
-    private final String username;
-    private final String password;
-    private final String dbname;
+    @Value("${ORIENTDB_URL:remote:mmath/}")
+    private String dbUrl;
+
+    @Value("${ORIENTDB_USER:root}")
+    private String username;
+
+    @Value("${ORIENTDB_DB_NAME:mmath}")
+    private String dbname;
+
+    @Value("${ORIENTDB_PASSWORD:password}")
+    private String password;
+
     public final static String VERTEX_FIGHTER = "fighter", EDGE_BEAT = "beat", SHERDOG_URL = "sherdog_url", FIGHT_ID = "fight_id";
 
     public final static String BETTER_THAN_QUERY = "select path.sherdog_url from (SELECT shortestPath( (SELECT FROM fighter WHERE sherdog_url='%s' ) , (SELECT FROM fighter WHERE sherdog_url='%s'), 'OUT', 'beat') AS path UNWIND path);";
@@ -34,13 +47,8 @@ public class OrientDBDao {
     public static final String DELETE_ALL_FIGHTERS = "DELETE VERTEX " + VERTEX_FIGHTER + ";";
     private Logger logger = LogManager.getLogger();
 
-    public OrientDBDao(String dbUrl, String username, String password, String dbname) {
-        this.dbUrl = dbUrl;
-        this.username = username;
-        this.password = password;
-        this.dbname = dbname;
-
-
+    @PostConstruct
+    private void init(){
         try {
             createSchema();
             createClasses();
@@ -49,7 +57,6 @@ public class OrientDBDao {
             logger.error("Something went wrong went setting up the schema", e);
         }
     }
-
 
     /**
      * Creates the OrientDB Schema

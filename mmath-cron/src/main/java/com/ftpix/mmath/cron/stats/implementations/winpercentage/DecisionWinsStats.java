@@ -1,11 +1,14 @@
 package com.ftpix.mmath.cron.stats.implementations.winpercentage;
 
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.stats.StatsCategory;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class DecisionWinsStats extends WinPercentageStats {
-    public DecisionWinsStats(MySQLDao dao) {
-        super(dao, Condition.DECISION);
+
+    public DecisionWinsStats() {
+        condition = Condition.DECISION;
     }
 
     @Override

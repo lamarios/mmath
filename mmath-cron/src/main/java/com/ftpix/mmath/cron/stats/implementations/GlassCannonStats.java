@@ -2,21 +2,33 @@ package com.ftpix.mmath.cron.stats.implementations;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
 import com.ftpix.mmath.cron.utils.BatchProcessor;
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+
+@Component
 public class GlassCannonStats extends StatsProcessor {
-    public GlassCannonStats(MySQLDao dao) {
-        super(dao);
-    }
+
+
+
+    @Autowired
+    private FightDAO fightDAO;
+
+
+    @Autowired
+    private FighterDAO fighterDAO;
 
     @Override
     protected StatsCategory getStatsCategory() {
@@ -38,7 +50,7 @@ public class GlassCannonStats extends StatsProcessor {
         List<MmathFighter> top100 = new ArrayList<>();
 
         BatchProcessor.forClass(MmathFight.class, 100)
-                .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                .withSupplier((batch, batchSize, offset) -> fightDAO.getBatch(offset, batchSize))
                 .withProcessor(fights -> {
 
                     Set<String> fightersWithKO = new HashSet<>();
@@ -83,7 +95,7 @@ public class GlassCannonStats extends StatsProcessor {
                     logger.info("Found {} fighters with KO or TKO only", fightersWithKO.size());
 
                     top100.addAll(fightersWithKO.stream()
-                            .map(f -> dao.getFighterDAO().getById(f))
+                            .map(f -> fighterDAO.getById(f))
                             .filter(Objects::nonNull)
                             .collect(Collectors.toList())
                     );
@@ -107,7 +119,7 @@ public class GlassCannonStats extends StatsProcessor {
         return top100.stream()
                 .map(f -> {
 
-                    f.setFights(dao.getFightDAO().getByFighter(f.getSherdogUrl()));
+                    f.setFights(fightDAO.getByFighter(f.getSherdogUrl()));
                     return f;
                 })
                 .map(f -> {

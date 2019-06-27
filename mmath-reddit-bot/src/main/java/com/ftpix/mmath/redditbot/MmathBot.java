@@ -1,7 +1,7 @@
 package com.ftpix.mmath.redditbot;
 
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
 import net.dean.jraw.http.UserAgent;
@@ -9,7 +9,11 @@ import net.dean.jraw.models.Comment;
 import net.dean.jraw.oauth.Credentials;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -19,9 +23,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
+@Component
 public class MmathBot {
-    private final MySQLDao dao;
-    private final OrientDBDao orientDBDao;
+
+
+    @Autowired
+    private OrientDBDao orientDBDao;
+
     private final Pattern mmathPattern, hypetrainPatter;
     private RedditBot bot;
     private final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -41,24 +50,48 @@ public class MmathBot {
     private Logger logger = LogManager.getLogger();
 
 
-    private final String redditUsername, redditPassword, redditClientId, redditSecret, subreddit, redditBotOwner;
+    @Value("${REDDIT_CLIENT_ID}")
+    private String redditClientId;
 
-    public MmathBot(MySQLDao dao, OrientDBDao orientDBDao, String redditUsername, String redditPassword, String redditClientId, String redditSecret, String subreddit, String redditBotOwner) {
-        this.dao = dao;
-        this.orientDBDao = orientDBDao;
-        this.redditUsername = redditUsername;
-        this.redditPassword = redditPassword;
-        this.redditClientId = redditClientId;
-        this.redditSecret = redditSecret;
-        this.subreddit = subreddit;
-        this.redditBotOwner = redditBotOwner;
+    @Value("${REDDIT_SECRET}")
+    private String redditSecret;
+
+
+    @Value("${REDDIT_USERNAME}")
+    private String redditUsername;
+
+
+    @Value("${REDDIT_PASSWORD}")
+    private String redditPassword;
+
+
+    @Value("${REDDIT_SUB}")
+    private String subreddit;
+
+
+    @Value("${REDDIT_BOT_OWNER}")
+    private String redditBotOwner;
+
+
+
+
+    @Autowired
+    private FighterDAO fighterDAO;
+
+
+
+    @Autowired
+    private HypeTrainDAO hypeTrainDAO;
+
+    public MmathBot() {
 
         mmathPattern = Pattern.compile(MMATH_PATTERN);
         hypetrainPatter = Pattern.compile(HYPETRAIN_PATTERN);
 
-        startBot();
     }
 
+
+    @PostConstruct
     private void startBot() {
         Credentials oauthCreds = Credentials.script(redditUsername, redditPassword, redditClientId, redditSecret);
 
@@ -105,16 +138,16 @@ public class MmathBot {
                     HypeTrain hypeTrain = new HypeTrain(user, mmathFighter.getSherdogUrl());
                     switch (onOff) {
                         case "!onboard":
-                            dao.getHypeTrainDAO().insert(hypeTrain);
+                            hypeTrainDAO.insert(hypeTrain);
                             reply = HYPE_TRAIN_ONBOARD_REPLY;
                             break;
                         case "!offboard":
-                            dao.getHypeTrainDAO().deleteById(hypeTrain);
+                            hypeTrainDAO.deleteById(hypeTrain);
                             reply = HYPE_TRAIN_OFFBOARD_REPLY;
                             break;
                     }
 
-                    Long count = Optional.ofNullable(dao.getHypeTrainDAO().countForFighter(mmathFighter.getSherdogUrl()))
+                    Long count = Optional.ofNullable(hypeTrainDAO.countForFighter(mmathFighter.getSherdogUrl()))
                             .orElse(0L);
 
                     reply = String.format(reply, mmathFighter.getName(), mmathFighter.getIdAsHash(), count);
@@ -168,11 +201,11 @@ public class MmathBot {
 
                     String f1Vsf2Result = f1Vsf2List.stream()
                             .filter(s -> s != null)
-                            .map(f -> dao.getFighterDAO().getById(f).getName())
+                            .map(f -> fighterDAO.getById(f).getName())
                             .collect(Collectors.joining(" > "));
                     String f2Vsf1Result = f2Vsf1List.stream()
                             .filter(s -> s != null)
-                            .map(f -> dao.getFighterDAO().getById(f).getName())
+                            .map(f -> fighterDAO.getById(f).getName())
                             .collect(Collectors.joining(" > "));
 
                     logger.info("result 1 vs 2: {}", f1Vsf2Result);
@@ -215,6 +248,6 @@ public class MmathBot {
 
 
     private Optional<MmathFighter> getFirstFighterForName(String s) {
-        return dao.getFighterDAO().searchByName(s).stream().findFirst();
+        return fighterDAO.searchByName(s).stream().findFirst();
     }
 }

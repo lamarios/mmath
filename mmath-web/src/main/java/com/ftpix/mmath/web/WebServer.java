@@ -1,13 +1,20 @@
 package com.ftpix.mmath.web;
 
+import com.ftpix.mmath.web.controllers.EventsController;
+import com.ftpix.mmath.web.controllers.MmathController;
+import com.ftpix.mmath.web.controllers.StatsController;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,17 +26,26 @@ import java.util.stream.Collectors;
 /**
  * Created by gz on 26-Sep-16.
  */
+@Component
 public class WebServer {
 
-    private final int port;
+    @Value("${MMATH_PORT:15678}")
+    private int port;
+
     private final Gson gson = GsonUtils.getGson();
     private Logger logger = LogManager.getLogger();
 
+    @Autowired
+    private EventsController eventsController;
 
-    public WebServer(int port) {
-        this.port = port;
-    }
+    @Autowired
+    private MmathController mmathController;
 
+    @Autowired
+    private StatsController statsController;
+
+
+    @PostConstruct
     public void startServer() {
         Spark.port(port);
 
@@ -54,6 +70,10 @@ public class WebServer {
         Spark.get("/events/:id/fights", this::serveIndex);
         Spark.get("/stats", this::serveIndex);
         Spark.get("/stats/:cat", this::serveIndex);
+
+        eventsController.declareEndPoints();
+        mmathController.declareEndPoints();
+        statsController.declareEndPoints();
 
         Spark.exception(Exception.class, (e, request, response) -> {
             logger.error("Error while processing request", e);

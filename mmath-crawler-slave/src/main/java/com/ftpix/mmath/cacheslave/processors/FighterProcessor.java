@@ -1,13 +1,15 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Fighter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -19,12 +21,30 @@ import java.util.stream.Collectors;
 /**
  * Created by gz on 16-Sep-16.
  */
+@Component
 public class FighterProcessor extends Processor<MmathFighter> {
 
 
-    public FighterProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
-        super(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, OrganizationTopic);
-    }
+
+    @Autowired
+    private OrganizationDAO organizationDAO;
+
+    @Autowired
+    private EventDAO eventDAO;
+
+    @Autowired
+    private FightDAO fightDAO;
+
+
+    @Autowired
+    private FighterDAO fighterDAO;
+
+    @Autowired
+    private StatsEntryDAO statsEntryDAO;
+
+    @Autowired
+    private StatsCategoryDAO statsCategoryDAO;
+
 
     @Override
     protected void propagate(MmathFighter obj) {
@@ -38,7 +58,7 @@ public class FighterProcessor extends Processor<MmathFighter> {
     @Override
     protected void insertToDao(MmathFighter obj) throws SQLException {
         try {
-            dao.getFighterDAO().insert(obj);
+            fighterDAO.insert(obj);
         }catch (DuplicateKeyException e){
             logger.info("Fighter already exist, skipping insert");
         }
@@ -46,7 +66,7 @@ public class FighterProcessor extends Processor<MmathFighter> {
 
     @Override
     protected void updateToDao(MmathFighter old, MmathFighter fromSherdog) throws SQLException {
-        dao.getFighterDAO().update(fromSherdog);
+        fighterDAO.update(fromSherdog);
     }
 
 
@@ -67,7 +87,7 @@ public class FighterProcessor extends Processor<MmathFighter> {
 
     @Override
     protected Optional<MmathFighter> getFromDao(String url) throws SQLException {
-        MmathFighter mmathFighter = dao.getFighterDAO().getById(url);
+        MmathFighter mmathFighter = fighterDAO.getById(url);
         return Optional.ofNullable(mmathFighter);
     }
 }

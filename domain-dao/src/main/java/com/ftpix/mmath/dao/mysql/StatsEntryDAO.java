@@ -6,15 +6,20 @@ import com.ftpix.mmath.model.stats.StatsEntry;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class StatsEntryDAO implements DAO<StatsEntry, Long> {
 
-    private final JdbcTemplate template;
+@Component
+public class StatsEntryDAO extends DAO<StatsEntry, Long> {
+    @Autowired
+    private JdbcTemplate template;
     private Logger logger = LogManager.getLogger();
 
     private final RowMapper<StatsEntry> rowMapper = (rs, i) -> {
@@ -48,6 +53,7 @@ public class StatsEntryDAO implements DAO<StatsEntry, Long> {
     }
 
     @Override
+    @PostConstruct
     public void init() {
 
         try {

@@ -1,13 +1,15 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Organization;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -19,12 +21,11 @@ import java.util.Optional;
 /**
  * Created by gz on 16-Sep-16.
  */
+@Component
 public class OrganizationProcessor extends Processor<MmathOrganization> {
 
-
-    public OrganizationProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
-        super(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, OrganizationTopic);
-    }
+    @Autowired
+    private OrganizationDAO organizationDAO;
 
     @Override
     protected void propagate(MmathOrganization obj) {
@@ -36,7 +37,7 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
     @Override
     protected void insertToDao(MmathOrganization obj) throws SQLException {
         try {
-            dao.getOrganizationDAO().insert(obj);
+            organizationDAO.insert(obj);
         } catch (DuplicateKeyException e) {
             logger.info("Organization already exists, skipping insert");
         }
@@ -44,7 +45,7 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
 
     @Override
     protected void updateToDao(MmathOrganization old, MmathOrganization fromSherdog) {
-        dao.getOrganizationDAO().update(fromSherdog);
+        organizationDAO.update(fromSherdog);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class OrganizationProcessor extends Processor<MmathOrganization> {
 
     @Override
     protected Optional<MmathOrganization> getFromDao(String url) throws SQLException {
-        return Optional.ofNullable(dao.getOrganizationDAO().getById(url));
+        return Optional.ofNullable(organizationDAO.getById(url));
     }
 
 }

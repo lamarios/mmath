@@ -1,8 +1,8 @@
 package com.ftpix.mmath.cron.graph;
 
 import com.ftpix.mmath.cron.utils.BatchProcessor;
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.tinkerpop.blueprints.Edge;
@@ -12,6 +12,9 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -20,17 +23,37 @@ import java.util.Map;
 import static com.ftpix.mmath.dao.OrientDBDao.FIGHT_ID;
 import static com.ftpix.mmath.dao.OrientDBDao.SHERDOG_URL;
 
+
+@Component
 public class GraphGenerator {
-    private final OrientDBDao orientDb;
-    private final MySQLDao dao;
+
+    @Autowired
+    private OrientDBDao orientDb;
+
     private Logger logger = LogManager.getLogger();
 
-    public GraphGenerator(OrientDBDao orientDb, MySQLDao dao) {
-        this.orientDb = orientDb;
-        this.dao = dao;
-    }
+
+    @Autowired
+    private OrganizationDAO organizationDAO;
+
+    @Autowired
+    private EventDAO eventDAO;
+
+    @Autowired
+    private FightDAO fightDAO;
 
 
+    @Autowired
+    private FighterDAO fighterDAO;
+
+    @Autowired
+    private StatsEntryDAO statsEntryDAO;
+
+    @Autowired
+    private StatsCategoryDAO statsCategoryDAO;
+
+
+    @Scheduled(cron = "0 0 23 ? * TUE")
     public void process() throws SQLException {
         logger.info("STARTING GRAPH JOB !!!");
 
@@ -47,7 +70,7 @@ public class GraphGenerator {
 
             logger.info("Getting all the processable fights");
             BatchProcessor.forClass(MmathFight.class, 100)
-                    .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                    .withSupplier((batch, batchSize, offset) -> fightDAO.getBatch(offset, batchSize))
                     .withProcessor(fights -> fights
                             .stream()
                             .filter(f -> f.getFighter2() != null && f.getFighter1() != null && (f.getResult() == FightResult.FIGHTER_1_WIN || f.getResult() == FightResult.FIGHTER_2_WIN))

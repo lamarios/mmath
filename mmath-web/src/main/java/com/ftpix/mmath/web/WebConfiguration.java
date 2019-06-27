@@ -1,7 +1,6 @@
 package com.ftpix.mmath.web;
 
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.web.controllers.EventsController;
 import com.ftpix.mmath.web.controllers.MmathController;
@@ -16,47 +15,8 @@ import org.springframework.context.annotation.*;
 
 @Configuration
 @Import({DaoConfiguration.class})
+@ComponentScan("com.ftpix.mmath")
 public class WebConfiguration {
-
-    @Value("${MMATH_PORT:15678}")
-    private int port;
-
-
-    @Bean
-    EventsController eventsController(MySQLDao dao, WebServer server) {
-
-        EventsController controller = new EventsController(dao);
-        controller.declareEndPoints();
-
-        return controller;
-    }
-
-    @Bean
-    MmathController mmathController(MySQLDao dao, OrientDBDao orientDBDao, WebServer server) {
-        MmathController mmathController = new MmathController(dao, orientDBDao);
-        mmathController.declareEndPoints();
-
-        return mmathController;
-    }
-
-
-    @Bean
-    StatsController statsController(MySQLDao dao,  WebServer server){
-        StatsController statsController = new StatsController(dao);
-        statsController.declareEndPoints();
-
-        return statsController;
-    }
-
-    @Bean
-    WebServer server() {
-        WebServer server = new WebServer(port);
-
-        server.startServer();
-
-        return server;
-    }
-
 
     public static void main(String... args) {
         ApplicationContext context =

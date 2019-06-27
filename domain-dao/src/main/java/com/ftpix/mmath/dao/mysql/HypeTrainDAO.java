@@ -3,17 +3,23 @@ package com.ftpix.mmath.dao.mysql;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.HypeTrainStats;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
 
-    private final JdbcTemplate template;
+@Component
+public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
+
+    @Autowired
+    private JdbcTemplate template;
 
     public HypeTrainDAO(JdbcTemplate template) {
         this.template = template;
@@ -42,6 +48,7 @@ public class HypeTrainDAO implements DAO<HypeTrain, HypeTrain> {
     };
 
     @Override
+    @PostConstruct
     public void init() {
         String createTable = "CREATE TABLE IF NOT EXISTS hype_trains" +
                 "(" +

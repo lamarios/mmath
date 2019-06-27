@@ -2,20 +2,23 @@ package com.ftpix.mmath.cron.stats.implementations;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
 import com.ftpix.mmath.cron.utils.BatchProcessor;
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+@Component
 public class MostFightStats extends StatsProcessor {
 
-    public MostFightStats(MySQLDao dao) {
-        super(dao);
-    }
+    @Autowired
+    private FighterDAO fighterDAO;
 
     @Override
     protected StatsCategory getStatsCategory() {
@@ -37,7 +40,7 @@ public class MostFightStats extends StatsProcessor {
         List<MmathFighter> top100 = new ArrayList<>();
 
         BatchProcessor.forClass(MmathFighter.class, 100)
-                .withSupplier((batch, batchSize, offset) -> dao.getFighterDAO().getBatch(offset, batchSize))
+                .withSupplier((batch, batchSize, offset) -> fighterDAO.getBatch(offset, batchSize))
                 .withProcessor(fighters -> {
                     top100.addAll(fighters);
                     List<MmathFighter> newTop100 = top100.stream()

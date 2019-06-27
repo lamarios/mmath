@@ -4,23 +4,24 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public interface DAO<T, R> {
+public abstract class DAO<T, R> {
     public static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
     public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
 
 
-     void init();
+    abstract void init();
 
-    T getById(R id);
+    abstract T getById(R id);
 
-    List<T> getAll();
-    List<T> getBatch(int offset, int limiy);
+    abstract List<T> getAll();
 
-    R insert(T object);
+    abstract List<T> getBatch(int offset, int limiy);
 
-    boolean update(T object);
+    abstract R insert(T object);
 
-    boolean deleteById(R id);
+    abstract boolean update(T object);
+
+    abstract boolean deleteById(R id);
 
 
 }

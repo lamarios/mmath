@@ -1,10 +1,10 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 
 import javax.jms.JMSException;
@@ -25,12 +25,17 @@ public abstract class Processor<T> implements MessageListener {
 
     protected Logger logger = LogManager.getLogger();
 
-    protected final JmsTemplate jmsTemplate;
-    protected final Sherdog sherdog;
-    protected final String fighterTopic;
-    protected final String eventTopic;
-    protected final String organizationTopic;
-    protected final MySQLDao dao;
+    @Autowired
+    protected JmsTemplate jmsTemplate;
+    @Autowired
+    protected Sherdog sherdog;
+    @Autowired
+    protected String fighterTopic;
+    @Autowired
+    protected String eventTopic;
+    @Autowired
+    protected String organizationTopic;
+
     public static int RATE = 1;
 
 
@@ -42,15 +47,6 @@ public abstract class Processor<T> implements MessageListener {
         } catch (JMSException e) {
             logger.error("Couldn't convert message to url");
         }
-    }
-
-    public Processor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
-        this.dao = dao;
-        this.jmsTemplate = jmsTemplate;
-        this.sherdog = sherdog;
-        this.fighterTopic = fighterTopic;
-        this.eventTopic = eventTopic;
-        organizationTopic = OrganizationTopic;
     }
 
 

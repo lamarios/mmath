@@ -3,14 +3,19 @@ package com.ftpix.mmath.dao.mysql;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class StatsCategoryDAO implements DAO<StatsCategory, String> {
-    private final JdbcTemplate template;
+@Component
+public class StatsCategoryDAO extends DAO<StatsCategory, String> {
+    @Autowired
+    private JdbcTemplate template;
     private Logger logger = LogManager.getLogger();
 
     private final RowMapper<StatsCategory> rowMapper = (rs, i) -> {
@@ -31,6 +36,7 @@ public class StatsCategoryDAO implements DAO<StatsCategory, String> {
 
 
     @Override
+    @PostConstruct
     public void init() {
         try{
         String createTable = "CREATE TABLE IF NOT EXISTS stats_categories\n" +

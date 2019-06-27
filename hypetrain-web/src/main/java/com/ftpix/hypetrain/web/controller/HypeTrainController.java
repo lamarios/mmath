@@ -6,9 +6,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ftpix.hypetrain.web.GsonTransformer;
-import com.ftpix.hypetrain.web.HypeTrainConfiguration;
 import com.ftpix.hypetrain.web.TrainGenerator;
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
@@ -18,6 +17,9 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 
 
 @SparkController
+@Component
 public class HypeTrainController {
 
     private static final String SESSION_LOGIN_STRING = "loginString";
@@ -40,24 +43,32 @@ public class HypeTrainController {
     private static final String SESSION_TOKEN = "token";
     private static final String JWT_TOKEN_ISSUER = "mmath";
 
-    private final String redditRedirectUrl;
-    private final  String jwtSalt;
-    private final String redditSecret;
 
-    private Logger logger = LogManager.getLogger();
+    @Value("${HYPETRAIN_JWT_SALT:somesupersalt}")
+    private String jwtSalt;
 
-    private final MySQLDao dao;
-
+    @Value("${REDDIT_CLIENT_ID}")
     private String redditClientId;
 
 
-    public HypeTrainController(MySQLDao dao, String redditClientId, String redditSecret, String jwtSalt, String redditRedirectUrl) {
-        this.dao = dao;
-        this.redditClientId = redditClientId;
-        this.redditSecret = redditSecret;
-        this.jwtSalt = jwtSalt;
-        this.redditRedirectUrl = redditRedirectUrl;
-    }
+    @Value("${REDDIT_SECRET}")
+    private String redditSecret;
+
+
+
+    @Value("${REDDIT_REDIRECT_URL:http://localhost:15679}")
+    private String redditRedirectUrl;
+
+
+    @Autowired
+    private FighterDAO fighterDAO;
+
+    @Autowired
+    private HypeTrainDAO hypeTrainDAO;
+
+
+    private Logger logger = LogManager.getLogger();
+
 
 
 
@@ -69,7 +80,7 @@ public class HypeTrainController {
         String random = UUID.randomUUID().toString();
         req.session().attribute(SESSION_LOGIN_STRING, random);
 
-        String url = "https://www.reddit.com/api/v1/authorize.compact?client_id=" + redditClientId + "&response_type=code&state=" + random + "&redirect_uri=" +  redditRedirectUrl+ "&duration=temporary&scope=identity";
+        String url = "https://www.reddit.com/api/v1/authorize.compact?client_id=" + redditClientId + "&response_type=code&state=" + random + "&redirect_uri=" + redditRedirectUrl + "&duration=temporary&scope=identity";
 
         res.redirect(url);
     }
@@ -170,20 +181,20 @@ public class HypeTrainController {
     @SparkPost(value = "/api/search", transformer = GsonTransformer.class)
     public List<MmathFighter> index(@SparkQueryParam("name") String name) {
 
-        List<MmathFighter> mmathFighters = dao.getFighterDAO().searchByName(name);
+        List<MmathFighter> mmathFighters = fighterDAO.searchByName(name);
         return mmathFighters;
     }
 
 
     @SparkGet(value = "/api/top", transformer = GsonTransformer.class)
     public List<AggregatedHypeTrain> getTopTrains() {
-        return dao.getHypeTrainDAO().getTop();
+        return hypeTrainDAO.getTop();
     }
 
     @SparkGet(value = "/api/fighter/:fighter", transformer = GsonTransformer.class)
     public Map<String, Object> getFighter(@SparkParam("fighter") String hash, Request req) {
 
-        MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
+        MmathFighter fighter = fighterDAO.getFromHash(hash);
         Map<String, Object> data = new HashMap<>();
         String user = null;
         try {
@@ -196,9 +207,9 @@ public class HypeTrainController {
         data.put("id", fighter.getIdAsHash());
         data.put("name", fighter.getName());
         data.put("loggedIn", user != null);
-        data.put("count", dao.getHypeTrainDAO().countForFighter(fighter.getSherdogUrl()));
+        data.put("count", hypeTrainDAO.countForFighter(fighter.getSherdogUrl()));
         if (user != null) {
-            data.put("onBoard", dao.getHypeTrainDAO().isOnBoard(user, fighter.getSherdogUrl()));
+            data.put("onBoard", hypeTrainDAO.isOnBoard(user, fighter.getSherdogUrl()));
         } else {
             data.put("onBoard", false);
         }
@@ -209,7 +220,7 @@ public class HypeTrainController {
 
     @SparkGet("/api/jumpOn/:fighter")
     public String jumpOn(@SparkParam("fighter") String hash, Response res, Request req) {
-        MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
+        MmathFighter fighter = fighterDAO.getFromHash(hash);
 
         String user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
 
@@ -226,7 +237,7 @@ public class HypeTrainController {
 
         HypeTrain hypeTrain = new HypeTrain(user, fighter.getSherdogUrl());
 
-        dao.getHypeTrainDAO().insert(hypeTrain);
+        hypeTrainDAO.insert(hypeTrain);
         res.status(200);
         return "OK";
     }
@@ -234,7 +245,7 @@ public class HypeTrainController {
 
     @SparkGet("/api/jumpOff/:fighter")
     public String jumpOff(@SparkParam("fighter") String hash, Response res, Request req) {
-        MmathFighter fighter = dao.getFighterDAO().getFromHash(hash);
+        MmathFighter fighter = fighterDAO.getFromHash(hash);
 
         String user = getUserFromToken(req.session().attribute(SESSION_TOKEN));
 
@@ -251,7 +262,7 @@ public class HypeTrainController {
 
         HypeTrain hypeTrain = new HypeTrain(user, fighter.getSherdogUrl());
 
-        dao.getHypeTrainDAO().deleteById(hypeTrain);
+        hypeTrainDAO.deleteById(hypeTrain);
         res.status(200);
         return "OK";
     }
@@ -266,7 +277,7 @@ public class HypeTrainController {
             return Collections.emptyList();
         }
 
-        return dao.getHypeTrainDAO().getByUser(user);
+        return hypeTrainDAO.getByUser(user);
     }
 
 
@@ -296,7 +307,7 @@ public class HypeTrainController {
             results.put(dateToString.apply(date.minusMonths(i)), 0);
         }
 
-        dao.getHypeTrainDAO().getStats(fighter, count)
+        hypeTrainDAO.getStats(fighter, count)
                 .stream()
                 .forEach(s -> {
                     results.put(s.getMonth(), s.getCount());

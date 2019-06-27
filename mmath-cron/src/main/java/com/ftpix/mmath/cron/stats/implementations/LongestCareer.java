@@ -2,7 +2,7 @@ package com.ftpix.mmath.cron.stats.implementations;
 
 import com.ftpix.mmath.cron.stats.StatsProcessor;
 import com.ftpix.mmath.cron.utils.BatchProcessor;
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
@@ -10,6 +10,9 @@ import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -17,12 +20,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class LongestCareer extends StatsProcessor {
-    private int i = 0;
 
-    public LongestCareer(MySQLDao dao) {
-        super(dao);
-    }
+@Component
+public class LongestCareer extends StatsProcessor {
+
+    @Autowired
+    private EventDAO eventDAO;
+
+    @Autowired
+    private FightDAO fightDAO;
+
+
+    @Autowired
+    private FighterDAO fighterDAO;
 
     @Override
     protected StatsCategory getStatsCategory() {
@@ -40,7 +50,7 @@ public class LongestCareer extends StatsProcessor {
         Map<String, Long> top100 = new LinkedHashMap<>();
 
         BatchProcessor.forClass(MmathFight.class, 100)
-                .withSupplier((batch, batchSize, offset) -> dao.getFightDAO().getBatch(offset, batchSize))
+                .withSupplier((batch, batchSize, offset) -> fightDAO.getBatch(offset, batchSize))
                 .withProcessor(fights -> {
                     Map<String, ZonedDateTime> earliestFight = new HashMap<>();
                     Map<String, ZonedDateTime> mostRecentFight = new HashMap<>();
@@ -51,7 +61,7 @@ public class LongestCareer extends StatsProcessor {
                             .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
                             .forEach(f -> {
                                 ZonedDateTime date;
-                                MmathEvent event = dao.getEventDAO().getById(f.getEvent().getSherdogUrl());
+                                MmathEvent event = eventDAO.getById(f.getEvent().getSherdogUrl());
                                 date = event.getDate();
 
                                 Consumer<String> processFighter = fighter -> {
@@ -111,7 +121,7 @@ public class LongestCareer extends StatsProcessor {
         return top100.keySet().stream()
                 .map(f -> {
                     StatsEntry e = new StatsEntry();
-                    MmathFighter fighter = dao.getFighterDAO().getById(f);
+                    MmathFighter fighter = fighterDAO.getById(f);
 
                     e.setFighter(fighter);
 

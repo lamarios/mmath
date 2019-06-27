@@ -5,34 +5,40 @@ import com.ftpix.mmath.cron.stats.StatsRefresher;
 import org.apache.commons.codec.binary.Base64;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
+
+@Component
 public class WebController {
 
-    private final Refresh refresh;
-    private final GraphGenerator graphGenerator;
-    private final StatsRefresher statsRefresher;
-    private final String mqAdminUrl;
+
+    @Autowired
+    private  Refresh refresh;
+    @Autowired
+    private  GraphGenerator graphGenerator;
+    @Autowired
+    private  StatsRefresher statsRefresher;
+    @Value("${MQ_ADMIN:mmath-mq:8161}")
+    private String mqAdminUrl;
 
     private AtomicBoolean graphRunning = new AtomicBoolean(false);
     private AtomicBoolean statsRunning = new AtomicBoolean(false);
 
-    public WebController(Refresh refresh, GraphGenerator graphGenerator, StatsRefresher statsRefresher, String mqAdminUrl) {
-        this.refresh = refresh;
-        this.graphGenerator = graphGenerator;
-        this.statsRefresher = statsRefresher;
-        this.mqAdminUrl = mqAdminUrl;
 
-        init();
-    }
 
+    @PostConstruct
     private void init() {
         Spark.get("/refresh-mysql", this::refreshMySQL);
         Spark.get("/refresh-graph", this::refreshGraph);

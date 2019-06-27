@@ -1,6 +1,6 @@
 package com.ftpix.mmath.cacheslave.processors;
 
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
@@ -9,8 +9,10 @@ import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Event;
 import com.ftpix.sherdogparser.models.FightType;
 import com.ftpix.sherdogparser.parsers.ParserUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -27,13 +29,19 @@ import java.util.stream.Collectors;
 /**
  * Created by gz on 16-Sep-16.
  */
+@Component
 public class EventProcessor extends Processor<MmathEvent> {
 
     private final ExecutorService exec = Executors.newFixedThreadPool(5);
 
-    public EventProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String OrganizationTopic) {
-        super(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, OrganizationTopic);
-    }
+
+
+    @Autowired
+    private EventDAO eventDAO;
+
+    @Autowired
+    private FightDAO fightDAO;
+
 
     @Override
     protected void propagate(MmathEvent event) {
@@ -52,8 +60,8 @@ public class EventProcessor extends Processor<MmathEvent> {
             String fighter2 = Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse("");
 
             //deleting any existing similar fights, so we can insert it again, as sometimes sherdog changes the order of  fighter1 / fighter2
-            dao.getFightDAO().deleteExistingSimilarFight(fighter1, fighter2, f.getEvent().getSherdogUrl());
-            dao.getFightDAO().replace(f);
+            fightDAO.deleteExistingSimilarFight(fighter1, fighter2, f.getEvent().getSherdogUrl());
+            fightDAO.replace(f);
         } catch (DuplicateKeyException e) {
             logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
         }
@@ -62,7 +70,7 @@ public class EventProcessor extends Processor<MmathEvent> {
     @Override
     protected void insertToDao(MmathEvent event) throws SQLException {
         try {
-            dao.getEventDAO().insert(event);
+            eventDAO.insert(event);
         } catch (DuplicateKeyException e) {
             logger.info("Event already exist, skipping insert");
         }
@@ -70,7 +78,7 @@ public class EventProcessor extends Processor<MmathEvent> {
 
     @Override
     protected void updateToDao(MmathEvent old, MmathEvent event) throws SQLException {
-        dao.getEventDAO().update(event);
+        eventDAO.update(event);
     }
 
     @Override
@@ -112,7 +120,7 @@ public class EventProcessor extends Processor<MmathEvent> {
 
     @Override
     protected Optional<MmathEvent> getFromDao(String url) throws SQLException {
-        return Optional.ofNullable(dao.getEventDAO().getById(url));
+        return Optional.ofNullable(eventDAO.getById(url));
     }
 }
 

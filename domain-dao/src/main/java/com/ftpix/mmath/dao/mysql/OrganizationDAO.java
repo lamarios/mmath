@@ -6,15 +6,20 @@ import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organizations;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mysql.cj.x.protobuf.MysqlxCrud;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class OrganizationDAO implements DAO<MmathOrganization, String> {
+@Component
+public class OrganizationDAO extends  DAO<MmathOrganization, String> {
 
-    private final JdbcTemplate template;
+    @Autowired
+    private JdbcTemplate template;
 
     private final static String[] EVENT_FILTER_ORGANIZATIONS = new String[]{
             Utils.cleanUrl(Organizations.UFC.url),
@@ -37,6 +42,7 @@ public class OrganizationDAO implements DAO<MmathOrganization, String> {
     }
 
     @Override
+    @PostConstruct
     public void init() {
         String createTable = "CREATE TABLE IF NOT EXISTS organizations" +
                 "(" +

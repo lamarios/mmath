@@ -5,11 +5,14 @@ import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,8 +23,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FightDAO implements DAO<MmathFight, Long> {
-    private final JdbcTemplate template;
+
+@Component
+public class FightDAO  extends DAO<MmathFight, Long> {
+
+
+    @Autowired
+    private JdbcTemplate template;
+
+
+
     private final RowMapper<MmathFight> rowMapper = (rs, i) -> {
 
         MmathFight f = new MmathFight();
@@ -63,12 +74,9 @@ public class FightDAO implements DAO<MmathFight, Long> {
         return f;
     };
 
-    public FightDAO(JdbcTemplate template) {
-
-        this.template = template;
-    }
 
     @Override
+    @PostConstruct
     public void init() {
         String createTable = "CREATE TABLE IF NOT EXISTS fights\n" +
                 "(\n" +

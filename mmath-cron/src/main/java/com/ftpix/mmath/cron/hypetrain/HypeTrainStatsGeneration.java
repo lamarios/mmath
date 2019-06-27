@@ -1,24 +1,30 @@
 package com.ftpix.mmath.cron.hypetrain;
 
 import com.ftpix.mmath.cron.utils.BatchProcessor;
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.HypeTrainDAO;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrainStats;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+
+@Component
 public class HypeTrainStatsGeneration {
 
-    private final MySQLDao dao;
     protected Logger logger = LogManager.getLogger();
 
-    public HypeTrainStatsGeneration(MySQLDao dao) {
-        this.dao = dao;
-    }
+
+    @Autowired
+    private HypeTrainDAO hypeTrainDAO;
 
 
+    @Scheduled(cron = "00 0 * * * ?")
     public void process() {
 
         LocalDate date = LocalDate.now();
@@ -26,7 +32,7 @@ public class HypeTrainStatsGeneration {
         String statsDate = date.getYear() + "-" + String.format("%02d", date.getMonthValue());
 
         BatchProcessor.forClass(AggregatedHypeTrain.class, 100)
-                .withSupplier((batch, batchSize, offset) -> dao.getHypeTrainDAO().getAllCounts(offset, batchSize))
+                .withSupplier((batch, batchSize, offset) -> hypeTrainDAO.getAllCounts(offset, batchSize))
                 .withProcessor(trains -> trains
                         .stream()
                         .map(s -> {
@@ -40,7 +46,7 @@ public class HypeTrainStatsGeneration {
                             return stats;
 
                         })
-                        .forEach(dao.getHypeTrainDAO()::insertStats)
+                        .forEach(hypeTrainDAO::insertStats)
                 ).start();
     }
 

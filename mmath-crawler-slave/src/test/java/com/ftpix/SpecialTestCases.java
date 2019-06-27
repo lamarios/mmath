@@ -1,7 +1,6 @@
 package com.ftpix;
 
 import com.ftpix.mmath.DaoConfiguration;
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
@@ -15,11 +14,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {DaoConfiguration.class})
 public class SpecialTestCases {
-    @Autowired
-    MySQLDao dao;
 
     @Test
     public void testSpecialCases() throws IOException, ParseException, SherdogParserException {

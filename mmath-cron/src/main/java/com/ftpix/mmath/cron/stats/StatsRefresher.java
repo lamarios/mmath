@@ -6,26 +6,47 @@ import com.ftpix.mmath.cron.stats.implementations.MostFightStats;
 import com.ftpix.mmath.cron.stats.implementations.winpercentage.DecisionWinsStats;
 import com.ftpix.mmath.cron.stats.implementations.winpercentage.KoWinsStats;
 import com.ftpix.mmath.cron.stats.implementations.winpercentage.SubmissionWinsStats;
-import com.ftpix.mmath.dao.MySQLDao;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class StatsRefresher {
 
-    private final MySQLDao dao;
+
+    @Autowired
+    private MostFightStats mostFightStats;
+
+    @Autowired
+    private GlassCannonStats glassCannonStats;
+
+    @Autowired
+    private LongestCareer longestCareer;
+
+    @Autowired
+    private KoWinsStats koWinsStats;
+
+    @Autowired
+    private DecisionWinsStats decisionWinsStats;
+
+    @Autowired
+    private SubmissionWinsStats submissionWinsStats;
+
 
     protected Logger logger = LogManager.getLogger();
 
-    public StatsRefresher(MySQLDao dao) {
-        this.dao = dao;
-    }
 
+
+    @Scheduled(cron = "0 0 20 ? * TUE")
     public void process() {
 
 //        new MostFightStats(dao).process();
 //        new GlassCannonStats(dao).process();// to fix
 //        new LongestCareer(dao).process();
-        new KoWinsStats(dao).process();
+        koWinsStats.process();
 //        new DecisionWinsStats(dao).process();
 //        new SubmissionWinsStats(dao).process();
 

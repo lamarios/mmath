@@ -2,9 +2,12 @@ package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -14,8 +17,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FighterDAO implements DAO<MmathFighter, String> {
-    private final JdbcTemplate template;
+@Component
+public class FighterDAO extends DAO<MmathFighter, String> {
+
+
+    @Autowired
+    private JdbcTemplate template;
 
 
     private final static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
@@ -51,12 +58,9 @@ public class FighterDAO implements DAO<MmathFighter, String> {
     };
 
 
-    public FighterDAO(JdbcTemplate template) {
-
-        this.template = template;
-    }
 
     @Override
+    @PostConstruct
     public void init() {
         try {
             String createTable = "CREATE TABLE IF NOT  EXISTS fighters\n" +

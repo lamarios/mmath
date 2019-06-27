@@ -5,7 +5,6 @@ import com.ftpix.mmath.cacheslave.processors.EventProcessor;
 import com.ftpix.mmath.cacheslave.processors.FighterProcessor;
 import com.ftpix.mmath.cacheslave.processors.OrganizationProcessor;
 import com.ftpix.mmath.cacheslave.processors.Processor;
-import com.ftpix.mmath.dao.MySQLDao;
 import com.ftpix.mmath.mq.MqConfiguration;
 import com.ftpix.sherdogparser.Sherdog;
 import org.apache.activemq.pool.PooledConnectionFactory;
@@ -19,25 +18,8 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
  */
 @Configuration
 @Import({DaoConfiguration.class, MqConfiguration.class})
+@ComponentScan("com.ftpix.mmath")
 public class CrawlerSlaveConfiguration {
-    //Receiver
-
-    @Bean
-    EventProcessor eventProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String organizationTopic) {
-        return new EventProcessor(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, organizationTopic);
-    }
-
-
-    @Bean
-    FighterProcessor fighterProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String organizationTopic) {
-        return new FighterProcessor(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, organizationTopic);
-    }
-
-    @Bean
-    OrganizationProcessor organizationProcessor(MySQLDao dao, JmsTemplate jmsTemplate, Sherdog sherdog, String fighterTopic, String eventTopic, String organizationTopic) {
-        return new OrganizationProcessor(dao, jmsTemplate, sherdog, fighterTopic, eventTopic, organizationTopic);
-    }
-
 
     @Bean
     DefaultMessageListenerContainer eventListener(PooledConnectionFactory pooledConnectionFactory, String eventTopic, EventProcessor eventProcessor) {

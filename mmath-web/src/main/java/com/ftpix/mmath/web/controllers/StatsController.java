@@ -1,24 +1,37 @@
 package com.ftpix.mmath.web.controllers;
 
-import com.ftpix.mmath.dao.MySQLDao;
+import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+@Component
 public class StatsController implements Controller {
-    private final MySQLDao dao;
     private final Gson gson = GsonUtils.getGson();
 
-    public StatsController(MySQLDao dao) {
-        this.dao = dao;
-    }
+
+
+
+
+    @Autowired
+    private FighterDAO fighterDAO;
+
+    @Autowired
+    private StatsEntryDAO statsEntryDAO;
+
+    @Autowired
+    private StatsCategoryDAO statsCategoryDAO;
 
     @Override
     public void declareEndPoints() {
@@ -35,10 +48,10 @@ public class StatsController implements Controller {
      * @return
      */
     private List<StatsEntry> getFighterStats(Request request, Response response) {
-        return dao.getStatsEntryDAO().getForFighterHash(request.params(":hash"))
+        return statsEntryDAO.getForFighterHash(request.params(":hash"))
                 .stream()
                 .map(s -> {
-                    s.setCategory(dao.getStatsCategoryDAO().getById(s.getCategory().getId()));
+                    s.setCategory(statsCategoryDAO.getById(s.getCategory().getId()));
                     return s;
                 }).collect(Collectors.toList());
     }
@@ -52,7 +65,7 @@ public class StatsController implements Controller {
      */
     private StatsCategory getCategory(Request request, Response response) {
 
-        return dao.getStatsCategoryDAO().getById(request.params(":cat"));
+        return statsCategoryDAO.getById(request.params(":cat"));
     }
 
     /**
@@ -65,9 +78,9 @@ public class StatsController implements Controller {
     private List<StatsEntry> getStatsForCategory(Request request, Response response) {
         String cat = request.params(":cat");
 
-        return dao.getStatsEntryDAO().getByCategory(cat).stream()
+        return statsEntryDAO.getByCategory(cat).stream()
                 .map(s -> {
-                    s.setFighter(dao.getFighterDAO().getById(s.getFighter().getSherdogUrl()));
+                    s.setFighter(fighterDAO.getById(s.getFighter().getSherdogUrl()));
                     return s;
                 })
                 .collect(Collectors.toList());
@@ -82,6 +95,6 @@ public class StatsController implements Controller {
      */
     private List<StatsCategory> getCategories(Request request, Response response) {
 
-        return dao.getStatsCategoryDAO().getAll();
+        return statsCategoryDAO.getAll();
     }
 }
