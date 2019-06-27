@@ -2,7 +2,12 @@ pipeline {
   agent any
   stages {
     stage('build') {
-      agent any
+      agent {
+        docker {
+          image 'gonzague/maven-nodejs:latest'
+        }
+
+      }
       steps {
         sh 'mvn clean install'
       }
