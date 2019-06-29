@@ -99,7 +99,10 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <!-- add Main-Class to manifest file -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.ftpix.mmath.web.WebConfiguration</mainClass>
+                                    <manifestEntries>
+                                        <Main-Class>com.ftpix.mmath.web.WebConfiguration</Main-Class>
+                                        <Build-Number>123</Build-Number>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
