@@ -161,6 +161,19 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>Check resources class</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <executable>ls</executable>
+                            <arguments>
+                                <argument>${project.basedir}/target/classes</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                     <!-- BUILD DOCKER IMAGE -->
                     <execution>
                         <id>Docker build</id>
