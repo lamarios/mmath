@@ -20,7 +20,7 @@
   "scripts": {
     "prebuild": "rm -rf ../resources/web/public",
     "dev": "parcel src/index.html --out-dir ../resources/web/public",
-    "build": "parcel build  src/index.html --out-dir ../resources/web/public"
+    "build": "parcel build --log-level 4 src/index.html --out-dir ../resources/web/public"
   },
   "author": "",
   "license": "ISC"

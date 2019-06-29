@@ -152,6 +152,19 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>Check resources</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <executable>ls</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/main/resources/web/public</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                     <!-- BUILD DOCKER IMAGE -->
                     <execution>
                         <id>Docker build</id>
