@@ -162,6 +162,21 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>Copy resources</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <executable>cp</executable>
+                            <arguments>
+                                <argument>-Rf</argument>
+                                <argument>${project.basedir}/src/main/resources/web</argument>
+                                <argument>${project.basedir}/target/classes</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>Check resources class</id>
                         <goals>
                             <goal>exec</goal>
