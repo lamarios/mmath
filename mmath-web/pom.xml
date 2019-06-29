@@ -101,7 +101,6 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>com.ftpix.mmath.web.WebConfiguration</Main-Class>
-                                        <Build-Number>123</Build-Number>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -162,21 +161,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>Copy resources</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <phase>compile</phase>
-                        <configuration>
-                            <executable>cp</executable>
-                            <arguments>
-                                <argument>-Rf</argument>
-                                <argument>${project.basedir}/src/main/resources/web</argument>
-                                <argument>${project.basedir}/target/classes</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>Check resources class</id>
                         <goals>
                             <goal>exec</goal>
@@ -216,6 +200,25 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.2</version>
                 <executions>
+                    <!-- somehow on teamcity it's not copying the web folder -->
+                    <execution>
+
+                        <id>copy-web-resources</id>
+                        <!-- here the phase you need -->
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/resources</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                     <execution>
 
                         <id>copy-resources</id>
