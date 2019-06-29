@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <docker.image.name>gonzague/mmath-cron</docker.image.name>
+        <docker.image.name>gonzague/mmath-cron:${docker.tag}</docker.image.name>
     </properties>
 
     <artifactId>mmath-cron</artifactId>

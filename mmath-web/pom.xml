@@ -12,7 +12,7 @@
     <properties>
         <web.src.folder>src/web</web.src.folder>
         <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
-        <docker.image.name>gonzague/mmath-web</docker.image.name>
+        <docker.image.name>gonzague/mmath-web:${docker.tag}</docker.image.name>
         <docker.skip>true</docker.skip>
     </properties>
 

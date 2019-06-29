@@ -12,7 +12,7 @@
     <artifactId>mmath-reddit-bot</artifactId>
 
     <properties>
-        <docker.image.name>gonzague/mmath-redditbot</docker.image.name>
+        <docker.image.name>gonzague/mmath-redditbot:${docker.tag}</docker.image.name>
         <docker.skip>true</docker.skip>
     </properties>
 

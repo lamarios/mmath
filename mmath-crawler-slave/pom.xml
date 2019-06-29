@@ -14,7 +14,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.scriptSourceDirectory>startup-scripts</project.build.scriptSourceDirectory>
-        <docker.image.name>gonzague/mmath-crawler</docker.image.name>
+        <docker.image.name>gonzague/mmath-crawler:${docker.tag}</docker.image.name>
     </properties>
 
     <dependencies>
