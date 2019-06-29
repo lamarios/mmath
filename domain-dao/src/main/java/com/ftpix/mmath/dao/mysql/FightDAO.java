@@ -1,10 +1,15 @@
 package com.ftpix.mmath.dao.mysql;
 
+import com.ftpix.mmath.dsl.tables.Fights;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
+import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -13,51 +18,50 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.sound.sampled.TargetDataLine;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+import static com.ftpix.mmath.dsl.Tables.*;
+
 @Component
-public class FightDAO  extends DAO<MmathFight, Long> {
+public class FightDAO extends DAO<MmathFight, Long> {
 
 
-    @Autowired
-    private JdbcTemplate template;
-
-
-
-    private final RowMapper<MmathFight> rowMapper = (rs, i) -> {
-
+    RecordMapper<Record, MmathFight> recordMapper = r -> {
         MmathFight f = new MmathFight();
-        f.setId(rs.getLong("id"));
+        f.setId(r.get(FIGHTS.ID));
 
-        Optional.ofNullable(rs.getString("fighter1_id")).ifPresent(url -> {
+        Optional.ofNullable(r.get(FIGHTS.FIGHTER1_ID)).ifPresent(url -> {
             MmathFighter f1 = new MmathFighter();
             f1.setSherdogUrl(url);
             f.setFighter1(f1);
         });
-        Optional.ofNullable(rs.getString("fighter2_id")).ifPresent(url -> {
+        Optional.ofNullable(r.get(FIGHTS.FIGHTER2_ID)).ifPresent(url -> {
             MmathFighter f2 = new MmathFighter();
             f2.setSherdogUrl(url);
             f.setFighter2(f2);
         });
 
         MmathEvent e = new MmathEvent();
-        e.setSherdogUrl(rs.getString("event_id"));
+        e.setSherdogUrl(r.get(FIGHTS.EVENT_ID));
         f.setEvent(e);
 
-        Optional.ofNullable(rs.getString("date")).ifPresent(s -> {
-            e.setDate(ZonedDateTime.parse(s, DAO.TIME_FORMAT));
+        Optional.ofNullable(r.get(FIGHTS.DATE)).ifPresent(s -> {
+            e.setDate(ZonedDateTime.ofInstant(s.toLocalDateTime().toInstant(ZoneOffset.UTC), ZoneId.systemDefault()));
         });
 
-        Optional.ofNullable(rs.getString("result")).ifPresent(w -> {
+        Optional.ofNullable(r.get(FIGHTS.RESULT)).ifPresent(w -> {
             try {
                 f.setResult(FightResult.valueOf(w));
             } catch (Exception ex) {
@@ -65,11 +69,11 @@ public class FightDAO  extends DAO<MmathFight, Long> {
             }
         });
 
-        f.setWinMethod(rs.getString("winMethod"));
-        f.setWinTime(rs.getString("winTime"));
-        f.setWinRound(rs.getInt("winRound"));
-        f.setLastUpdate(LocalDateTime.parse(rs.getString("lastUpdate"), DAO.TIME_FORMAT));
-        f.setFightType(FightType.valueOf(rs.getString("fight_type")));
+        f.setWinMethod(r.get(FIGHTS.WINMETHOD));
+        f.setWinTime(r.get(FIGHTS.WINTIME));
+        f.setWinRound(r.get(FIGHTS.WINROUND));
+        f.setLastUpdate(r.get(FIGHTS.LASTUPDATE).toLocalDateTime());
+        f.setFightType(FightType.valueOf(r.get(FIGHTS.FIGHT_TYPE)));
 
         return f;
     };
@@ -108,31 +112,28 @@ public class FightDAO  extends DAO<MmathFight, Long> {
 
     @Override
     public MmathFight getById(Long id) {
-        String query = "SELECT * FROM fights WHERE id = ?";
-
-        List<MmathFight> query1 = template.query(query, rowMapper, id);
-
-        return query1.size() == 1 ? query1.get(0) : null;
+        return getDsl().select().from(FIGHTS)
+                .where(FIGHTS.ID.eq(id))
+                .fetchOne(recordMapper);
     }
 
     @Override
     public List<MmathFight> getAll() {
-        String query = "SELECT * FROM fights";
-
-        return template.query(query, rowMapper);
+        return getDsl().select().from(FIGHTS).fetch(recordMapper);
     }
 
     @Override
     public List<MmathFight> getBatch(int offset, int limit) {
-        String query = "SELECT * FROM fights LIMIT ?,?";
-
-        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+        return getDsl().select().from(FIGHTS)
+                .limit(limit)
+                .offset(offset)
+                .fetch(recordMapper);
     }
 
     public List<MmathFight> getFightsForEventHash(String hash) {
-        String query = "SELECT * FROM fights WHERE MD5(`event_id`) = ?";
-
-        return template.query(query, rowMapper, hash);
+        return getDsl().select().from(FIGHTS)
+                .where(DSL.md5(FIGHTS.EVENT_ID).eq(hash))
+                .fetch(recordMapper);
     }
 
     @Override
@@ -162,7 +163,15 @@ public class FightDAO  extends DAO<MmathFight, Long> {
      * @return true if the delete query actually deleted something
      */
     public boolean deleteExistingSimilarFight(String fighter1, String fighter2, String event) {
-        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?)) AND event_id = ?", fighter1, fighter2, fighter1, fighter2, event) > 0;
+        return getDsl().delete(FIGHTS)
+                .where(
+                        DSL.or(
+                                DSL.and(FIGHTS.FIGHTER1_ID.eq(fighter1), FIGHTS.FIGHTER2_ID.eq(fighter2)),
+                                DSL.and(FIGHTS.FIGHTER1_ID.eq(fighter2), FIGHTS.FIGHTER2_ID.eq(fighter1)))
+                )
+                .and(FIGHTS.EVENT_ID.eq(event))
+                .execute() > 0;
+//        return template.update("DELETE FROM fights WHERE ((fighter1_id = ? AND  fighter2_id = ?) OR (fighter2_id = ? AND  fighter1_id = ?)) AND event_id = ?", fighter1, fighter2, fighter1, fighter2, event) > 0;
     }
 
     @Override
@@ -180,21 +189,26 @@ public class FightDAO  extends DAO<MmathFight, Long> {
 
     @Override
     public boolean deleteById(Long id) {
-        return template.update("DELETE  FROM fights WHERE  id = ?", id) == 1;
+        return getDsl().delete(FIGHTS).where(FIGHTS.ID.eq(id)).execute() == 1;
     }
 
 
     public boolean deleteAllNotHappenedFights() {
-        return template.update("DELETE FROM fights WHERE  result='NOT_HAPPENED'") >= 0;
+        return getDsl().delete(FIGHTS).where(FIGHTS.RESULT.eq(FightResult.NOT_HAPPENED.name())).execute() > 0;
+//        return template.update("DELETE FROM fights WHERE  result='NOT_HAPPENED'") >= 0;
     }
 
     public List<MmathFight> getByFighter(String sherdogUrl) {
 
-        String query = "SELECT * FROM fights WHERE fighter2_id = ? OR fighter1_id = ? ORDER BY `date` ASC";
+//        String query = "SELECT * FROM fights WHERE fighter2_id = ? OR fighter1_id = ? ORDER BY `date` ASC";
 
-        List<MmathFight> query1 = template.query(query, rowMapper, sherdogUrl, sherdogUrl);
+        List<MmathFight> query1 = getDsl().select().from(FIGHTS)
+                .where(FIGHTS.FIGHTER2_ID.eq(sherdogUrl))
+                .or(FIGHTS.FIGHTER1_ID.eq(sherdogUrl))
+                .orderBy(FIGHTS.DATE.asc())
+                .fetch(recordMapper);
+
         List<MmathFight> fights = query1.stream()
-                .peek(f -> System.out.println(f.getFighter1() + " - " + f.getFighter2()))
                 .filter(f -> Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).isPresent() && Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).isPresent())
                 .map(f -> {
                     //we need to swap

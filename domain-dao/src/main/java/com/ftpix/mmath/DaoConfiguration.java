@@ -1,17 +1,17 @@
 package com.ftpix.mmath;
 
-import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.sherdog.SherdogConfiguration;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
-import java.util.Properties;
 
 /**
  * Created by gz on 18-Sep-16.
@@ -68,22 +68,6 @@ public class DaoConfiguration {
         return ds;
     }
 
-    @Bean
-    public LocalSessionFactoryBean sessionFactory() throws PropertyVetoException, SQLException {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(source());
-        sessionFactory.setPackagesToScan(new String[] { "com.ftpix.mmath.model" });
-        sessionFactory.setHibernateProperties(hibernateProperties());
-        return sessionFactory;
-    }
-
-    private Properties hibernateProperties() {
-        Properties properties = new Properties();
-        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
-        properties.put("hibernate.show_sql", true);
-        properties.put("hibernate.format_sql", true);
-        return properties;
-    }
 
     @Bean
     JdbcTemplate template(DataSource source) {
@@ -92,5 +76,7 @@ public class DaoConfiguration {
 
         return jdbcTemplate;
     }
+
+
 
 }

@@ -6,6 +6,7 @@ import com.ftpix.mmath.dao.mysql.FighterDAO;
 import com.ftpix.mmath.dao.mysql.OrganizationDAO;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
@@ -39,6 +40,7 @@ public class EventsController implements Controller {
 
     @Autowired
     private FighterDAO fighterDAO;
+
 
     @Override
     public void declareEndPoints() {
@@ -81,6 +83,7 @@ public class EventsController implements Controller {
      */
     private List<MmathEvent> getIncomingEvents(Request request, Response response) {
         String organizations = request.queryParams("organizations");
+
         int page = 1;
 
         try {

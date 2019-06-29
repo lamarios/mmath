@@ -1,5 +1,7 @@
 package com.ftpix.mmath.web;
 
+import com.ftpix.mmath.dao.mysql.FighterDAO;
+import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.web.controllers.EventsController;
 import com.ftpix.mmath.web.controllers.MmathController;
 import com.ftpix.mmath.web.controllers.StatsController;
@@ -21,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -92,6 +95,7 @@ public class WebServer {
      */
     private String serveIndex(Request request, Response response) throws IOException {
         try (
+
                 InputStream inputStream = getClass().getClassLoader().getResource("web/public/index.html").openStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {

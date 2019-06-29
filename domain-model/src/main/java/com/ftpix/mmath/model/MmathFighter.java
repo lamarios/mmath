@@ -5,6 +5,9 @@ import com.ftpix.utils.DateUtils;
 import com.google.gson.annotations.Expose;
 import io.gsonfire.annotations.ExposeMethodResult;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jooq.Record;
+import org.jooq.RecordHandler;
+import org.jooq.RecordMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +21,9 @@ import java.util.stream.Collectors;
  */
 public class MmathFighter {
 
+
     private String sherdogUrl;
+
 
     private LocalDateTime lastUpdate = LocalDateTime.now();
 
@@ -266,4 +271,5 @@ public class MmathFighter {
     public boolean equals(Object obj) {
         return Objects.equals(sherdogUrl, ((MmathFighter) obj).getSherdogUrl());
     }
+
 }
