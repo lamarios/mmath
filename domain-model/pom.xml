@@ -30,11 +30,6 @@
             <artifactId>build-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.ftpix</groupId>
-            <artifactId>build-mysql</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.ftpix</groupId>
