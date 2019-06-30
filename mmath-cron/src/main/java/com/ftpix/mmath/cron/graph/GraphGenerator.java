@@ -4,7 +4,9 @@ import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.FightResult;
+import com.orientechnologies.orient.core.id.ORecordId;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
@@ -19,9 +21,9 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import static com.ftpix.mmath.dao.OrientDBDao.FIGHT_ID;
-import static com.ftpix.mmath.dao.OrientDBDao.SHERDOG_URL;
+import static com.ftpix.mmath.dao.OrientDBDao.*;
 
 
 @Component
@@ -60,22 +62,19 @@ public class GraphGenerator {
         final OrientGraph graph = orientDb.getGraph();
 
         try {
-
-            Map<String, Vertex> graphFighters = new HashMap<>();
-            Map<Long, Edge> graphFights = new HashMap<>();
-
-            logger.info("Cleaning all data before starting from scratch");
-            orientDb.deleteAllEdges();
-            orientDb.deleteAllFighters();
-
             logger.info("Getting all the processable fights");
             BatchProcessor.forClass(MmathFight.class, 100)
                     .withSupplier((batch, batchSize, offset) -> fightDAO.getBatch(offset, batchSize))
                     .withProcessor(fights -> fights
                             .stream()
                             .filter(f -> f.getFighter2() != null && f.getFighter1() != null && (f.getResult() == FightResult.FIGHTER_1_WIN || f.getResult() == FightResult.FIGHTER_2_WIN))
-                            .filter(f -> !graphFights.containsKey(f.getId()))
-                            .forEach(f -> addFightToGraph(f, graph, graphFights, graphFighters))
+                            .filter(f -> {
+                               for(Edge e:  graph.getEdges(EDGE_BEAT+"."+FIGHT_ID, f.getId())){
+                                   return false;
+                               }
+                               return true;
+                            })
+                            .forEach(f -> addFightToGraph(f, graph))
                     ).start();
         } finally {
             logger.info("Graph job done");
@@ -86,75 +85,67 @@ public class GraphGenerator {
     /**
      * Will check if a fight exist and  if it doesn't add it to the graphDB
      *
-     * @param fight         the fight to process
-     * @param graph         the graph connection
-     * @param graphFights   the list of all the fights in the graph DB
-     * @param graphFighters the list of all the fighters in the graph DB
+     * @param fight the fight to process
+     * @param graph the graph connection
      */
-    private void addFightToGraph(MmathFight fight, OrientGraph graph, Map<Long, Edge> graphFights, Map<String, Vertex> graphFighters) {
+    private void addFightToGraph(MmathFight fight, OrientGraph graph) {
 
         logger.info("[{}] vs [{}] at event [{}]", fight.getFighter1().getSherdogUrl(), fight.getFighter2().getSherdogUrl(), fight.getEvent().getSherdogUrl());
 
 
         //we check if it already exists
-        if (!graphFights.containsKey(fight.getId())) {
-            logger.info("fight doesn't exist, adding it to graph");
-            String winner;
-            String loser;
+        logger.info("fight doesn't exist, adding it to graph");
+        MmathFighter winner;
+        MmathFighter loser;
 
-            switch (fight.getResult()) {
-                case FIGHTER_1_WIN:
-                    winner = fight.getFighter1().getSherdogUrl();
-                    loser = fight.getFighter2().getSherdogUrl();
-                    break;
-                case FIGHTER_2_WIN:
-                    winner = fight.getFighter2().getSherdogUrl();
-                    loser = fight.getFighter1().getSherdogUrl();
-                    break;
-                default:
-                    //we need a winner to proceed
-                    return;
-            }
-
-            //checking if our fighter exist
-            Vertex winnerVertex = createOrGetFighter(winner, graph, graphFighters);
-            Vertex loserVertex = createOrGetFighter(loser, graph, graphFighters);
-
-            OrientEdge orientEdge = graph.addEdge(null, winnerVertex, loserVertex, OrientDBDao.EDGE_BEAT);
-            orientEdge.setProperty(FIGHT_ID, fight.getId());
-            orientEdge.save();
-
-            graphFights.put(orientEdge.getProperty(FIGHT_ID), orientEdge);
-
-            graph.commit();
-
-        } else {
-            logger.info("fight already exist... skipping");
+        switch (fight.getResult()) {
+            case FIGHTER_1_WIN:
+                winner = fight.getFighter1();
+                loser = fight.getFighter2();
+                break;
+            case FIGHTER_2_WIN:
+                winner = fight.getFighter2();
+                loser = fight.getFighter1();
+                break;
+            default:
+                //we need a winner to proceed
+                return;
         }
+
+        //checking if our fighter exist
+        Vertex winnerVertex = createOrGetFighter(winner, graph);
+        Vertex loserVertex = createOrGetFighter(loser, graph);
+
+        OrientEdge orientEdge = graph.addEdge(null, winnerVertex, loserVertex, OrientDBDao.EDGE_BEAT);
+        orientEdge.setProperty(FIGHT_ID, fight.getId());
+        orientEdge.save();
+
+        graph.commit();
 
     }
 
     /**
      * Gets the fighter Vertex or create it if it doesn't exist
      *
-     * @param sherdogUrl    the url of the fighter
-     * @param graph         the orientDB graph
-     * @param graphFighters the list of all the fighters on the graphDB
+     * @param f     the fighter
+     * @param graph the orientDB graph
      * @return
      */
-    private Vertex createOrGetFighter(String sherdogUrl, OrientGraph graph, Map<String, Vertex> graphFighters) {
-        Vertex fighter;
-        if (!graphFighters.containsKey(sherdogUrl)) {
-            logger.info("fighter [{}] doesn't have a vertex, creating it", sherdogUrl);
+    private Vertex createOrGetFighter(MmathFighter f, OrientGraph graph) {
+        Vertex fighter = null;
+        for (Vertex v : graph.getVertices(VERTEX_FIGHTER+"."+SHERDOG_URL, f.getSherdogUrl())) {
+            fighter = v;
+        }
+
+        if (fighter == null) {
+            logger.info("fighter [{}] doesn't have a vertex, creating it", f.getSherdogUrl());
             OrientVertex orientVertex = graph.addVertex(null);
-            orientVertex.setProperty(SHERDOG_URL, sherdogUrl);
+            orientVertex.setProperty(SHERDOG_URL, f.getSherdogUrl());
             orientVertex.moveToClass(OrientDBDao.VERTEX_FIGHTER);
             orientVertex.save();
             fighter = orientVertex;
-            graphFighters.put(sherdogUrl, orientVertex);
         } else {
-            logger.info("fighter [{}] already exists", sherdogUrl);
-            fighter = graphFighters.get(sherdogUrl);
+            logger.info("fighter [{}] already exists", f.getSherdogUrl());
         }
 
         return fighter;

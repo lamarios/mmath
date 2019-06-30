@@ -38,13 +38,13 @@ public class BatchProcessor<T> {
         int totalProcessed = 0;
         List<T> batchData;
         do {
-            logger.info("Getting batch {} with offset {} and batch size {}", batch, offset, batchSize);
+//            logger.info("Getting batch {} with offset {} and batch size {}", batch, offset, batchSize);
             batchData = supplier.getBatch(batch, batchSize, offset);
             consumer.accept(batchData);
 
 
             totalProcessed += batchData.size();
-            logger.info("Processed batch {}, Data count:{}, batch size {}, total processed: {}", batch, batchData.size(), batchSize, totalProcessed);
+//            logger.info("Processed batch {}, Data count:{}, batch size {}, total processed: {}", batch, batchData.size(), batchSize, totalProcessed);
             batch++;
             offset = (batch - 1) * batchSize;
 

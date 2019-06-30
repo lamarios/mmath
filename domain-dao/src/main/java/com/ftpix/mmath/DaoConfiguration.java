@@ -63,7 +63,7 @@ public class DaoConfiguration {
         ds.setTestConnectionOnCheckin(true);
         ds.setIdleConnectionTestPeriod(300);
 //        ComboPooledDataSource );
-        ds.setMaxPoolSize(10);
+        ds.setMaxPoolSize(20);
 
         return ds;
     }

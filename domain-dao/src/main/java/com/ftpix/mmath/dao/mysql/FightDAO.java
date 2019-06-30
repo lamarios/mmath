@@ -1,36 +1,24 @@
 package com.ftpix.mmath.dao.mysql;
 
-import com.ftpix.mmath.dsl.tables.Fights;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
-import com.ftpix.sherdogparser.models.Fight;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.impl.DSL;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.sound.sampled.TargetDataLine;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.time.LocalDateTime;
+import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 import static com.ftpix.mmath.dsl.Tables.*;
 
@@ -82,6 +70,7 @@ public class FightDAO extends DAO<MmathFight, Long> {
     @Override
     @PostConstruct
     public void init() {
+
         String createTable = "CREATE TABLE IF NOT EXISTS fights\n" +
                 "(\n" +
                 "  id          BIGINT AUTO_INCREMENT\n" +
@@ -108,6 +97,7 @@ public class FightDAO extends DAO<MmathFight, Long> {
         } catch (Exception e) {
 
         }
+
     }
 
     @Override
@@ -138,20 +128,35 @@ public class FightDAO extends DAO<MmathFight, Long> {
 
     @Override
     public Long insert(MmathFight f) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
-        PreparedStatementCreator css = connection -> {
-            PreparedStatement s = connection.prepareStatement("INSERT  INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, fight_type, lastUpdate)" +
-                            "VALUES  (?,?,?,?,?,?,?,?,?,NOW())",
-                    Statement.RETURN_GENERATED_KEYS);
-            setStatement(s, f);
-            return s;
 
-        };
+        return getDsl().insertInto(FIGHTS)
+                .set(FIGHTS.FIGHTER1_ID, Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.FIGHTER2_ID, Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.EVENT_ID, Optional.ofNullable(f.getEvent()).map(MmathEvent::getSherdogUrl).orElse(null))
+                .set(FIGHTS.DATE, f.getDate() == null ? null: new Timestamp(f.getDate().toInstant().toEpochMilli()))
+                .set(FIGHTS.RESULT, f.getResult().name())
+                .set(FIGHTS.WINMETHOD, f.getWinMethod())
+                .set(FIGHTS.WINTIME, f.getWinTime())
+                .set(FIGHTS.WINROUND, f.getWinRound())
+                .set(FIGHTS.FIGHT_TYPE, f.getFightType().name())
+                .set(FIGHTS.LASTUPDATE, DSL.now())
+                .returning(FIGHTS.ID)
+                .fetchOne().get(FIGHTS.ID);
+//        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+//
+//        PreparedStatementCreator css = connection -> {
+//            PreparedStatement s = connection.prepareStatement("INSERT  INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, fight_type, lastUpdate)" +
+//                            "VALUES  (?,?,?,?,?,?,?,?,?,NOW())",
+//                    Statement.RETURN_GENERATED_KEYS);
+//            setStatement(s, f);
+//            return s;
 
-        template.update(css, keyHolder);
+//        };
 
-        return keyHolder.getKey().longValue();
+//        template.update(css, keyHolder);
+//
+//        return keyHolder.getKey().longValue();
     }
 
     /**
@@ -176,15 +181,31 @@ public class FightDAO extends DAO<MmathFight, Long> {
 
     @Override
     public boolean update(MmathFight f) {
-        PreparedStatementCreator css = connection -> {
-            PreparedStatement s = connection.prepareStatement("UPDATE fights SET fighter1_id = ?, fighter2_id = ?, event_id = ?, `date` = ?, result = ?, winMethod = ?, winTime = ?, winRound = ?, fight_type = ?, lastUpdate = NOW() WHERE id = ?");
-            setStatement(s, f);
-            s.setLong(9, f.getId());
-            return s;
 
-        };
 
-        return template.update(css) == 1;
+        return getDsl().update(FIGHTS)
+                .set(FIGHTS.FIGHTER1_ID, Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.FIGHTER2_ID, Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.EVENT_ID, Optional.ofNullable(f.getEvent()).map(MmathEvent::getSherdogUrl).orElse(null))
+                .set(FIGHTS.DATE, f.getDate() == null ? null : new Timestamp(f.getDate().toInstant().toEpochMilli()))
+                .set(FIGHTS.RESULT, f.getResult().name())
+                .set(FIGHTS.WINMETHOD, f.getWinMethod())
+                .set(FIGHTS.WINTIME, f.getWinTime())
+                .set(FIGHTS.WINROUND, f.getWinRound())
+                .set(FIGHTS.FIGHT_TYPE, f.getFightType().name())
+                .set(FIGHTS.LASTUPDATE, DSL.now())
+                .where(FIGHTS.ID.eq(f.getId()))
+                .execute() == 1;
+
+//        PreparedStatementCreator css = connection -> {
+//            PreparedStatement s = connection.prepareStatement("UPDATE fights SET fighter1_id = ?, fighter2_id = ?, event_id = ?, `date` = ?, result = ?, winMethod = ?, winTime = ?, winRound = ?, fight_type = ?, lastUpdate = NOW() WHERE id = ?");
+//            setStatement(s, f);
+//            s.setLong(9, f.getId());
+//            return s;
+//
+//        };
+//
+//        return template.update(css) == 1;
     }
 
     @Override
@@ -272,15 +293,32 @@ public class FightDAO extends DAO<MmathFight, Long> {
 
     public void replace(MmathFight f) {
 
-        PreparedStatementCreator css = connection -> {
-            PreparedStatement s = connection.prepareStatement("REPLACE INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, fight_type, lastUpdate)" +
-                            "VALUES  (?,?,?,?,?,?,?,?,?,NOW())",
-                    Statement.RETURN_GENERATED_KEYS);
-            setStatement(s, f);
-            return s;
 
-        };
+        getDsl().insertInto(FIGHTS)
+                .set(FIGHTS.FIGHTER1_ID, Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.FIGHTER2_ID, Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.EVENT_ID, Optional.ofNullable(f.getEvent()).map(MmathEvent::getSherdogUrl).orElse(null))
+                .set(FIGHTS.DATE, f.getDate() == null ? null : new Timestamp(f.getDate().toInstant().toEpochMilli()))
+                .set(FIGHTS.RESULT, f.getResult().name())
+                .set(FIGHTS.WINMETHOD, f.getWinMethod())
+                .set(FIGHTS.WINTIME, f.getWinTime())
+                .set(FIGHTS.WINROUND, f.getWinRound())
+                .set(FIGHTS.FIGHT_TYPE, f.getFightType().name())
+                .set(FIGHTS.LASTUPDATE, DSL.now())
+                .onDuplicateKeyUpdate()
+                .set(FIGHTS.FIGHTER1_ID, Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.FIGHTER2_ID, Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl).orElse(null))
+                .set(FIGHTS.EVENT_ID, Optional.ofNullable(f.getEvent()).map(MmathEvent::getSherdogUrl).orElse(null))
+                .set(FIGHTS.DATE, f.getDate() == null ? null : new Timestamp(f.getDate().toInstant().toEpochMilli()))
+                .set(FIGHTS.RESULT, f.getResult().name())
+                .set(FIGHTS.WINMETHOD, f.getWinMethod())
+                .set(FIGHTS.WINTIME, f.getWinTime())
+                .set(FIGHTS.WINROUND, f.getWinRound())
+                .set(FIGHTS.FIGHT_TYPE, f.getFightType().name())
+                .set(FIGHTS.LASTUPDATE, DSL.now())
+                .returning(FIGHTS.ID)
+                .fetchOne().get(FIGHTS.ID);
 
-        template.update(css);
+
     }
 }

@@ -2,18 +2,23 @@ package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathOrganization;
-import org.apache.commons.lang.ArrayUtils;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.jooq.SelectConditionStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ftpix.mmath.dsl.Tables.EVENTS;
 
 @Component
 public class EventDAO extends DAO<MmathEvent, String> {
@@ -22,26 +27,24 @@ public class EventDAO extends DAO<MmathEvent, String> {
     @Autowired
     private JdbcTemplate template;
 
-
-    private RowMapper<MmathEvent> rowMapper = (rs, i) -> {
+    private final RecordMapper<Record, MmathEvent> recordMapper = r -> {
         MmathEvent e = new MmathEvent();
-        e.setSherdogUrl(rs.getString("sherdogUrl"));
-        Optional.ofNullable(rs.getString("date")).ifPresent(s -> {
-            e.setDate(ZonedDateTime.parse(s, DAO.TIME_FORMAT));
+        e.setSherdogUrl(r.get(EVENTS.SHERDOGURL));
+        Optional.ofNullable(r.get(EVENTS.DATE)).ifPresent(s -> {
+            e.setDate(ZonedDateTime.ofInstant(s.toLocalDateTime().toInstant(ZoneOffset.UTC), ZoneId.systemDefault()));
         });
 
         MmathOrganization org = new MmathOrganization();
-        org.setSherdogUrl(rs.getString("organization_id"));
+        org.setSherdogUrl(r.get(EVENTS.SHERDOGURL));
         e.setOrganization(org);
 
-        e.setName(rs.getString("name"));
-        e.setLocation(rs.getString("location"));
-        e.setLastUpdate(LocalDateTime.parse(rs.getString("lastUpdate"), DAO.TIME_FORMAT));
+        e.setName(r.get(EVENTS.NAME));
+//        e.setLocation(EVENTS.LOCATION);
+        e.setLastUpdate(r.get(EVENTS.LASTUPDATE).toLocalDateTime());
 
 
         return e;
     };
-
 
 
     @Override
@@ -66,40 +69,34 @@ public class EventDAO extends DAO<MmathEvent, String> {
 
     @Override
     public MmathEvent getById(String id) {
-
-        String query = "SELECT * FROM events WHERE sherdogUrl = ?";
-
-        List<MmathEvent> query1 = template.query(query, rowMapper, id);
-
-        return query1.size() == 1 ? query1.get(0) : null;
+        return getDsl().select().from(EVENTS)
+                .where(EVENTS.SHERDOGURL.eq(id))
+                .fetchOne(recordMapper);
     }
 
 
     public MmathEvent getFromHash(String hash) {
-        String query = "SELECT * FROM events WHERE MD5(sherdogUrl) = ?";
-
-        List<MmathEvent> query1 = template.query(query, rowMapper, hash);
-
-        return query1.size() == 1 ? query1.get(0) : null;
+        return getDsl().select().from(EVENTS)
+                .where(DSL.md5(EVENTS.SHERDOGURL).eq(hash))
+                .fetchOne(recordMapper);
     }
 
 
     @Override
     public List<MmathEvent> getAll() {
-        String query = "SELECT * FROM events";
-
-        return template.query(query, rowMapper);
+        return getDsl().select().from(EVENTS)
+                .fetch(recordMapper);
     }
 
     @Override
     public List<MmathEvent> getBatch(int offset, int limit) {
-        String query = "SELECT * FROM events LIMI ?,?";
-
-        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+        return getDsl().select().from(EVENTS)
+                .offset(offset)
+                .limit(limit)
+                .fetch(recordMapper);
     }
 
     public List<MmathEvent> getIncoming(String organizations, Integer page) {
-        LocalDateTime now = LocalDateTime.now().minusDays(2);
         int limit = 20;
 
         if (page == null) {
@@ -114,47 +111,55 @@ public class EventDAO extends DAO<MmathEvent, String> {
         } else {
             orgsArray = organizations.split(",");
         }
-        String orgsSQLIdentifier = "";
-        if (orgsArray.length > 0) {
-            orgsSQLIdentifier = new String(new char[orgsArray.length]).replace("\0", "?,");
-            orgsSQLIdentifier = orgsSQLIdentifier.substring(0, orgsSQLIdentifier.length() - 1);
-        }
 
-        Object[] parameters = new Object[]{now.format(DAO.TIME_FORMAT)};
+        SelectConditionStep<Record> select = getDsl().select().from(EVENTS)
+                .where(EVENTS.DATE.ge(DSL.now()));
 
         if (orgsArray.length > 0) {
-            parameters = ArrayUtils.addAll(parameters, orgsArray);
+            select = select.and(DSL.md5(EVENTS.ORGANIZATION_ID).in(orgsArray));
         }
 
-        parameters = ArrayUtils.add(parameters, offset);
-        parameters = ArrayUtils.add(parameters, limit);
-
-        String query = "SELECT * FROM events WHERE `date` >= ? " + ((orgsArray.length > 0) ? "AND md5(organization_id) IN (" + orgsSQLIdentifier + ")" : "") + "ORDER BY `date`  LIMIT ?,?";
-
-        return template.query(query, rowMapper, parameters);
+        return select.orderBy(EVENTS.DATE)
+                .limit(limit)
+                .offset(offset)
+                .fetch(recordMapper);
     }
 
 
     public boolean deleteNotHappenedEvents() {
-        return template.update("DELETE FROM events WHERE  `date`>= NOW()") >= 0;
+        return getDsl().delete(EVENTS)
+                .where(EVENTS.DATE.ge(DSL.now()))
+                .execute() >= 0;
     }
 
     @Override
     public String insert(MmathEvent e) {
-        template.update("INSERT INTO events (sherdogUrl, `date`, organization_id, name, location, lastUpdate) VALUES (?,?,?,?,?,NOW())"
-                , e.getSherdogUrl(), DAO.TIME_FORMAT.format(e.getDate()), e.getOrganization().getSherdogUrl(), e.getName(), e.getLocation());
+
+        getDsl().insertInto(EVENTS)
+                .set(EVENTS.SHERDOGURL, e.getSherdogUrl())
+                .set(EVENTS.DATE, new Timestamp(e.getDate().toEpochSecond()))
+                .set(EVENTS.ORGANIZATION_ID, e.getOrganization().getSherdogUrl())
+                .set(EVENTS.NAME, e.getName())
+                .set(EVENTS.LASTUPDATE, DSL.now())
+                .execute();
+
         return e.getSherdogUrl();
     }
 
     @Override
     public boolean update(MmathEvent e) {
-        return template.update("UPDATE events SET `date` = ?, organization_id=?, name=?, location = ?, lastUpdate = NOW() WHERE sherdogUrl = ?"
-                , DAO.TIME_FORMAT.format(e.getDate()), e.getOrganization().getSherdogUrl(), e.getName(), e.getLocation(), e.getSherdogUrl()) == 1;
+        return getDsl().update(EVENTS)
+                .set(EVENTS.DATE, new Timestamp(e.getDate().toEpochSecond()))
+                .set(EVENTS.ORGANIZATION_ID, e.getOrganization().getSherdogUrl())
+                .set(EVENTS.NAME, e.getName())
+                .set(EVENTS.LASTUPDATE, DSL.now())
+                .where(EVENTS.SHERDOGURL.eq(e.getSherdogUrl()))
+                .execute() == 1;
     }
 
     @Override
     public boolean deleteById(String id) {
-        return template.update("DELETE FROM events WHERE  sherdogUrl = ?", id) == 1;
+        return getDsl().delete(EVENTS).where(EVENTS.SHERDOGURL.eq(id)).execute() == 1;
     }
 
 }

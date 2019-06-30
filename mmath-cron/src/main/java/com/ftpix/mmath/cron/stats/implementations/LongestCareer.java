@@ -49,55 +49,29 @@ public class LongestCareer extends StatsProcessor {
 
         Map<String, Long> top100 = new LinkedHashMap<>();
 
-        BatchProcessor.forClass(MmathFight.class, 100)
-                .withSupplier((batch, batchSize, offset) -> fightDAO.getBatch(offset, batchSize))
-                .withProcessor(fights -> {
+        BatchProcessor.forClass(MmathFighter.class, 100)
+                .withSupplier((batch, batchSize, offset) -> fighterDAO.getBatch(offset, batchSize))
+                .withProcessor(fighters -> {
                     Map<String, ZonedDateTime> earliestFight = new HashMap<>();
                     Map<String, ZonedDateTime> mostRecentFight = new HashMap<>();
 
+                    fighters.stream()
+                            .filter(f -> f.getSherdogUrl() != null && f.getSherdogUrl().trim().length() > 0)
+                            .forEach(fighter -> {
+                                List<MmathFight> fights = fightDAO.getByFighter(fighter.getSherdogUrl())
+                                        .stream()
+                                        .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
+                                        .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
+                                        .filter(f -> f.getEvent() != null && f.getEvent().getDate() != null)
+                                        .collect(Collectors.toList());
+                                if (!fights.isEmpty()) {
+                                    long careerLength = Math.abs(ChronoUnit.DAYS.between(fights.get(0).getEvent().getDate(), fights.get(fights.size() - 1).getEvent().getDate()));
 
-                    fights.stream()
-                            .filter(f -> f.getFightType() == FightType.PRO || f.getFightType() == FightType.PRO_EXHIBITION)
-                            .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
-                            .forEach(f -> {
-                                ZonedDateTime date;
-                                MmathEvent event = eventDAO.getById(f.getEvent().getSherdogUrl());
-                                date = event.getDate();
-
-                                Consumer<String> processFighter = fighter -> {
-                                    if (earliestFight.containsKey(fighter)) {
-                                        if (date.isBefore(earliestFight.get(fighter))) {
-                                            earliestFight.put(fighter, date);
-                                        }
-                                    } else {
-                                        earliestFight.put(fighter, date);
-                                    }
+                                    top100.put(fighter.getSherdogUrl(), careerLength);
+                                }
 
 
-                                    if (mostRecentFight.containsKey(fighter)) {
-                                        if (date.isAfter(mostRecentFight.get(fighter))) {
-                                            mostRecentFight.put(fighter, date);
-                                        }
-                                    } else {
-                                        mostRecentFight.put(fighter, date);
-                                    }
-                                };
-
-                                Optional.ofNullable(f.getFighter1()).map(MmathFighter::getSherdogUrl)
-                                        .filter(s -> s.length() > 0)
-                                        .ifPresent(processFighter);
-
-                                Optional.ofNullable(f.getFighter2()).map(MmathFighter::getSherdogUrl)
-                                        .filter(s -> s.length() > 0)
-                                        .ifPresent(processFighter);
                             });
-
-
-                    earliestFight.forEach((f, earliest) -> {
-                        Optional.ofNullable(mostRecentFight.get(f)).ifPresent(latest -> {
-                            top100.put(f, Math.abs(ChronoUnit.DAYS.between(earliest, latest)));
-                        });
-                    });
 
 
                     Map<String, Long> newTop100 = new LinkedHashMap<>();
@@ -110,7 +84,6 @@ public class LongestCareer extends StatsProcessor {
 
                     top100.clear();
                     top100.putAll(newTop100);
-
 
                 })
                 .start();

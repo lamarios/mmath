@@ -35,6 +35,7 @@ public class WebController {
 
     private AtomicBoolean graphRunning = new AtomicBoolean(false);
     private AtomicBoolean statsRunning = new AtomicBoolean(false);
+    private AtomicBoolean sqlRunning = new AtomicBoolean(false);
 
 
 
@@ -119,8 +120,19 @@ public class WebController {
     }
 
     private String refreshMySQL(Request request, Response response) {
-        refresh.process();
-        return "Refresh job started";
+        if (!sqlRunning.get()) {
+            new Thread(() -> {
+                sqlRunning.set(true);
+                try {
+                    refresh.process();
+                } finally {
+                    sqlRunning.set(false);
+                }
+            }).start();
+            return "Refresh job started";
+        } else {
+            return "Job already started";
+        }
 
     }
 }

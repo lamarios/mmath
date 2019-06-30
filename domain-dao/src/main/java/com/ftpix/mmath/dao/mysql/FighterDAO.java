@@ -1,16 +1,12 @@
 package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathFighter;
-import com.sun.source.tree.ReturnTree;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.sql.Date;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,32 +28,6 @@ public class FighterDAO extends DAO<MmathFighter, String> {
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-    private RowMapper<MmathFighter> rowMapper = (resultSet, i) -> {
-        MmathFighter f = new MmathFighter();
-        f.setSherdogUrl(resultSet.getString("sherdogUrl"));
-        f.setLastUpdate(LocalDateTime.parse(resultSet.getString("lastUpdate"), DAO.TIME_FORMAT));
-        f.setName(resultSet.getString("name"));
-
-        Optional.ofNullable(resultSet.getString("birthday")).ifPresent(s -> {
-            f.setBirthday(LocalDate.parse(s, DAO.DATE_FORMAT));
-        });
-        f.setDraws(resultSet.getInt("draws"));
-        f.setLosses(resultSet.getInt("losses"));
-        f.setWins(resultSet.getInt("wins"));
-        f.setWeight(resultSet.getString("weight"));
-        f.setHeight(resultSet.getString("height"));
-        f.setNickname(resultSet.getString("nickname"));
-        f.setNc(resultSet.getInt("nc"));
-        f.setSearchRank(resultSet.getInt("search_rank"));
-
-        f.setSearchRank(resultSet.getInt("winKo"));
-        f.setSearchRank(resultSet.getInt("winSub"));
-        f.setSearchRank(resultSet.getInt("winDec"));
-        f.setSearchRank(resultSet.getInt("lossKo"));
-        f.setSearchRank(resultSet.getInt("lossDec"));
-        f.setSearchRank(resultSet.getInt("lossSub"));
-        return f;
-    };
 
     private RecordMapper<Record, MmathFighter> recordMapper = record -> {
         MmathFighter f = new MmathFighter();
@@ -139,6 +109,8 @@ public class FighterDAO extends DAO<MmathFighter, String> {
         } catch (Exception e) {
             //probably already exists
         }
+
+
     }
 
     @Override
@@ -169,7 +141,7 @@ public class FighterDAO extends DAO<MmathFighter, String> {
                 .set(FIGHTERS.SHERDOGURL, f.getSherdogUrl())
                 .set(FIGHTERS.LASTUPDATE, DSL.now())
                 .set(FIGHTERS.NAME, f.getName())
-                .set(FIGHTERS.BIRTHDAY, Date.valueOf(f.getBirthday()))
+                .set(FIGHTERS.BIRTHDAY, f.getBirthday() == null ? null : Date.valueOf(f.getBirthday()))
                 .set(FIGHTERS.DRAWS, f.getDraws())
                 .set(FIGHTERS.LOSSES, f.getLosses())
                 .set(FIGHTERS.WINS, f.getWins())
@@ -194,7 +166,7 @@ public class FighterDAO extends DAO<MmathFighter, String> {
         return getDsl().update(FIGHTERS)
                 .set(FIGHTERS.LASTUPDATE, DSL.now())
                 .set(FIGHTERS.NAME, f.getName())
-                .set(FIGHTERS.BIRTHDAY, Date.valueOf(f.getBirthday()))
+                .set(FIGHTERS.BIRTHDAY, f.getBirthday() == null ? null : Date.valueOf(f.getBirthday()))
                 .set(FIGHTERS.DRAWS, f.getDraws())
                 .set(FIGHTERS.LOSSES, f.getLosses())
                 .set(FIGHTERS.WINS, f.getWins())

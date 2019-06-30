@@ -15,7 +15,7 @@ public class DecisionWinsStats extends WinPercentageStats {
     protected StatsCategory getStatsCategory() {
         StatsCategory cat = new StatsCategory();
         cat.setId("DECISION_WIN_PERCENT");
-        cat.setDescription("Highest percentage of wins by decision for fighters with at least 10 wins.");
+        cat.setDescription("Highest number of wins by decision for fighters with at least 10 wins.");
         cat.setName("Judge's favorite");
         cat.setOrder(5);
         return cat;

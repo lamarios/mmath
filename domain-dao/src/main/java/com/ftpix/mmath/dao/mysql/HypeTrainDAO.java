@@ -3,17 +3,19 @@ package com.ftpix.mmath.dao.mysql;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.HypeTrainStats;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import static com.ftpix.mmath.dsl.Tables.*;
 
 @Component
 public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
@@ -25,27 +27,28 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
         this.template = template;
     }
 
-    private final RowMapper<HypeTrain> rowMapper = (resultSet, i) -> {
-        HypeTrain train = new HypeTrain(null, null);
-        train.setFighterId(resultSet.getString("fighter"));
-        train.setUser(resultSet.getString("user"));
+    private final RecordMapper<Record, HypeTrainStats> statsRecordMapper = r -> {
+        HypeTrainStats stats = new HypeTrainStats();
 
-        Optional.ofNullable(resultSet.getString("name"))
-                .ifPresent(train::setFighterName);
+        stats.setFighter(r.get(HYPE_TRAINS_STATS.FIGHTER));
+        stats.setMonth(r.get(HYPE_TRAINS_STATS.MONTH));
+        stats.setCount(r.get(HYPE_TRAINS_STATS.COUNT));
+
+        return stats;
+    };
+
+
+    private final RecordMapper<Record, HypeTrain> recordMapper = r -> {
+
+        HypeTrain train = new HypeTrain(null, null);
+        train.setFighterId(r.get(HYPE_TRAINS.FIGHTER));
+        train.setUser(r.get(HYPE_TRAINS.USER));
+
+        Optional.ofNullable(r.get(FIGHTERS.NAME)).ifPresent(train::setFighterName);
 
         return train;
     };
 
-
-    private final RowMapper<HypeTrainStats> statsRowMapper = (resultSet, i) -> {
-        HypeTrainStats stats = new HypeTrainStats();
-
-        stats.setFighter(resultSet.getString("fighter"));
-        stats.setMonth(resultSet.getString("month"));
-        stats.setCount(resultSet.getInt("count"));
-
-        return stats;
-    };
 
     @Override
     @PostConstruct
@@ -79,23 +82,26 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
 
     @Override
     public List<HypeTrain> getAll() {
-        String query = "SELECT * FROM hype_trains";
-
-        return template.query(query, rowMapper);
+        return getDsl().select().from(HYPE_TRAINS)
+                .fetch(recordMapper);
     }
 
     @Override
     public List<HypeTrain> getBatch(int offset, int limit) {
-        String query = "SELECT * FROM hype_trains LIMIT ?,?";
-
-        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+        return getDsl().select().from(HYPE_TRAINS)
+                .offset(offset)
+                .limit(limit)
+                .fetch(recordMapper);
     }
 
     @Override
     public HypeTrain insert(HypeTrain object) {
 
-        String sql = "REPLACE INTO hype_trains(user, fighter) VALUES (?,?)";
-        template.update(sql, object.getUser(), object.getFighterId());
+        getDsl().insertInto(HYPE_TRAINS, HYPE_TRAINS.USER, HYPE_TRAINS.FIGHTER)
+                .values(object.getUser(), object.getFighterId())
+                .onDuplicateKeyIgnore()
+                .execute();
+
         return object;
     }
 
@@ -106,20 +112,23 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
 
     @Override
     public boolean deleteById(HypeTrain id) {
-        return template.update("DELETE FROM hype_trains WHERE fighter = ? AND user = ?", id.getFighterId(), id.getUser()) == 1;
+        return getDsl().delete(HYPE_TRAINS)
+                .where(HYPE_TRAINS.FIGHTER.eq(id.getFighterId()))
+                .and(HYPE_TRAINS.USER.eq(id.getUser()))
+                .execute() == 1;
     }
 
 
     public List<HypeTrain> getFromFighterHash(String hash) {
-        String query = "SELECT * FROM hype_trains WHERE MD5(fighter) = ?";
-
-        return template.query(query, rowMapper, hash);
+        return getDsl().select().from(HYPE_TRAINS).where(DSL.md5(HYPE_TRAINS.FIGHTER).eq(hash))
+                .fetch(recordMapper);
     }
 
     public List<HypeTrain> getByUser(String user) {
-        String query = "SELECT t.*, f.name FROM hype_trains t LEFT JOIN fighters f ON t.fighter = f.sherdogUrl  WHERE user = ?";
-
-        return template.query(query, rowMapper, user);
+        return getDsl().select(HYPE_TRAINS.asterisk(), FIGHTERS.NAME).from(HYPE_TRAINS)
+                .leftJoin(FIGHTERS).on(HYPE_TRAINS.FIGHTER.eq(FIGHTERS.SHERDOGURL))
+                .where(HYPE_TRAINS.USER.eq(user))
+                .fetch(recordMapper);
     }
 
     /**
@@ -132,19 +141,39 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
     }
 
     public List<AggregatedHypeTrain> getAllCounts(int offset, int topLimit) {
-        String sql = "SELECT t.fighter as fighter, f.name as name, count(*) as count from hype_trains t LEFT JOIN fighters f ON t.fighter = f.sherdogUrl GROUP BY fighter ORDER BY count DESC LIMIT ?,?";
-
-        RowMapper<AggregatedHypeTrain> mapper = (resultSet, i) -> {
-            AggregatedHypeTrain trains = new AggregatedHypeTrain();
-
-            trains.setCount(resultSet.getInt("count"));
-            trains.setFighter(resultSet.getString("fighter"));
-            trains.setName(resultSet.getString("name"));
-            return trains;
-        };
 
 
-        return template.query(sql, mapper,  offset, topLimit);
+        Field<Integer> count = DSL.count().as("count");
+
+        return getDsl().select(HYPE_TRAINS.FIGHTER, FIGHTERS.NAME, count)
+                .from(HYPE_TRAINS)
+                .leftJoin(FIGHTERS).on(HYPE_TRAINS.FIGHTER.eq(FIGHTERS.SHERDOGURL))
+                .groupBy(HYPE_TRAINS.FIGHTER)
+                .orderBy(count.desc())
+                .offset(offset)
+                .limit(topLimit)
+                .fetch(r -> {
+                    AggregatedHypeTrain trains = new AggregatedHypeTrain();
+
+                    trains.setCount(r.get(count));
+                    trains.setFighter(r.get(HYPE_TRAINS.FIGHTER));
+                    trains.setName(r.get(FIGHTERS.NAME));
+                    return trains;
+                });
+
+//        String sql = "SELECT t.fighter as fighter, f.name as name, count(*) as count from hype_trains t LEFT JOIN fighters f ON t.fighter = f.sherdogUrl GROUP BY fighter ORDER BY count DESC LIMIT ?,?";
+//
+//        RowMapper<AggregatedHypeTrain> mapper = (resultSet, i) -> {
+//            AggregatedHypeTrain trains = new AggregatedHypeTrain();
+//
+//            trains.setCount(resultSet.getInt("count"));
+//            trains.setFighter(resultSet.getString("fighter"));
+//            trains.setName(resultSet.getString("name"));
+//            return trains;
+//        };
+
+
+//        return template.query(sql, mapper, offset, topLimit);
 
     }
 
@@ -157,11 +186,15 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
      * @return
      */
     public boolean isOnBoard(String user, String fighterUrl) {
-        String sql = "SELECT * FROM hype_trains WHERE user= ? AND fighter= ?";
-
-        List<Map<String, Object>> maps = template.queryForList(sql, user, fighterUrl);
-
-        return maps.size() == 1;
+        return getDsl().selectCount().from(HYPE_TRAINS)
+                .where(HYPE_TRAINS.USER.eq(user))
+                .and(HYPE_TRAINS.FIGHTER.eq(fighterUrl))
+                .fetchOne(0, int.class) == 1;
+//        String sql = "SELECT * FROM hype_trains WHERE user= ? AND fighter= ?";
+//
+//        List<Map<String, Object>> maps = template.queryForList(sql, user, fighterUrl);
+//
+//        return maps.size() == 1;
     }
 
 
@@ -172,15 +205,9 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
      * @return hoe many people on board
      */
     public long countForFighter(String fighter) {
-        String sql = "SELECT COUNT(1) as count FROM hype_trains WHERE fighter = ?";
-
-        List<Map<String, Object>> result = template.queryForList(sql, fighter);
-
-        if (result.size() == 1) {
-            return (long) result.get(0).get("count");
-        } else {
-            return 0;
-        }
+        return getDsl().selectCount().from(HYPE_TRAINS)
+                .where(HYPE_TRAINS.FIGHTER.eq(fighter))
+                .fetchOne(0, long.class);
     }
 
     /**
@@ -191,15 +218,24 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
      * @return
      */
     public List<HypeTrainStats> getStats(String fighterHash, int monthCount) {
-        String sql = "SELECT * FROM hype_trains_stats WHERE MD5(fighter) = ? ORDER BY `month` DESC LIMIT ?";
-
-        return template.query(sql, statsRowMapper, fighterHash, monthCount);
+        return getDsl().select().from(HYPE_TRAINS_STATS)
+                .where(DSL.md5(HYPE_TRAINS_STATS.FIGHTER).eq(fighterHash))
+                .orderBy(HYPE_TRAINS_STATS.MONTH.desc())
+                .limit(monthCount)
+                .fetch(statsRecordMapper);
     }
 
 
     public HypeTrainStats insertStats(HypeTrainStats stats) {
-        String sql = "REPLACE INTO hype_trains_stats(`month`, fighter, `count`) VALUES (?,?,?)";
-        template.update(sql, stats.getMonth(), stats.getFighter(), stats.getCount());
+
+        getDsl().insertInto(HYPE_TRAINS_STATS, HYPE_TRAINS_STATS.MONTH, HYPE_TRAINS_STATS.FIGHTER, HYPE_TRAINS_STATS.COUNT)
+                .values(stats.getMonth(), stats.getFighter(), stats.getCount())
+                .onDuplicateKeyUpdate()
+                .set(HYPE_TRAINS_STATS.MONTH, stats.getMonth())
+                .set(HYPE_TRAINS_STATS.FIGHTER, stats.getFighter())
+                .set(HYPE_TRAINS_STATS.COUNT, stats.getCount())
+                .execute();
+
         return stats;
     }
 

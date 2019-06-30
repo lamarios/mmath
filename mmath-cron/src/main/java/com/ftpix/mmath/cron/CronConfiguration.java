@@ -12,13 +12,18 @@ import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import java.text.ParseException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @Configuration
@@ -32,6 +37,11 @@ public class CronConfiguration {
         ApplicationContext context =
                 new AnnotationConfigApplicationContext(CronConfiguration.class);
 
+    }
+
+    @Bean
+    public TaskScheduler taskScheduler() {
+        return new ConcurrentTaskScheduler();
     }
 
 }

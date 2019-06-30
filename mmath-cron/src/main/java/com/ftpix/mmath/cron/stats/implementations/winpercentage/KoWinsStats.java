@@ -15,7 +15,7 @@ public class KoWinsStats extends WinPercentageStats {
     protected StatsCategory getStatsCategory() {
         StatsCategory cat = new StatsCategory();
         cat.setId("KO_WIN_PERCENT");
-        cat.setDescription("Highest percentage of wins by KO / TKO for fighters with at least 10 wins");
+        cat.setDescription("Highest number of wins wins by KO / TKO for fighters with at least 10 wins");
         cat.setName("Hands of stone");
         cat.setOrder(3);
         return cat;

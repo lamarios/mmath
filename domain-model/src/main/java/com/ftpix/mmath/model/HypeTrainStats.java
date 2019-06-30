@@ -2,7 +2,7 @@ package com.ftpix.mmath.model;
 
 public class HypeTrainStats {
     private String month, fighter;
-    private int count;
+    private long count;
 
     public String getMonth() {
         return month;
@@ -20,11 +20,11 @@ public class HypeTrainStats {
         this.fighter = fighter;
     }
 
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(long count) {
         this.count = count;
     }
 }

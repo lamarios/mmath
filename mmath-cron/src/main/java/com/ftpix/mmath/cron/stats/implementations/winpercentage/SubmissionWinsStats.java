@@ -14,7 +14,7 @@ public class SubmissionWinsStats extends WinPercentageStats {
     protected StatsCategory getStatsCategory() {
         StatsCategory cat = new StatsCategory();
         cat.setId("SUB_WIN_PERCENT");
-        cat.setDescription("Highest percentage of wins by submission for fighters with at least 10 wins");
+        cat.setDescription("Highest number of wins by submission for fighters with at least 10 wins");
         cat.setName("Gracie's blood");
         cat.setOrder(4);
         return cat;

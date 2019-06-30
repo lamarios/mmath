@@ -2,21 +2,22 @@ package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.mmath.model.Utils;
-import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Organizations;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mysql.cj.x.protobuf.MysqlxCrud;
+import org.jooq.Record;
+import org.jooq.RecordMapper;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.List;
 
+import static com.ftpix.mmath.dsl.Tables.ORGANIZATIONS;
+
 @Component
-public class OrganizationDAO extends  DAO<MmathOrganization, String> {
+public class OrganizationDAO extends DAO<MmathOrganization, String> {
 
     @Autowired
     private JdbcTemplate template;
@@ -28,11 +29,11 @@ public class OrganizationDAO extends  DAO<MmathOrganization, String> {
             Utils.cleanUrl(Organizations.ONE_FC.url)
     };
 
-    private final RowMapper<MmathOrganization> rowMapper = (rs, i) -> {
+    private final RecordMapper<Record, MmathOrganization>  recordMapper = r -> {
         MmathOrganization o = new MmathOrganization();
-        o.setSherdogUrl(rs.getString("sherdogUrl"));
-        o.setLastUpdate(LocalDateTime.parse(rs.getString("lastUpdate"), DAO.TIME_FORMAT));
-        o.setName(rs.getString("name"));
+        o.setSherdogUrl(r.get(ORGANIZATIONS.SHERDOGURL));
+        o.setLastUpdate(r.get(ORGANIZATIONS.LASTUPDATE).toLocalDateTime());
+        o.setName(r.get(ORGANIZATIONS.NAME));
         return o;
     };
 
@@ -59,43 +60,47 @@ public class OrganizationDAO extends  DAO<MmathOrganization, String> {
 
     @Override
     public MmathOrganization getById(String id) {
-        String query = "SELECT * FROM organizations WHERE sherdogUrl = ?";
-
-        List<MmathOrganization> query1 = template.query(query, rowMapper, id);
-
-        return query1.size() == 1 ? query1.get(0) : null;
+        return getDsl().select().from(ORGANIZATIONS)
+                .where(ORGANIZATIONS.SHERDOGURL.eq(id))
+                .fetchOne(recordMapper);
     }
 
     @Override
     public List<MmathOrganization> getAll() {
-        String query = "SELECT * FROM organizations";
-
-        return template.query(query, rowMapper);
+        return getDsl().select().from(ORGANIZATIONS)
+                .fetch(recordMapper);
     }
 
     @Override
     public List<MmathOrganization> getBatch(int offset, int limit) {
-        String query = "SELECT * FROM organizations LIMIT ?,?";
-
-        return template.query(query, new Integer[]{offset, limit}, rowMapper);
+        return getDsl().select().from(ORGANIZATIONS)
+                .limit(limit)
+                .offset(offset)
+                .fetch(recordMapper);
     }
 
     @Override
     public String insert(MmathOrganization o) {
-        template.update("INSERT  INTO  organizations (sherdogUrl, lastUpdate, name) values (?, NOW(), ?)"
-                , o.getSherdogUrl(), o.getName());
+
+        getDsl().insertInto(ORGANIZATIONS, ORGANIZATIONS.SHERDOGURL, ORGANIZATIONS.LASTUPDATE, ORGANIZATIONS.NAME)
+                .values(o.getSherdogUrl(), new Timestamp(System.currentTimeMillis()) , o.getName())
+                .execute();
+
         return o.getSherdogUrl();
     }
 
     @Override
     public boolean update(MmathOrganization o) {
-        return template.update("UPDATE organizations SET name = ?, lastUpdate = NOW() WHERE sherdogUrl = ?"
-                , o.getName(), o.getSherdogUrl()) == 1;
+        return getDsl().update(ORGANIZATIONS)
+                .set(ORGANIZATIONS.NAME, o.getName())
+                .set(ORGANIZATIONS.LASTUPDATE, DSL.now())
+                .where(ORGANIZATIONS.SHERDOGURL.eq(o.getSherdogUrl()))
+                .execute() == 1;
     }
 
     @Override
     public boolean deleteById(String id) {
-        return template.update("DELETE  FROM organizations WHERE sherdogUrl = ?", id) == 1;
+        return getDsl().delete(ORGANIZATIONS).where(ORGANIZATIONS.SHERDOGURL.eq(id)).execute() == 1;
     }
 
 
@@ -105,9 +110,10 @@ public class OrganizationDAO extends  DAO<MmathOrganization, String> {
      * @return
      */
     public List<MmathOrganization> getOrganizationsInEventFilter() {
-        String query = "SELECT * FROM organizations WHERE sherdogUrl in (?,?,?,?)";
 
-        return template.query(query, rowMapper, EVENT_FILTER_ORGANIZATIONS);
+        return getDsl().select().from(ORGANIZATIONS)
+                .where(ORGANIZATIONS.SHERDOGURL.in(EVENT_FILTER_ORGANIZATIONS))
+                .fetch(recordMapper);
     }
 
 }

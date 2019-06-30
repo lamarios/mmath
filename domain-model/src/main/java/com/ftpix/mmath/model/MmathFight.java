@@ -45,6 +45,7 @@ public class MmathFight {
     @Expose
     private LocalDateTime lastUpdate = LocalDateTime.now();
 
+
     public long getId() {
         return id;
     }
