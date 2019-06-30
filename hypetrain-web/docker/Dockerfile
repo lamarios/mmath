@@ -8,5 +8,5 @@ WORKDIR /usr/src/app
 
 EXPOSE 15678
 
-CMD java -jar app.jar
+CMD java -Xmx256M -jar app.jar
 

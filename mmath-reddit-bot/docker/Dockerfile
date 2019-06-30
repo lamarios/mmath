@@ -5,5 +5,5 @@ COPY ./*.jar /usr/src/app/app.jar
 
 WORKDIR /usr/src/app
 
-CMD java -jar app.jar
+CMD java -Xmx128M -jar app.jar
 
