@@ -290,28 +290,26 @@ public class HypeTrainController {
 
 
     @SparkGet(value = "/api/history/:fighter", transformer = GsonTransformer.class)
-    public Map<String, Integer> getFighterHistory(@SparkParam("fighter") String fighter, @SparkQueryParam("count") int count) {
+    public Map<String, Long> getFighterHistory(@SparkParam("fighter") String fighter, @SparkQueryParam("count") int count) {
         if (count <= 5) {
             count = 5;
         }
 
         Function<LocalDate, String> dateToString = localDate -> localDate.getYear() + "-" + String.format("%02d", localDate.getMonthValue());
 
-        Map<String, Integer> results = new TreeMap<>();
+        Map<String, Long> results = new TreeMap<>();
 
 
         //Initializing date map
         LocalDate date = LocalDate.now();
 
         for (int i = 0; i < count; i++) {
-            results.put(dateToString.apply(date.minusMonths(i)), 0);
+            results.put(dateToString.apply(date.minusMonths(i)), 0L);
         }
 
         hypeTrainDAO.getStats(fighter, count)
                 .stream()
-                .forEach(s -> {
-                    results.put(s.getMonth(), s.getCount());
-                });
+                .forEach(s -> results.put(s.getMonth(), s.getCount()));
 
 
         return results;
