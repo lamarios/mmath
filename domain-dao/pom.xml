@@ -16,6 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jooq.skip>true</jooq.skip>
     </properties>
 
     <dependencies>
@@ -130,6 +131,7 @@
                                 <user>root</user>
                                 <password>password</password>
                             </jdbc>
+                            <skip>${jooq.skip}</skip>
 
                             <generator>
                                 <!-- The default code generator. You can override this one, to generate your own code style.
