@@ -46,15 +46,12 @@ public class StatsRefresher {
     @Scheduled(cron = "0 0 20 ? * TUE")
     public void process() {
 
-//        new MostFightStats(dao).process();
-//        new GlassCannonStats(dao).process();// to fix
-//        new LongestCareer(dao).process();
-//        mostFightStats.process();
-//        glassCannonStats.process();
-//        longestCareer.process();
-//        koWinsStats.process();
-//        decisionWinsStats.process();
-//        submissionWinsStats.process();
+        mostFightStats.process();
+        glassCannonStats.process();
+        longestCareer.process();
+        koWinsStats.process();
+        decisionWinsStats.process();
+        submissionWinsStats.process();
 
 
         logger.info("Refreshing fighter search rank");
