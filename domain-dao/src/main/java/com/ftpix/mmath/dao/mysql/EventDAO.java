@@ -137,7 +137,7 @@ public class EventDAO extends DAO<MmathEvent, String> {
 
         getDsl().insertInto(EVENTS)
                 .set(EVENTS.SHERDOGURL, e.getSherdogUrl())
-                .set(EVENTS.DATE, new Timestamp(e.getDate().toEpochSecond()))
+                .set(EVENTS.DATE, new Timestamp(e.getDate().toInstant().toEpochMilli()))
                 .set(EVENTS.ORGANIZATION_ID, e.getOrganization().getSherdogUrl())
                 .set(EVENTS.NAME, e.getName())
                 .set(EVENTS.LASTUPDATE, DSL.now())
@@ -149,7 +149,7 @@ public class EventDAO extends DAO<MmathEvent, String> {
     @Override
     public boolean update(MmathEvent e) {
         return getDsl().update(EVENTS)
-                .set(EVENTS.DATE, new Timestamp(e.getDate().toEpochSecond()))
+                .set(EVENTS.DATE, new Timestamp(e.getDate().toInstant().toEpochMilli()))
                 .set(EVENTS.ORGANIZATION_ID, e.getOrganization().getSherdogUrl())
                 .set(EVENTS.NAME, e.getName())
                 .set(EVENTS.LASTUPDATE, DSL.now())
