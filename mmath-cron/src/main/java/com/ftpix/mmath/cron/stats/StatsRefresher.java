@@ -46,11 +46,11 @@ public class StatsRefresher {
     @Scheduled(cron = "0 0 20 ? * TUE")
     public void process() {
 
-        mostFightStats.process();
-        glassCannonStats.process();
-        longestCareer.process();
-        koWinsStats.process();
-        decisionWinsStats.process();
+//        mostFightStats.process();
+//        glassCannonStats.process();
+//        longestCareer.process();
+//        koWinsStats.process();
+//        decisionWinsStats.process();
         submissionWinsStats.process();
 
 

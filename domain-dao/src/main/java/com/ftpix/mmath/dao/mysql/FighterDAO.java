@@ -35,9 +35,7 @@ public class FighterDAO extends DAO<MmathFighter, String> {
         f.setLastUpdate(record.get(FIGHTERS.LASTUPDATE).toLocalDateTime());
         f.setName(record.get(FIGHTERS.NAME));
 
-        Optional.ofNullable(record.get(FIGHTERS.BIRTHDAY)).ifPresent(s -> {
-            f.setBirthday(s.toLocalDate());
-        });
+        Optional.ofNullable(record.get(FIGHTERS.BIRTHDAY)).ifPresent(s -> f.setBirthday(s.toLocalDate()));
         f.setDraws(record.get(FIGHTERS.DRAWS));
         f.setLosses(record.get(FIGHTERS.LOSSES));
         f.setWins(record.get(FIGHTERS.WINS));
@@ -45,10 +43,11 @@ public class FighterDAO extends DAO<MmathFighter, String> {
         f.setHeight(record.get(FIGHTERS.HEIGHT));
         f.setNickname(record.get(FIGHTERS.NICKNAME));
         f.setNc(record.get(FIGHTERS.NC));
-        f.setSearchRank(record.get(FIGHTERS.SEARCH_RANK));
+
+        Optional.ofNullable(record.get(FIGHTERS.SEARCH_RANK)).ifPresent(f::setSearchRank);
 
         f.setWinKo(record.get(FIGHTERS.WINKO));
-        f.setWinSub(record.get(FIGHTERS.WINS));
+        f.setWinSub(record.get(FIGHTERS.WINSUB));
         f.setWinDec(record.get(FIGHTERS.WINDEC));
         f.setLossKo(record.get(FIGHTERS.LOSSKO));
         f.setLossSub(record.get(FIGHTERS.LOSSSUB));

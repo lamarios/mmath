@@ -20,7 +20,8 @@ public class SpecialTestCases {
     public void testSpecialCases() throws IOException, ParseException, SherdogParserException {
         Sherdog sherdog = new Sherdog.Builder().build();
 
-        MmathFighter fighter = MmathFighter.fromSherdong(sherdog.getFighter("http://www.sherdog.com/fighter/Johil-de-Oliveira-6"));
+        MmathFighter fighter = MmathFighter.fromSherdong(sherdog.getFighter("https://www.sherdog.com/fighter/Alistair-Overeem-461"));
+        System.out.println(fighter);
 
 
     }
