@@ -7,15 +7,12 @@ import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
-import com.ftpix.sherdogparser.models.FightResult;
-import com.ftpix.sherdogparser.models.FightType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,13 +22,12 @@ public abstract class WinPercentageStats extends StatsProcessor {
     }
 
     public enum Condition {
-        KO(f -> f.getWinMethod() != null && f.getWinMethod().contains("KO"), "%d out of %d fights  won by KO/TKO", "", MmathFighter::getWinKo),
-        SUBMISSION(f -> f.getWinMethod() != null && f.getWinMethod().toLowerCase().contains("submission"), "%d out of %d fights won by submission", "", MmathFighter::getWinSub),
-        DECISION(f -> f.getWinMethod() != null && f.getWinMethod().toLowerCase().contains("decision"), "%d out od %d fights won by decision", "", MmathFighter::getWinDec),
+        KO( "%d out of %d wins  won by KO/TKO", "", MmathFighter::getWinKo),
+        SUBMISSION( "%d out of %d wins won by submission", "", MmathFighter::getWinSub),
+        DECISION( "%d out of %d wins won by decision", "", MmathFighter::getWinDec),
         ;
 
-        Condition(Predicate<MmathFight> condition, String shortDescription, String longDescription, Function<MmathFighter, Integer> getWinsOfType) {
-            this.predicate = condition;
+        Condition(String shortDescription, String longDescription, Function<MmathFighter, Integer> getWinsOfType) {
             this.shortDescription = shortDescription;
             this.longDescription = longDescription;
             this.getWinsOfType = getWinsOfType;
@@ -72,7 +68,7 @@ public abstract class WinPercentageStats extends StatsProcessor {
 
                                 if (total1 == total2) {
                                     // if fighters have the same, we put first the one with the least fights as the percentage is higher
-                                    return Integer.compare(countFights(f1), countFights(f2));
+                                    return Integer.compare(f1.getWins(), f2.getWins());
                                 } else {
                                     return Integer.compare(total2, total1); // more of condition first first
                                 }
@@ -90,7 +86,7 @@ public abstract class WinPercentageStats extends StatsProcessor {
 
 
         if (top100.size() > 0) {
-            int reference = top100.get(0).getWinKo();
+            int reference = condition.getWinsOfType.apply(top100.get(0));
 
 
             return top100.stream()
@@ -98,7 +94,7 @@ public abstract class WinPercentageStats extends StatsProcessor {
                         StatsEntry entry = new StatsEntry();
 
                         entry.setFighter(f);
-                        entry.setTextToShow(String.format(condition.shortDescription, condition.getWinsOfType.apply(f), countFights(f)));
+                        entry.setTextToShow(String.format(condition.shortDescription, condition.getWinsOfType.apply(f), f.getWins()));
 
 
                         double percent = ((double) condition.getWinsOfType.apply(f) / (double) reference) * 100;
@@ -113,8 +109,5 @@ public abstract class WinPercentageStats extends StatsProcessor {
         return new ArrayList<>();
     }
 
-    private int countFights(MmathFighter f) {
-        return f.getWins() + f.getLosses() + f.getNc() + f.getDraws();
-    }
 
 }
