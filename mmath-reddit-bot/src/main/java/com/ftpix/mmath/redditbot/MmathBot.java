@@ -4,6 +4,7 @@ import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
+import net.dean.jraw.RedditClient;
 import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.models.Comment;
 import net.dean.jraw.oauth.Credentials;
@@ -50,34 +51,16 @@ public class MmathBot {
     private Logger logger = LogManager.getLogger();
 
 
-    @Value("${REDDIT_CLIENT_ID}")
-    private String redditClientId;
-
-    @Value("${REDDIT_SECRET}")
-    private String redditSecret;
-
-
-    @Value("${REDDIT_USERNAME}")
-    private String redditUsername;
-
-
-    @Value("${REDDIT_PASSWORD}")
-    private String redditPassword;
-
-
     @Value("${REDDIT_SUB}")
     private String subreddit;
 
 
-    @Value("${REDDIT_BOT_OWNER}")
-    private String redditBotOwner;
-
-
+    @Autowired
+    private RedditClient redditClient;
 
 
     @Autowired
     private FighterDAO fighterDAO;
-
 
 
     @Autowired
@@ -93,19 +76,14 @@ public class MmathBot {
 
     @PostConstruct
     private void startBot() {
-        Credentials oauthCreds = Credentials.script(redditUsername, redditPassword, redditClientId, redditSecret);
-
-// Create a unique User-Agent for our bot
-        UserAgent userAgent = new UserAgent("linux-docker", "science.mmathbro.bot", "1.0.0", redditBotOwner);
 
 //        logger.info("Creating reddit bot using account: {}, clientid:{} redditSecret:{} redditPassword:{}", redditUsername, redditClientId, redditSecret, redditPassword);
-        bot = new RedditBot.Builder(oauthCreds, userAgent)
+        bot = new RedditBot.Builder(redditClient)
                 .followingSubReddit(subreddit)
                 .withPullDelay(60_000)
                 .filterComments(c -> c.getBody().trim().matches(PATTERN))
                 .onNewComment(this::processComment)
                 .build();
-
         bot.startAsync();
     }
 
@@ -159,7 +137,7 @@ public class MmathBot {
 
                 if (reply.length() > 0) {
                     logger.info("Replying {}", reply);
-                    bot.getClient().comment(comment.getId()).reply(reply);
+                    redditClient.comment(comment.getId()).reply(reply);
                 }
 
 
@@ -220,7 +198,7 @@ public class MmathBot {
 
                     String reply = String.format(MMATH_BOT_REPLY, f1.getName(), f2.getName(), f1.getIdAsHash(), f2.getIdAsHash(), f1Vsf2Result, f2Vsf1Result).replace("\n", NEW_LINE);
                     logger.info("Replying {}", reply);
-                    bot.getClient().comment(comment.getId()).reply(reply);
+                    redditClient.comment(comment.getId()).reply(reply);
 
                 } else {
                     String reply = "";
@@ -232,7 +210,7 @@ public class MmathBot {
 
                     if (reply.length() > 0) {
                         logger.info("Replying {}", reply);
-                        bot.getClient().comment(comment.getId()).reply(reply);
+                        redditClient.comment(comment.getId()).reply(reply);
                     }
                     logger.info("No fighters...");
                 }

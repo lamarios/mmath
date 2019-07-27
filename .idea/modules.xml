@@ -17,6 +17,7 @@
       <module fileurl="file://$PROJECT_DIR$/domain-dao/domain-dao.iml" filepath="$PROJECT_DIR$/domain-dao/domain-dao.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain-model/domain-model.iml" filepath="$PROJECT_DIR$/domain-model/domain-model.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain-mq/domain-mq.iml" filepath="$PROJECT_DIR$/domain-mq/domain-mq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/domain-reddit/domainreddit.iml" filepath="$PROJECT_DIR$/domain-reddit/domainreddit.iml" />
       <module fileurl="file://$PROJECT_DIR$/hypetrain-web/hypetrain-web.iml" filepath="$PROJECT_DIR$/hypetrain-web/hypetrain-web.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath.iml" filepath="$PROJECT_DIR$/mmath.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath-config/mmath-config.iml" filepath="$PROJECT_DIR$/mmath-config/mmath-config.iml" />

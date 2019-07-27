@@ -127,7 +127,7 @@
                         <configuration>
                             <jdbc>
                                 <driver>com.mysql.jdbc.Driver</driver>
-                                <url>jdbc:mysql://k8node1:30336/mmath?useSSL=false</url>
+                                <url>jdbc:mysql://k8node3:30336/mmath?useSSL=false</url>
                                 <user>root</user>
                                 <password>password</password>
                             </jdbc>
@@ -140,6 +140,13 @@
                                      - org.jooq.codegen.ScalaGenerator
                                      Defaults to org.jooq.codegen.JavaGenerator -->
                                 <name>org.jooq.codegen.JavaGenerator</name>
+
+<!--                                <forcedTypes>
+                                    <forcedType>
+                                        <name>BOOLEAN</name>
+                                        <types>(?i:TINYINT)</types>
+                                    </forcedType>
+                                </forcedTypes>-->
 
                                 <database>
                                     <!-- The database type. The format here is:
