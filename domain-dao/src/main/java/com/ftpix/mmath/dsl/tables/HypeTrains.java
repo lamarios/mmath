@@ -40,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class HypeTrains extends TableImpl<HypeTrainsRecord> {
 
-    private static final long serialVersionUID = 2074690822;
+    private static final long serialVersionUID = -383820967;
 
     /**
      * The reference instance of <code>mmath.hype_trains</code>
@@ -64,6 +64,16 @@ public class HypeTrains extends TableImpl<HypeTrainsRecord> {
      * The column <code>mmath.hype_trains.fighter</code>.
      */
     public final TableField<HypeTrainsRecord, String> FIGHTER = createField("fighter", org.jooq.impl.SQLDataType.VARCHAR(1000).nullable(false), this, "");
+
+    /**
+     * The column <code>mmath.hype_trains.nextFight</code>.
+     */
+    public final TableField<HypeTrainsRecord, Long> NEXTFIGHT = createField("nextFight", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>mmath.hype_trains.notified</code>.
+     */
+    public final TableField<HypeTrainsRecord, Byte> NOTIFIED = createField("notified", org.jooq.impl.SQLDataType.TINYINT.defaultValue(org.jooq.impl.DSL.inline("0", org.jooq.impl.SQLDataType.TINYINT)), this, "");
 
     /**
      * Create a <code>mmath.hype_trains</code> table reference
@@ -111,7 +121,7 @@ public class HypeTrains extends TableImpl<HypeTrainsRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.HYPE_TRAINS_PRIMARY);
+        return Arrays.<Index>asList(Indexes.HYPE_TRAINS_HYPE_TRAINS_FIGHTS_ID_FK, Indexes.HYPE_TRAINS_PRIMARY);
     }
 
     /**
@@ -128,6 +138,18 @@ public class HypeTrains extends TableImpl<HypeTrainsRecord> {
     @Override
     public List<UniqueKey<HypeTrainsRecord>> getKeys() {
         return Arrays.<UniqueKey<HypeTrainsRecord>>asList(Keys.KEY_HYPE_TRAINS_PRIMARY);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ForeignKey<HypeTrainsRecord, ?>> getReferences() {
+        return Arrays.<ForeignKey<HypeTrainsRecord, ?>>asList(Keys.HYPE_TRAINS_FIGHTS_ID_FK);
+    }
+
+    public Fights fights() {
+        return new Fights(this, Keys.HYPE_TRAINS_FIGHTS_ID_FK);
     }
 
     /**

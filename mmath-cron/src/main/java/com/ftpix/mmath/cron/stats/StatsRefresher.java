@@ -1,5 +1,6 @@
 package com.ftpix.mmath.cron.stats;
 
+import com.ftpix.mmath.cron.search.SearchRank;
 import com.ftpix.mmath.cron.stats.implementations.GlassCannonStats;
 import com.ftpix.mmath.cron.stats.implementations.LongestCareer;
 import com.ftpix.mmath.cron.stats.implementations.MostFightStats;
@@ -36,6 +37,8 @@ public class StatsRefresher {
     @Autowired
     private SubmissionWinsStats submissionWinsStats;
 
+    @Autowired
+    private SearchRank searchRank;
 
     protected Logger logger = LogManager.getLogger();
 
@@ -46,16 +49,16 @@ public class StatsRefresher {
     @Scheduled(cron = "0 0 20 ? * TUE")
     public void process() {
 
-        mostFightStats.process();
-        glassCannonStats.process();
-        longestCareer.process();
-        koWinsStats.process();
-        decisionWinsStats.process();
-        submissionWinsStats.process();
+//        mostFightStats.process();
+//        glassCannonStats.process();
+//        longestCareer.process();
+//        koWinsStats.process();
+//        decisionWinsStats.process();
+//        submissionWinsStats.process();
 
 
         logger.info("Refreshing fighter search rank");
-        fighterDAO.setAllFighterSearchRank();
+        searchRank.process();
         logger.info("Fighter search rank updated");
 
     }

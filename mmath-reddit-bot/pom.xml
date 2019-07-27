@@ -19,12 +19,6 @@
     <dependencies>
         <dependency>
             <groupId>com.ftpix</groupId>
-            <artifactId>build-reddit</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>com.ftpix</groupId>
             <artifactId>build-spring</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
@@ -34,6 +28,11 @@
         <dependency>
             <groupId>com.ftpix</groupId>
             <artifactId>domain-dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ftpix</groupId>
+            <artifactId>domain-reddit</artifactId>
             <version>${project.version}</version>
         </dependency>
 

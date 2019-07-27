@@ -6,6 +6,7 @@ import com.ftpix.mmath.cron.hypetrain.HypeTrainStatsGeneration;
 import com.ftpix.mmath.cron.stats.StatsRefresher;
 import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.mq.MqConfiguration;
+import com.ftpix.mmath.reddit.RedditConfiguration;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
@@ -27,7 +28,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @Configuration
-@Import({DaoConfiguration.class, MqConfiguration.class})
+@Import({DaoConfiguration.class, MqConfiguration.class, RedditConfiguration.class})
 @ComponentScan("com.ftpix.mmath")
 @EnableScheduling
 public class CronConfiguration {

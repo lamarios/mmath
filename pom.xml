@@ -29,6 +29,7 @@
         <module>mmath-cron</module>
         <module>build-mq</module>
         <module>domain-mq</module>
+        <module>domain-reddit</module>
     </modules>
     <packaging>pom</packaging>
 

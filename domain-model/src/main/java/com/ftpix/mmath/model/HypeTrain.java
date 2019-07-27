@@ -9,6 +9,9 @@ public class HypeTrain {
     private String user;
     private String fighterId;
 
+    private boolean notified;
+    private Long nextFight;
+
     @Expose
     private String fighterName;
 
@@ -45,5 +48,21 @@ public class HypeTrain {
     @ExposeMethodResult("id")
     public String getIdAsHash() {
         return DigestUtils.md5Hex(fighterId);
+    }
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    public void setNotified(boolean notified) {
+        this.notified = notified;
+    }
+
+    public Long getNextFight() {
+        return nextFight;
+    }
+
+    public void setNextFight(Long nextFight) {
+        this.nextFight = nextFight;
     }
 }

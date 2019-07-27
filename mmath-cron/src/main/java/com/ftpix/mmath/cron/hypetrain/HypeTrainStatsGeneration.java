@@ -16,7 +16,6 @@ import java.time.LocalDate;
 
 @Component
 public class HypeTrainStatsGeneration {
-
     protected Logger logger = LogManager.getLogger();
 
 

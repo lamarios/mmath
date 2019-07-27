@@ -110,6 +110,14 @@ public class FighterDAO extends DAO<MmathFighter, String> {
         }
 
 
+
+        try {
+            template.execute("ALTER TABLE fighters MODIFY COLUMN search_rank INT(6) DEFAULT 999999");
+        } catch (Exception e) {
+            //probably already exist
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -154,6 +162,7 @@ public class FighterDAO extends DAO<MmathFighter, String> {
                 .set(FIGHTERS.LOSSKO, f.getLossKo())
                 .set(FIGHTERS.LOSSSUB, f.getLossSub())
                 .set(FIGHTERS.LOSSDEC, f.getLossDec())
+                .set(FIGHTERS.SEARCH_RANK, f.getSearchRank())
                 .execute();
 
         return f.getSherdogUrl();
@@ -179,6 +188,7 @@ public class FighterDAO extends DAO<MmathFighter, String> {
                 .set(FIGHTERS.LOSSKO, f.getLossKo())
                 .set(FIGHTERS.LOSSSUB, f.getLossSub())
                 .set(FIGHTERS.LOSSDEC, f.getLossDec())
+                .set(FIGHTERS.SEARCH_RANK, f.getSearchRank())
                 .where(FIGHTERS.SHERDOGURL.eq(f.getSherdogUrl()))
                 .execute() == 1;
 

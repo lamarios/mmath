@@ -20,8 +20,6 @@ import java.util.function.Predicate;
 
 public class RedditBot {
     public static final int PAGE_SIZE = 100;
-    private final Credentials credentials;
-    private final UserAgent userAgent;
     private String subReddit = "all";
     private boolean running = false;
     private Consumer<Comment> onNewComment;
@@ -30,9 +28,10 @@ public class RedditBot {
     private long sleepDelay = 10000;
     private Logger logger = LogManager.getLogger();
 
-    private RedditBot(Credentials credentials, UserAgent userAgent) {
-        this.credentials = credentials;
-        this.userAgent = userAgent;
+   private final RedditClient client;
+
+    private RedditBot(RedditClient client) {
+        this.client = client;
     }
 
 
@@ -72,10 +71,6 @@ public class RedditBot {
         running = false;
     }
 
-    public RedditClient getClient() {
-        return OAuthHelper.automatic(new OkHttpNetworkAdapter(userAgent), credentials);
-    }
-
     /**
      * Generate some sort of unique identifier for a comment
      * @param c
@@ -89,7 +84,6 @@ public class RedditBot {
      * Will fetch the comments until the last seen
      */
     private void fetchComments() {
-        RedditClient client = getClient();
         final BarebonesPaginator.Builder<Comment> commentsBuilder = client.subreddit(subReddit).comments();
 
         //if last seen doesn't exist, we just take the last comment and do nothing, just set last seen
@@ -162,8 +156,8 @@ public class RedditBot {
 
         private final RedditBot bot;
 
-        public Builder(Credentials credentials, UserAgent userAgent) {
-            bot = new RedditBot(credentials, userAgent);
+        public Builder(RedditClient client) {
+            bot = new RedditBot(client);
         }
 
         /**

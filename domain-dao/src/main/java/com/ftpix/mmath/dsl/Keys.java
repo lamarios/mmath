@@ -23,6 +23,7 @@ import com.ftpix.mmath.dsl.tables.records.StatsEntriesRecord;
 
 import javax.annotation.Generated;
 
+import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
@@ -67,6 +68,7 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<HypeTrainsRecord, FightsRecord> HYPE_TRAINS_FIGHTS_ID_FK = ForeignKeys0.HYPE_TRAINS_FIGHTS_ID_FK;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -87,5 +89,9 @@ public class Keys {
         public static final UniqueKey<OrganizationsRecord> KEY_ORGANIZATIONS_PRIMARY = Internal.createUniqueKey(Organizations.ORGANIZATIONS, "KEY_organizations_PRIMARY", Organizations.ORGANIZATIONS.SHERDOGURL);
         public static final UniqueKey<StatsCategoriesRecord> KEY_STATS_CATEGORIES_PRIMARY = Internal.createUniqueKey(StatsCategories.STATS_CATEGORIES, "KEY_stats_categories_PRIMARY", StatsCategories.STATS_CATEGORIES.ID);
         public static final UniqueKey<StatsEntriesRecord> KEY_STATS_ENTRIES_PRIMARY = Internal.createUniqueKey(StatsEntries.STATS_ENTRIES, "KEY_stats_entries_PRIMARY", StatsEntries.STATS_ENTRIES.ID);
+    }
+
+    private static class ForeignKeys0 {
+        public static final ForeignKey<HypeTrainsRecord, FightsRecord> HYPE_TRAINS_FIGHTS_ID_FK = Internal.createForeignKey(com.ftpix.mmath.dsl.Keys.KEY_FIGHTS_PRIMARY, HypeTrains.HYPE_TRAINS, "hype_trains_fights_id_fk", HypeTrains.HYPE_TRAINS.NEXTFIGHT);
     }
 }

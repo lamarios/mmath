@@ -46,7 +46,9 @@ public class FightDAO extends DAO<MmathFight, Long> {
         f.setEvent(e);
 
         Optional.ofNullable(r.get(FIGHTS.DATE)).ifPresent(s -> {
-            e.setDate(ZonedDateTime.ofInstant(s.toLocalDateTime().toInstant(ZoneOffset.UTC), ZoneId.systemDefault()));
+            ZonedDateTime date = ZonedDateTime.ofInstant(s.toLocalDateTime().toInstant(ZoneOffset.UTC), ZoneId.systemDefault());
+            e.setDate(date);
+            f.setDate(date);
         });
 
         Optional.ofNullable(r.get(FIGHTS.RESULT)).ifPresent(w -> {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.ftpix.mmath.dsl.Tables.EVENTS;
+import static com.ftpix.mmath.dsl.Tables.ORGANIZATIONS;
 
 @Component
 public class EventDAO extends DAO<MmathEvent, String> {
@@ -35,7 +36,7 @@ public class EventDAO extends DAO<MmathEvent, String> {
         });
 
         MmathOrganization org = new MmathOrganization();
-        org.setSherdogUrl(r.get(EVENTS.SHERDOGURL));
+        org.setSherdogUrl(r.get(EVENTS.ORGANIZATION_ID));
         e.setOrganization(org);
 
         e.setName(r.get(EVENTS.NAME));

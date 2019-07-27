@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +71,10 @@ public class HypeTrainController {
     private Logger logger = LogManager.getLogger();
 
 
+    @PostConstruct
+    public void setUrl(){
+        redditRedirectUrl=redditRedirectUrl+"/post-login";
+    }
 
 
     @SparkGet("/login")
@@ -80,7 +85,7 @@ public class HypeTrainController {
         String random = UUID.randomUUID().toString();
         req.session().attribute(SESSION_LOGIN_STRING, random);
 
-        String url = "https://www.reddit.com/api/v1/authorize.compact?client_id=" + redditClientId + "&response_type=code&state=" + random + "&redirect_uri=" + redditRedirectUrl + "&duration=temporary&scope=identity";
+        String url = "https://www.reddit.com/api/v1/authorize.compact?client_id=" + redditClientId + "&response_type=code&state=" + random + "&redirect_uri=" + redditRedirectUrl+ "&duration=temporary&scope=identity";
 
         res.redirect(url);
     }

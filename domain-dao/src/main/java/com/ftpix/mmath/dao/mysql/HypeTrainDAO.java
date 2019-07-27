@@ -43,6 +43,8 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
         HypeTrain train = new HypeTrain(null, null);
         train.setFighterId(r.get(HYPE_TRAINS.FIGHTER));
         train.setUser(r.get(HYPE_TRAINS.USER));
+        train.setNextFight(r.get(HYPE_TRAINS.NEXTFIGHT));
+        train.setNotified(r.get(HYPE_TRAINS.NOTIFIED) == 1);
 
         Optional.ofNullable(r.get(FIGHTERS.NAME)).ifPresent(train::setFighterName);
 
@@ -53,25 +55,44 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
     @Override
     @PostConstruct
     public void init() {
-        String createTable = "CREATE TABLE IF NOT EXISTS hype_trains" +
-                "(" +
-                "    user VARCHAR(255) NOT NULL," +
-                "    fighter VARCHAR(1000) NOT NULL," +
-                "    CONSTRAINT hype_trains_pk PRIMARY KEY (user, fighter)" +
-                ");";
+        try {
+            String createTable = "CREATE TABLE IF NOT EXISTS hype_trains" +
+                    "(" +
+                    "    user VARCHAR(255) NOT NULL," +
+                    "    fighter VARCHAR(1000) NOT NULL," +
+                    "    CONSTRAINT hype_trains_pk PRIMARY KEY (user, fighter)" +
+                    ");";
 
-        template.execute(createTable);
+            template.execute(createTable);
 
 
-        createTable = "CREATE TABLE IF NOT EXISTS hype_trains_stats" +
-                "(" +
-                "    `month` VARCHAR (7) NOT NULL," +
-                "    fighter VARCHAR(1000) NOT NULL," +
-                "    `count` BIGINT NOT NULL DEFAULT 0, " +
-                "    CONSTRAINT hype_trains_stats_pk PRIMARY KEY (`month`, fighter)" +
-                ");";
+            createTable = "CREATE TABLE IF NOT EXISTS hype_trains_stats" +
+                    "(" +
+                    "    `month` VARCHAR (7) NOT NULL," +
+                    "    fighter VARCHAR(1000) NOT NULL," +
+                    "    `count` BIGINT NOT NULL DEFAULT 0, " +
+                    "    CONSTRAINT hype_trains_stats_pk PRIMARY KEY (`month`, fighter)" +
+                    ");";
 
-        template.execute(createTable);
+            template.execute(createTable);
+        } catch (Exception e) {
+
+        }
+
+
+        try {
+            String alterTable = "alter table hype_trains add nextFight BIGINT null;";
+
+            template.execute(alterTable);
+            alterTable = "alter table hype_trains add notified BOOLEAN default FALSE null;";
+            template.execute(alterTable);
+
+            alterTable = "alter table hype_trains add constraint hype_trains_fights_id_fk foreign key (nextFight) references fights (id);";
+            template.execute(alterTable);
+        } catch (Exception e) {
+
+        }
+
 
     }
 
@@ -94,6 +115,13 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
                 .fetch(recordMapper);
     }
 
+   public List<String> getAllUsers(int offset, int limit){
+       return getDsl().selectDistinct(HYPE_TRAINS.USER).from(HYPE_TRAINS)
+               .offset(offset)
+               .limit(limit)
+               .fetch(record -> record.get(HYPE_TRAINS.USER, String.class));
+   }
+
     @Override
     public HypeTrain insert(HypeTrain object) {
 
@@ -106,9 +134,15 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
     }
 
     @Override
-    public boolean update(HypeTrain object) {
-        throw new UnsupportedOperationException("Hype trains can't be updated");
+    public boolean update(HypeTrain ht) {
+        return getDsl().update(HYPE_TRAINS)
+                .set(HYPE_TRAINS.NEXTFIGHT, ht.getNextFight())
+                .set(HYPE_TRAINS.NOTIFIED, ht.isNotified() ? (byte) 1 : (byte) 0)
+                .where(HYPE_TRAINS.FIGHTER.eq(ht.getFighterId()))
+                .and(HYPE_TRAINS.USER.eq(ht.getUser()))
+                .execute() == 1;
     }
+
 
     @Override
     public boolean deleteById(HypeTrain id) {
