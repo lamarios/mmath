@@ -9,7 +9,6 @@
       <module fileurl="file://$PROJECT_DIR$/build-orientdb/build-orientdb.iml" filepath="$PROJECT_DIR$/build-orientdb/build-orientdb.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-quartz/build-quartz.iml" filepath="$PROJECT_DIR$/build-quartz/build-quartz.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-reddit/build-reddit.iml" filepath="$PROJECT_DIR$/build-reddit/build-reddit.iml" />
-      <module fileurl="file://$PROJECT_DIR$/build-retrofit/build-retrofit.iml" filepath="$PROJECT_DIR$/build-retrofit/build-retrofit.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-sherdog/build-sherdog.iml" filepath="$PROJECT_DIR$/build-sherdog/build-sherdog.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-spark/build-spark.iml" filepath="$PROJECT_DIR$/build-spark/build-spark.iml" />
       <module fileurl="file://$PROJECT_DIR$/build-spring/build-spring.iml" filepath="$PROJECT_DIR$/build-spring/build-spring.iml" />
@@ -17,6 +16,7 @@
       <module fileurl="file://$PROJECT_DIR$/domain-dao/domain-dao.iml" filepath="$PROJECT_DIR$/domain-dao/domain-dao.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain-model/domain-model.iml" filepath="$PROJECT_DIR$/domain-model/domain-model.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain-mq/domain-mq.iml" filepath="$PROJECT_DIR$/domain-mq/domain-mq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/domain-reddit/domain-reddit.iml" filepath="$PROJECT_DIR$/domain-reddit/domain-reddit.iml" />
       <module fileurl="file://$PROJECT_DIR$/domain-reddit/domainreddit.iml" filepath="$PROJECT_DIR$/domain-reddit/domainreddit.iml" />
       <module fileurl="file://$PROJECT_DIR$/hypetrain-web/hypetrain-web.iml" filepath="$PROJECT_DIR$/hypetrain-web/hypetrain-web.iml" />
       <module fileurl="file://$PROJECT_DIR$/mmath.iml" filepath="$PROJECT_DIR$/mmath.iml" />

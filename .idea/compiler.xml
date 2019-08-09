@@ -11,13 +11,14 @@
         <module name="mmath-crawler-slave" />
         <module name="domain-model" />
         <module name="build-sherdog" />
-        <module name="domainreddit" />
         <module name="mmath-cron" />
         <module name="domain-dao" />
         <module name="mmath-config" />
         <module name="domain-mq" />
-        <module name="build-utils" />
         <module name="mmath-web" />
+        <module name="build-utils" />
+        <module name="domain-reddit" />
+        <module name="domainreddit" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -36,6 +37,7 @@
       <module name="domain-dao" target="11" />
       <module name="domain-model" target="11" />
       <module name="domain-mq" target="11" />
+      <module name="domain-reddit" target="11" />
       <module name="domainreddit" target="11" />
       <module name="hypetrain-web" target="11" />
       <module name="mmath" target="11" />

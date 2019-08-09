@@ -66,6 +66,7 @@ public class FighterProcessor extends Processor<MmathFighter> {
 
     @Override
     protected void updateToDao(MmathFighter old, MmathFighter fromSherdog) throws SQLException {
+        fromSherdog.setSearchRank(old.getSearchRank());
         fighterDAO.update(fromSherdog);
     }
 
