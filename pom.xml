@@ -18,7 +18,6 @@
         <module>build-sherdog</module>
         <module>build-utils</module>
         <module>build-spark</module>
-        <module>build-retrofit</module>
         <module>build-quartz</module>
         <module>mmath-web</module>
         <module>build-orientdb</module>

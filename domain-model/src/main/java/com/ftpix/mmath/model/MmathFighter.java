@@ -51,7 +51,7 @@ public class MmathFighter {
     private int winKo, winSub, winDec, lossKo, lossDec, lossSub;
 
 
-    private int searchRank;
+    private int searchRank = 99999;
 
     public LocalDateTime getLastUpdate() {
         return lastUpdate;
