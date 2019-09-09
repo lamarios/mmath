@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -145,20 +146,6 @@ public class FightDAO extends DAO<MmathFight, Long> {
                 .set(FIGHTS.LASTUPDATE, DSL.now())
                 .returning(FIGHTS.ID)
                 .fetchOne().get(FIGHTS.ID);
-//        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-//
-//        PreparedStatementCreator css = connection -> {
-//            PreparedStatement s = connection.prepareStatement("INSERT  INTO fights (fighter1_id, fighter2_id, event_id, `date`, result, winMethod, winTime, winRound, fight_type, lastUpdate)" +
-//                            "VALUES  (?,?,?,?,?,?,?,?,?,NOW())",
-//                    Statement.RETURN_GENERATED_KEYS);
-//            setStatement(s, f);
-//            return s;
-
-//        };
-
-//        template.update(css, keyHolder);
-//
-//        return keyHolder.getKey().longValue();
     }
 
     /**
@@ -219,6 +206,16 @@ public class FightDAO extends DAO<MmathFight, Long> {
     public boolean deleteAllNotHappenedFights() {
         return getDsl().delete(FIGHTS).where(FIGHTS.RESULT.eq(FightResult.NOT_HAPPENED.name())).execute() > 0;
 //        return template.update("DELETE FROM fights WHERE  result='NOT_HAPPENED'") >= 0;
+    }
+
+    public boolean cleanFightersRecord(){
+
+        // giving a buffer
+        LocalDateTime dateBuffer =  LocalDateTime.now().minusDays(2);
+
+        return getDsl().delete(FIGHTS).where(FIGHTS.RESULT.eq(FightResult.NOT_HAPPENED.name()))
+                .and(FIGHTS.DATE.lt(Timestamp.valueOf(dateBuffer)))
+                .execute() > 0;
     }
 
     public List<MmathFight> getByFighter(String sherdogUrl) {

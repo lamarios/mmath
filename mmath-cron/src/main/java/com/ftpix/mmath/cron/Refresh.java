@@ -56,6 +56,11 @@ public class Refresh {
     public static int RATE = 1;
 
 
+    @Scheduled(cron = "0 6 11 * * ?")
+    public void cleanDB(){
+        fightDAO.cleanFightersRecord();
+    }
+
     @Scheduled(cron = "0 0 0 ? * TUE")
     public void process() {
         logger.info("Starting job");
