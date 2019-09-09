@@ -94,6 +94,14 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
         }
 
 
+        try{
+            String alterTable = "alter table hype_trains drop foreign key hype_trains_fights_id_fk";
+            template.execute(alterTable);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+
     }
 
     @Override
