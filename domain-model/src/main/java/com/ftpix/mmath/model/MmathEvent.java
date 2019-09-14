@@ -1,6 +1,8 @@
 package com.ftpix.mmath.model;
 
+import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.models.Event;
+import com.ftpix.webwatcher.interfaces.WebSite;
 import com.google.gson.annotations.Expose;
 import io.gsonfire.annotations.ExposeMethodResult;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -12,7 +14,7 @@ import java.util.List;
 /**
  * Created by gz on 24-Sep-16.
  */
-public class MmathEvent {
+public class MmathEvent implements WebSite {
     private String sherdogUrl;
 
     @Expose
@@ -32,6 +34,8 @@ public class MmathEvent {
     private String location;
 
     private LocalDateTime lastUpdate = LocalDateTime.now();
+    private LocalDateTime lastContentCheck;
+    private String contentHash;
 
     public LocalDateTime getLastUpdate() {
         return lastUpdate;
@@ -110,4 +114,43 @@ public class MmathEvent {
     }
 
 
+    @Override
+    public String getUrl() {
+        return Sherdog.BASE_URL + sherdogUrl;
+    }
+
+    @Override
+    public LocalDateTime getLastCheck() {
+        return lastContentCheck;
+    }
+
+    @Override
+    public String getLastContentHash() {
+        return contentHash;
+    }
+
+    @Override
+    public String getCssSelector() {
+        return ".fight_card .fight, .content .event_match";
+    }
+
+    @Override
+    public void setUrl(String url) {
+        throw new UnsupportedOperationException("Not supposed to set  URL");
+    }
+
+    @Override
+    public void setLastCheck(LocalDateTime lastCheck) {
+        lastContentCheck = lastCheck;
+    }
+
+    @Override
+    public void setLastContentHash(String hash) {
+        contentHash = hash;
+    }
+
+    @Override
+    public void setCssSelector(String cssSelector) {
+        throw new UnsupportedOperationException("Not supposed to set css selector");
+    }
 }

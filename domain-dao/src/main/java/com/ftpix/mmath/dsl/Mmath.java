@@ -7,6 +7,7 @@ package com.ftpix.mmath.dsl;
 import com.ftpix.mmath.dsl.tables.Events;
 import com.ftpix.mmath.dsl.tables.Fighters;
 import com.ftpix.mmath.dsl.tables.Fights;
+import com.ftpix.mmath.dsl.tables.FlywaySchemaHistory;
 import com.ftpix.mmath.dsl.tables.HypeTrains;
 import com.ftpix.mmath.dsl.tables.HypeTrainsStats;
 import com.ftpix.mmath.dsl.tables.JdbcTest;
@@ -38,7 +39,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Mmath extends SchemaImpl {
 
-    private static final long serialVersionUID = 545467365;
+    private static final long serialVersionUID = 34769205;
 
     /**
      * The reference instance of <code>mmath</code>
@@ -59,6 +60,11 @@ public class Mmath extends SchemaImpl {
      * The table <code>mmath.fights</code>.
      */
     public final Fights FIGHTS = com.ftpix.mmath.dsl.tables.Fights.FIGHTS;
+
+    /**
+     * The table <code>mmath.flyway_schema_history</code>.
+     */
+    public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.ftpix.mmath.dsl.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
      * The table <code>mmath.hype_trains</code>.
@@ -118,6 +124,7 @@ public class Mmath extends SchemaImpl {
             Events.EVENTS,
             Fighters.FIGHTERS,
             Fights.FIGHTS,
+            FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
             HypeTrains.HYPE_TRAINS,
             HypeTrainsStats.HYPE_TRAINS_STATS,
             JdbcTest.JDBC_TEST,

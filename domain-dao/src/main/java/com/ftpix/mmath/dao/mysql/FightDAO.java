@@ -71,39 +71,6 @@ public class FightDAO extends DAO<MmathFight, Long> {
 
 
     @Override
-    @PostConstruct
-    public void init() {
-
-        String createTable = "CREATE TABLE IF NOT EXISTS fights\n" +
-                "(\n" +
-                "  id          BIGINT AUTO_INCREMENT\n" +
-                "    PRIMARY KEY,\n" +
-                "  fighter1_id VARCHAR(1000) NULL,\n" +
-                "  fighter2_id VARCHAR(1000) NULL,\n" +
-                "  event_id    VARCHAR(1000) NULL,\n" +
-                "  `date`        DATETIME      NULL,\n" +
-                "  result      VARCHAR(100)  NULL,\n" +
-                "  winMethod   VARCHAR(255)  NULL,\n" +
-                "  winTime     VARCHAR(255)  NULL,\n" +
-                "  winRound    INT           NULL,\n" +
-                "  lastUpdate  DATETIME      NULL,\n" +
-                "  CONSTRAINT primary_key\n" +
-                "  UNIQUE (fighter1_id, fighter2_id, event_id)\n" +
-                ")\n" +
-                "  ENGINE = InnoDB;";
-
-        template.execute(createTable);
-
-
-        try {
-            template.execute("ALTER TABLE fights ADD COLUMN fight_type VARCHAR(50) DEFAULT 'PRO'");
-        } catch (Exception e) {
-
-        }
-
-    }
-
-    @Override
     public MmathFight getById(Long id) {
         return getDsl().select().from(FIGHTS)
                 .where(FIGHTS.ID.eq(id))

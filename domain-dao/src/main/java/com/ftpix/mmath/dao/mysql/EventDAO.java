@@ -8,13 +8,16 @@ import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,31 +45,14 @@ public class EventDAO extends DAO<MmathEvent, String> {
         e.setName(r.get(EVENTS.NAME));
 //        e.setLocation(EVENTS.LOCATION);
         e.setLastUpdate(r.get(EVENTS.LASTUPDATE).toLocalDateTime());
+        e.setLastContentHash(r.get(EVENTS.CONTENTHASH));
 
-
+        Optional.ofNullable(r.get(EVENTS.LASTCONTENTCHECK))
+                .map(Timestamp::toLocalDateTime)
+                .ifPresent(e::setLastCheck);
         return e;
     };
 
-
-    @Override
-    @PostConstruct
-    public void init() {
-
-
-        String createTable = "CREATE TABLE IF NOT EXISTS events\n" +
-                "(\n" +
-                "  sherdogUrl      VARCHAR(1000) NOT NULL\n" +
-                "    PRIMARY KEY,\n" +
-                "  `date`            DATETIME      NULL,\n" +
-                "  organization_id VARCHAR(1000) NULL,\n" +
-                "  name            VARCHAR(255)  NULL,\n" +
-                "  location        VARCHAR(255)  NULL,\n" +
-                "  lastUpdate      DATETIME      NULL\n" +
-                ")\n" +
-                "  ENGINE = InnoDB;";
-
-        template.execute(createTable);
-    }
 
     @Override
     public MmathEvent getById(String id) {
@@ -142,6 +128,8 @@ public class EventDAO extends DAO<MmathEvent, String> {
                 .set(EVENTS.ORGANIZATION_ID, e.getOrganization().getSherdogUrl())
                 .set(EVENTS.NAME, e.getName())
                 .set(EVENTS.LASTUPDATE, DSL.now())
+                .set(EVENTS.CONTENTHASH, e.getLastContentHash())
+                .set(EVENTS.LASTCONTENTCHECK, e.getLastCheck() != null ? Timestamp.valueOf(e.getLastCheck()) : null)
                 .execute();
 
         return e.getSherdogUrl();
@@ -154,8 +142,21 @@ public class EventDAO extends DAO<MmathEvent, String> {
                 .set(EVENTS.ORGANIZATION_ID, e.getOrganization().getSherdogUrl())
                 .set(EVENTS.NAME, e.getName())
                 .set(EVENTS.LASTUPDATE, DSL.now())
+                .set(EVENTS.CONTENTHASH, e.getLastContentHash())
+                .set(EVENTS.LASTCONTENTCHECK, e.getLastCheck() != null ? Timestamp.valueOf(e.getLastCheck()) : null)
                 .where(EVENTS.SHERDOGURL.eq(e.getSherdogUrl()))
                 .execute() == 1;
+    }
+
+    /**
+     * Gets event to check for update, it is either happening today or has not yet completed it's webwatcher round
+     * @return
+     */
+    public List<MmathEvent> getEventsToCheck() {
+        String date = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return getDsl().select().from(EVENTS)
+                .where(EVENTS.DATE.like(date + '%').or(EVENTS.CONTENTHASH.isNotNull()))
+                .fetch(recordMapper);
     }
 
     @Override

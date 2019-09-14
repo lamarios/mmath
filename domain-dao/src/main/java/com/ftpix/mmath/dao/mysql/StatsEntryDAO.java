@@ -59,39 +59,6 @@ public class StatsEntryDAO extends DAO<StatsEntry, Long> {
     }
 
     @Override
-    @PostConstruct
-    public void init() {
-
-        try {
-            String createTable = "CREATE TABLE IF NOT EXISTS  stats_entries\n" +
-                    "(\n" +
-                    "  id           INT(11) AUTO_INCREMENT\n" +
-                    "    PRIMARY KEY,\n" +
-                    "  category_id  VARCHAR(255) NULL,\n" +
-                    "  fighter_id   VARCHAR(999) NULL,\n" +
-                    "  percent      INT(3)       NULL,\n" +
-                    "  text_to_show VARCHAR(255) NULL,\n" +
-                    "  details      TEXT         NULL,\n" +
-                    "  lastUpdate   DATETIME     NULL\n" +
-                    ")\n" +
-                    "  ENGINE = InnoDB;";
-
-
-            template.execute(createTable);
-        } catch (Exception e) {
-            logger.warn("Table probably already exist", e);
-        }
-
-        try {
-            String addRankQuery = "ALTER TABLE stats_entries ADD COLUMN rank INT NOT NULL DEFAULT  0 AFTER percent";
-            template.execute(addRankQuery);
-        } catch (Exception e) {
-            logger.warn("Column probably already exist", e);
-        }
-
-    }
-
-    @Override
     public StatsEntry getById(Long id) {
 
         return getDsl().select().from(STATS_ENTRIES)

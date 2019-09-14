@@ -2,6 +2,7 @@ package com.ftpix.mmath;
 
 import com.ftpix.mmath.sherdog.SherdogConfiguration;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -64,6 +65,11 @@ public class DaoConfiguration {
         ds.setIdleConnectionTestPeriod(300);
 //        ComboPooledDataSource );
         ds.setMaxPoolSize(20);
+
+
+        // run flyway migration
+        Flyway flyway = Flyway.configure().dataSource(ds).baselineOnMigrate(true).load();
+        flyway.migrate();
 
         return ds;
     }

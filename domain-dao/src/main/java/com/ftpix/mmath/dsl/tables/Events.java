@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Events extends TableImpl<EventsRecord> {
 
-    private static final long serialVersionUID = -601422901;
+    private static final long serialVersionUID = 2116583060;
 
     /**
      * The reference instance of <code>mmath.events</code>
@@ -85,6 +85,16 @@ public class Events extends TableImpl<EventsRecord> {
      * The column <code>mmath.events.lastUpdate</code>.
      */
     public final TableField<EventsRecord, Timestamp> LASTUPDATE = createField("lastUpdate", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+    /**
+     * The column <code>mmath.events.contentHash</code>.
+     */
+    public final TableField<EventsRecord, String> CONTENTHASH = createField("contentHash", org.jooq.impl.SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>mmath.events.lastContentCheck</code>.
+     */
+    public final TableField<EventsRecord, Timestamp> LASTCONTENTCHECK = createField("lastContentCheck", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
     /**
      * Create a <code>mmath.events</code> table reference
