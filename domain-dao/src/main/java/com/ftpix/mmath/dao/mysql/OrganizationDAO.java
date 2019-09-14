@@ -42,21 +42,6 @@ public class OrganizationDAO extends DAO<MmathOrganization, String> {
         this.template = template;
     }
 
-    @Override
-    @PostConstruct
-    public void init() {
-        String createTable = "CREATE TABLE IF NOT EXISTS organizations" +
-                "(" +
-                "  sherdogUrl VARCHAR(1000) NOT NULL" +
-                "    PRIMARY KEY," +
-                "  lastUpdate DATETIME      NULL," +
-                "  name       VARCHAR(255)  NULL" +
-                ")" +
-                "  ENGINE = InnoDB;";
-
-        template.execute(createTable);
-
-    }
 
     @Override
     public MmathOrganization getById(String id) {

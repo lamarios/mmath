@@ -7,6 +7,7 @@ package com.ftpix.mmath.dsl;
 import com.ftpix.mmath.dsl.tables.Events;
 import com.ftpix.mmath.dsl.tables.Fighters;
 import com.ftpix.mmath.dsl.tables.Fights;
+import com.ftpix.mmath.dsl.tables.FlywaySchemaHistory;
 import com.ftpix.mmath.dsl.tables.HypeTrains;
 import com.ftpix.mmath.dsl.tables.HypeTrainsStats;
 import com.ftpix.mmath.dsl.tables.Organizations;
@@ -41,6 +42,8 @@ public class Indexes {
     public static final Index FIGHTERS_PRIMARY = Indexes0.FIGHTERS_PRIMARY;
     public static final Index FIGHTS_PRIMARY = Indexes0.FIGHTS_PRIMARY;
     public static final Index FIGHTS_PRIMARY_KEY = Indexes0.FIGHTS_PRIMARY_KEY;
+    public static final Index FLYWAY_SCHEMA_HISTORY_FLYWAY_SCHEMA_HISTORY_S_IDX = Indexes0.FLYWAY_SCHEMA_HISTORY_FLYWAY_SCHEMA_HISTORY_S_IDX;
+    public static final Index FLYWAY_SCHEMA_HISTORY_PRIMARY = Indexes0.FLYWAY_SCHEMA_HISTORY_PRIMARY;
     public static final Index HYPE_TRAINS_HYPE_TRAINS_FIGHTS_ID_FK = Indexes0.HYPE_TRAINS_HYPE_TRAINS_FIGHTS_ID_FK;
     public static final Index HYPE_TRAINS_PRIMARY = Indexes0.HYPE_TRAINS_PRIMARY;
     public static final Index HYPE_TRAINS_STATS_PRIMARY = Indexes0.HYPE_TRAINS_STATS_PRIMARY;
@@ -57,6 +60,8 @@ public class Indexes {
         public static Index FIGHTERS_PRIMARY = Internal.createIndex("PRIMARY", Fighters.FIGHTERS, new OrderField[] { Fighters.FIGHTERS.SHERDOGURL }, true);
         public static Index FIGHTS_PRIMARY = Internal.createIndex("PRIMARY", Fights.FIGHTS, new OrderField[] { Fights.FIGHTS.ID }, true);
         public static Index FIGHTS_PRIMARY_KEY = Internal.createIndex("primary_key", Fights.FIGHTS, new OrderField[] { Fights.FIGHTS.FIGHTER1_ID, Fights.FIGHTS.FIGHTER2_ID, Fights.FIGHTS.EVENT_ID }, true);
+        public static Index FLYWAY_SCHEMA_HISTORY_FLYWAY_SCHEMA_HISTORY_S_IDX = Internal.createIndex("flyway_schema_history_s_idx", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.SUCCESS }, false);
+        public static Index FLYWAY_SCHEMA_HISTORY_PRIMARY = Internal.createIndex("PRIMARY", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
         public static Index HYPE_TRAINS_HYPE_TRAINS_FIGHTS_ID_FK = Internal.createIndex("hype_trains_fights_id_fk", HypeTrains.HYPE_TRAINS, new OrderField[] { HypeTrains.HYPE_TRAINS.NEXTFIGHT }, false);
         public static Index HYPE_TRAINS_PRIMARY = Internal.createIndex("PRIMARY", HypeTrains.HYPE_TRAINS, new OrderField[] { HypeTrains.HYPE_TRAINS.USER, HypeTrains.HYPE_TRAINS.FIGHTER }, true);
         public static Index HYPE_TRAINS_STATS_PRIMARY = Internal.createIndex("PRIMARY", HypeTrainsStats.HYPE_TRAINS_STATS, new OrderField[] { HypeTrainsStats.HYPE_TRAINS_STATS.MONTH, HypeTrainsStats.HYPE_TRAINS_STATS.FIGHTER }, true);

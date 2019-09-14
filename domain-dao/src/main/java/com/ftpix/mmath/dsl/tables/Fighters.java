@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Fighters extends TableImpl<FightersRecord> {
 
-    private static final long serialVersionUID = 1937066012;
+    private static final long serialVersionUID = -1362228772;
 
     /**
      * The reference instance of <code>mmath.fighters</code>
@@ -115,7 +115,7 @@ public class Fighters extends TableImpl<FightersRecord> {
     /**
      * The column <code>mmath.fighters.search_rank</code>.
      */
-    public final TableField<FightersRecord, Integer> SEARCH_RANK = createField("search_rank", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("99", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+    public final TableField<FightersRecord, Integer> SEARCH_RANK = createField("search_rank", org.jooq.impl.SQLDataType.INTEGER.defaultValue(org.jooq.impl.DSL.inline("999999", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>mmath.fighters.winKo</code>.

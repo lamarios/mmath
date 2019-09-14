@@ -40,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class HypeTrains extends TableImpl<HypeTrainsRecord> {
 
-    private static final long serialVersionUID = -383820967;
+    private static final long serialVersionUID = 1488503743;
 
     /**
      * The reference instance of <code>mmath.hype_trains</code>
@@ -138,18 +138,6 @@ public class HypeTrains extends TableImpl<HypeTrainsRecord> {
     @Override
     public List<UniqueKey<HypeTrainsRecord>> getKeys() {
         return Arrays.<UniqueKey<HypeTrainsRecord>>asList(Keys.KEY_HYPE_TRAINS_PRIMARY);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<ForeignKey<HypeTrainsRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<HypeTrainsRecord, ?>>asList(Keys.HYPE_TRAINS_FIGHTS_ID_FK);
-    }
-
-    public Fights fights() {
-        return new Fights(this, Keys.HYPE_TRAINS_FIGHTS_ID_FK);
     }
 
     /**

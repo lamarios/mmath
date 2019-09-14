@@ -52,57 +52,6 @@ public class HypeTrainDAO extends DAO<HypeTrain, HypeTrain> {
     };
 
 
-    @Override
-    @PostConstruct
-    public void init() {
-        try {
-            String createTable = "CREATE TABLE IF NOT EXISTS hype_trains" +
-                    "(" +
-                    "    user VARCHAR(255) NOT NULL," +
-                    "    fighter VARCHAR(1000) NOT NULL," +
-                    "    CONSTRAINT hype_trains_pk PRIMARY KEY (user, fighter)" +
-                    ");";
-
-            template.execute(createTable);
-
-
-            createTable = "CREATE TABLE IF NOT EXISTS hype_trains_stats" +
-                    "(" +
-                    "    `month` VARCHAR (7) NOT NULL," +
-                    "    fighter VARCHAR(1000) NOT NULL," +
-                    "    `count` BIGINT NOT NULL DEFAULT 0, " +
-                    "    CONSTRAINT hype_trains_stats_pk PRIMARY KEY (`month`, fighter)" +
-                    ");";
-
-            template.execute(createTable);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            String alterTable = "alter table hype_trains add nextFight BIGINT null;";
-
-            template.execute(alterTable);
-            alterTable = "alter table hype_trains add notified BOOLEAN default FALSE null;";
-            template.execute(alterTable);
-
-            alterTable = "alter table hype_trains add constraint hype_trains_fights_id_fk foreign key (nextFight) references fights (id);";
-            template.execute(alterTable);
-        } catch (Exception e) {
-
-        }
-
-
-        try{
-            String alterTable = "alter table hype_trains drop foreign key hype_trains_fights_id_fk";
-            template.execute(alterTable);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
-
-    }
 
     @Override
     public HypeTrain getById(HypeTrain id) {

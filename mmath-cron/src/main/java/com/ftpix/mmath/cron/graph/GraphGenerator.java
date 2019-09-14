@@ -88,7 +88,7 @@ public class GraphGenerator {
      * @param fight the fight to process
      * @param graph the graph connection
      */
-    private void addFightToGraph(MmathFight fight, OrientGraph graph) {
+    public void addFightToGraph(MmathFight fight, OrientGraph graph) {
 
         logger.info("[{}] vs [{}] at event [{}]", fight.getFighter1().getSherdogUrl(), fight.getFighter2().getSherdogUrl(), fight.getEvent().getSherdogUrl());
 

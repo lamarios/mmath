@@ -57,68 +57,6 @@ public class FighterDAO extends DAO<MmathFighter, String> {
     };
 
 
-    @Override
-    @PostConstruct
-    public void init() {
-        try {
-            String createTable = "CREATE TABLE IF NOT  EXISTS fighters\n" +
-                    "(\n" +
-                    "  sherdogUrl VARCHAR(1000) NOT NULL\n" +
-                    "    PRIMARY KEY,\n" +
-                    "  lastUpdate DATETIME      NULL,\n" +
-                    "  name       VARCHAR(255)  NULL,\n" +
-                    "  picture    VARCHAR(255)  NULL,\n" +
-                    "  birthday   DATE      NULL,\n" +
-                    "  draws      INT           NULL,\n" +
-                    "  losses     INT           NULL,\n" +
-                    "  wins       INT           NULL,\n" +
-                    "  weight     VARCHAR(255)  NULL,\n" +
-                    "  height     VARCHAR(255)  NULL,\n" +
-                    "  nickname   VARCHAR(255)  NULL,\n" +
-                    "  nc         INT           NULL\n" +
-                    ")\n" +
-                    "  ENGINE = InnoDB;\n";
-
-
-            template.execute(createTable);
-        } catch (Exception e) {
-            //table probably already exist
-        }
-
-
-        try {
-            template.execute("ALTER TABLE fighters ADD COLUMN search_rank INT(2) DEFAULT 99");
-        } catch (Exception e) {
-            //probably already exist
-        }
-
-        try {
-            template.execute("ALTER TABLE fighters DROP COLUMN picture");
-        } catch (Exception e) {
-            //probably already removed
-        }
-
-        try {
-            template.execute("ALTER TABLE fighters ADD COLUMN winKo INT(4) DEFAULT 0");
-            template.execute("ALTER TABLE fighters ADD COLUMN winSub INT(4) DEFAULT 0");
-            template.execute("ALTER TABLE fighters ADD COLUMN winDec INT(4) DEFAULT 0");
-            template.execute("ALTER TABLE fighters ADD COLUMN lossKo INT(4) DEFAULT 0");
-            template.execute("ALTER TABLE fighters ADD COLUMN lossSub INT(4) DEFAULT 0");
-            template.execute("ALTER TABLE fighters ADD COLUMN lossDec INT(4) DEFAULT 0");
-        } catch (Exception e) {
-            //probably already exists
-        }
-
-
-
-        try {
-            template.execute("ALTER TABLE fighters MODIFY COLUMN search_rank INT(6) DEFAULT 999999");
-        } catch (Exception e) {
-            //probably already exist
-            e.printStackTrace();
-        }
-
-    }
 
     @Override
     public MmathFighter getById(String id) {

@@ -7,6 +7,7 @@ package com.ftpix.mmath.dsl;
 import com.ftpix.mmath.dsl.tables.Events;
 import com.ftpix.mmath.dsl.tables.Fighters;
 import com.ftpix.mmath.dsl.tables.Fights;
+import com.ftpix.mmath.dsl.tables.FlywaySchemaHistory;
 import com.ftpix.mmath.dsl.tables.HypeTrains;
 import com.ftpix.mmath.dsl.tables.HypeTrainsStats;
 import com.ftpix.mmath.dsl.tables.JdbcTest;
@@ -44,6 +45,11 @@ public class Tables {
      * The table <code>mmath.fights</code>.
      */
     public static final Fights FIGHTS = com.ftpix.mmath.dsl.tables.Fights.FIGHTS;
+
+    /**
+     * The table <code>mmath.flyway_schema_history</code>.
+     */
+    public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.ftpix.mmath.dsl.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
      * The table <code>mmath.hype_trains</code>.

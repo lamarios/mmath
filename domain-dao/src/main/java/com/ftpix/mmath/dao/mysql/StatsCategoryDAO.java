@@ -40,33 +40,6 @@ public class StatsCategoryDAO extends DAO<StatsCategory, String> {
 
 
     @Override
-    @PostConstruct
-    public void init() {
-        try {
-            String createTable = "CREATE TABLE IF NOT EXISTS stats_categories\n" +
-                    "(\n" +
-                    "  id          VARCHAR(255) NOT NULL\n" +
-                    "    PRIMARY KEY,\n" +
-                    "  name        VARCHAR(255) NULL,\n" +
-                    "  description TEXT         NULL,\n" +
-                    "  lastUpdate  DATETIME     NULL\n" +
-                    ")\n" +
-                    "  ENGINE = InnoDB;";
-
-            template.execute(createTable);
-        } catch (Exception e) {
-            logger.warn("Table probably already exist", e);
-        }
-
-        try {
-            String addRankQuery = "ALTER TABLE stats_categories ADD COLUMN `order` INT NOT NULL DEFAULT  0 AFTER description";
-            template.execute(addRankQuery);
-        } catch (Exception e) {
-            logger.warn("Column probably already exist", e);
-        }
-    }
-
-    @Override
     public StatsCategory getById(String id) {
         return getDsl().select().from(STATS_CATEGORIES)
                 .where(STATS_CATEGORIES.ID.eq(id))

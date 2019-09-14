@@ -21,8 +21,6 @@ public abstract class DAO<T, R> {
     @Autowired
     private DataSource source;
 
-    abstract void init();
-
     abstract T getById(R id);
 
     abstract List<T> getAll();
