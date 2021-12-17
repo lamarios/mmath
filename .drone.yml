@@ -73,6 +73,10 @@ steps:
       repo: gonzague/mmath-cron
       context: ./mmath-cron
       dockerfile: ./mmath-cron/Dockerfile
+    when:
+      event:
+        exclude:
+          - tag
 
   - name: publish mmath-crawler
     image: plugins/docker
