@@ -29,7 +29,7 @@ steps:
       - npm run build
       -
   - name: build backend
-    image: maven:3.8-openjdk-17
+    image: maven:3.8-openjdk-11
     commands:
       - mvn clean install -Dmaven.repo.local=./m2
 
