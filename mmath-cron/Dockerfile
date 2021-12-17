@@ -1,7 +1,7 @@
 FROM openjdk:11
 
 
-COPY ./*.jar /usr/src/app/app.jar
+COPY ./target/mmath*.jar /usr/src/app/app.jar
 
 EXPOSE 4567
 
