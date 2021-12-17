@@ -7,6 +7,8 @@ import com.ftpix.mmath.dao.mysql.FighterDAO;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class SearchRank {
-    protected Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     private FighterDAO fighterDAO;
@@ -65,7 +67,7 @@ public class SearchRank {
 
     private void updateFighterRank(MmathFighter fighter) {
         try {
-            logger.info("Updating search rank for {}", fighter.getName());
+            logger.info("Updating search rank for "+ fighter.getName());
 
 
             List<MmathFight> fights = fightDAO.getByFighter(fighter.getSherdogUrl())
@@ -105,7 +107,7 @@ public class SearchRank {
 
             fighterDAO.update(fighter);
 
-            logger.info("Fighter  search rank: {}, bestOrg [{}], years since last fight [{}], fight count [{}]", fighter.getSearchRank(), bestOrg.get(), yearsSinceLastFight, count.get());
+            logger.info("Fighter  search rank: "+fighter.getSearchRank()+", bestOrg ["+bestOrg.get()+"], years since last fight ["+yearsSinceLastFight+"], fight count ["+count.get()+"]");
         } catch (Exception e) {
             e.printStackTrace();
             fighter.setSearchRank(99999);
