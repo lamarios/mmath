@@ -37,7 +37,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <docker.skip>true</docker.skip>
-        <docker.tag>dev</docker.tag>
+        <docker.tag>latest</docker.tag>
+        <npm.path>npm</npm.path>
     </properties>
 
 

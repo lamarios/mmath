@@ -8,11 +8,13 @@ import com.ftpix.mmath.dao.mysql.FightDAO;
 import com.ftpix.mmath.dao.mysql.FighterDAO;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
+import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
 import com.ftpix.sherdogparser.models.Event;
 import com.ftpix.sherdogparser.models.FightResult;
 import com.ftpix.sherdogparser.models.FightType;
+import com.ftpix.sherdogparser.models.Fighter;
 import com.ftpix.sherdogparser.parsers.ParserUtils;
 import com.ftpix.webwatcher.WebWatcher;
 import com.ftpix.webwatcher.interfaces.WebSiteListener;
@@ -30,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @EnableScheduling
@@ -85,6 +88,14 @@ public class LiveDataRefresh implements WebSiteListener<MmathEvent> {
                     .map(MmathFight::fromSherdog)
                     .filter(f -> f.getResult() != FightResult.NOT_HAPPENED)
                     .forEach(f -> {
+                        MmathFighter fighter1 = getUpdatedFighter(f.getFighter1().getSherdogUrl());
+                        MmathFighter fighter2 = getUpdatedFighter(f.getFighter2().getSherdogUrl());
+
+                        if (fighter1 != null) fighterDAO.update(fighter1);
+                        if (fighter2 != null) fighterDAO.update(fighter2);
+
+
+
                         fightDAO.deleteExistingSimilarFight(f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), event.getSherdogUrl());
                         f.setId(fightDAO.insert(f));
                         try {
@@ -109,5 +120,33 @@ public class LiveDataRefresh implements WebSiteListener<MmathEvent> {
         } finally {
             graph.shutdown();
         }
+    }
+
+
+    private MmathFighter getUpdatedFighter(String sherdogUrl) {
+        return Optional.ofNullable(sherdogUrl)
+                .map(fighterDAO::getById)
+                .map(fighter -> {
+                    try {
+                        Fighter sherdogFighter = sherdog.getFighter(Sherdog.BASE_URL + fighter.getSherdogUrl());
+                        MmathFighter updatedFighter = MmathFighter.fromSherdong(sherdogFighter);
+                        updatedFighter.setSearchRank(fighter.getSearchRank());
+
+                        return updatedFighter;
+                    } catch (IOException | ParseException | SherdogParserException e) {
+                        logger.error("Couldn't get fighter", e);
+                        return null;
+                    }
+                })
+                .orElseGet(() -> {
+                    try {
+                        MmathFighter mmathFighter = MmathFighter.fromSherdong(sherdog.getFighter(Sherdog.BASE_URL + sherdogUrl));
+                        fighterDAO.insert(mmathFighter);
+                        return mmathFighter;
+                    } catch (IOException | ParseException | SherdogParserException e) {
+                        logger.error("Couldn't get fighter", e);
+                        return null;
+                    }
+                });
     }
 }

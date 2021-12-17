@@ -43,7 +43,7 @@ public abstract class Processor<T> implements MessageListener {
     public void onMessage(Message message) {
         try {
             String msg = ((TextMessage) message).getText();
-            this.process(msg);
+            this.process(msg.trim());
         } catch (JMSException e) {
             logger.error("Couldn't convert message to url");
         }
