@@ -108,7 +108,7 @@ steps:
         exclude:
           - tag
 
-  - name: publish mmath-crawler
+  - name: publish mmath-web
     image: plugins/docker
     settings:
       username:
