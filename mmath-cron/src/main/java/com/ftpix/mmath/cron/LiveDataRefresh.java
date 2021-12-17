@@ -19,15 +19,13 @@ import com.ftpix.sherdogparser.parsers.ParserUtils;
 import com.ftpix.webwatcher.WebWatcher;
 import com.ftpix.webwatcher.interfaces.WebSiteListener;
 import com.orientechnologies.orient.core.exception.OCoreException;
-import com.orientechnologies.orient.core.storage.ORecordDuplicatedException;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -37,7 +35,7 @@ import java.util.Optional;
 @Component
 @EnableScheduling
 public class LiveDataRefresh implements WebSiteListener<MmathEvent> {
-    private Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     private EventDAO eventDAO;
@@ -95,13 +93,12 @@ public class LiveDataRefresh implements WebSiteListener<MmathEvent> {
                         if (fighter2 != null) fighterDAO.update(fighter2);
 
 
-
                         fightDAO.deleteExistingSimilarFight(f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), event.getSherdogUrl());
                         f.setId(fightDAO.insert(f));
                         try {
                             graphGenerator.addFightToGraph(f, graph);
                         } catch (OCoreException e) {
-                            logger.info("Fight {} vs {} for event {} probably already exists, {}", f.getFighter1().getName(), f.getFighter2().getName(), event.getName(), e.getMessage());
+                            logger.info("Fight " + f.getFighter1().getName() + " vs " + f.getFighter2().getName() + " for event " + event.getName() + " probably already exists, " + e.getMessage());
                         }
                     });
 

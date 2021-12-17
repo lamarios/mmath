@@ -63,7 +63,7 @@ public class EventProcessor extends Processor<MmathEvent> {
             fightDAO.deleteExistingSimilarFight(fighter1, fighter2, f.getEvent().getSherdogUrl());
             fightDAO.replace(f);
         } catch (DuplicateKeyException e) {
-            logger.info("Fight {} vs {}  at event {} already exists", f.getFighter1().getSherdogUrl(), f.getFighter2().getSherdogUrl(), f.getEvent().getSherdogUrl());
+            logger.info("Fight "+f.getFighter1().getSherdogUrl()+" vs "+f.getFighter2().getSherdogUrl()+"  at event "+f.getEvent().getSherdogUrl()+" already exists");
         }
     }
 
@@ -103,7 +103,7 @@ public class EventProcessor extends Processor<MmathEvent> {
         try {
             exec.invokeAll(tasks);
         } catch (InterruptedException e1) {
-            logger.error("Couldn't get fight types", e);
+            logger.error("Couldn't get fight types", e1);
         }
 
         event.getFights().forEach(f -> {

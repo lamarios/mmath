@@ -4,21 +4,19 @@ import com.ftpix.mmath.dao.OrientDBDao;
 import com.ftpix.mmath.dao.mysql.EventDAO;
 import com.ftpix.mmath.dao.mysql.FightDAO;
 import com.ftpix.mmath.dao.mysql.FighterDAO;
-import com.ftpix.mmath.dao.mysql.OrganizationDAO;
 import com.ftpix.mmath.model.GsonFriendlyFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.web.models.Query;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ public class MmathController implements Controller {
 
     @Autowired
     private OrientDBDao orientDBDao;
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
     private final Gson gson = GsonUtils.getGson();
 
 
@@ -58,6 +56,7 @@ public class MmathController implements Controller {
 
     /**
      * Gets a single fighter from its hash
+     *
      * @param request
      * @param response
      * @return
@@ -71,6 +70,7 @@ public class MmathController implements Controller {
 
     /**
      * Search fights by name or nickname
+     *
      * @param request
      * @param response
      * @return
@@ -85,6 +85,7 @@ public class MmathController implements Controller {
 
     /**
      * Do the tree search query both ways through fighter 1 and 2
+     *
      * @param request
      * @param response
      * @return
@@ -96,7 +97,7 @@ public class MmathController implements Controller {
             String fighter2 = request.params(":fighter2");
 
 
-            logger.info("{} vs {}", fighter1, fighter2);
+            logger.info(fighter1 + " vs " + fighter2);
 
 
             Optional<MmathFighter> fighter1Opt = Optional.ofNullable(fighterDAO.getFromHash(fighter1));
@@ -124,7 +125,7 @@ public class MmathController implements Controller {
                         })
                         .collect(Collectors.toList());
 
-                logger.info("Result size: {}", result.size());
+                logger.info("Result size: " + result.size());
                 return result;
             } else {
                 return new ArrayList<>();

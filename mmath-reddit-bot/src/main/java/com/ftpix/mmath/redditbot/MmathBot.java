@@ -1,15 +1,14 @@
 package com.ftpix.mmath.redditbot;
 
 import com.ftpix.mmath.dao.OrientDBDao;
-import com.ftpix.mmath.dao.mysql.*;
+import com.ftpix.mmath.dao.mysql.FighterDAO;
+import com.ftpix.mmath.dao.mysql.HypeTrainDAO;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
 import net.dean.jraw.RedditClient;
-import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.models.Comment;
-import net.dean.jraw.oauth.Credentials;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,7 +47,7 @@ public class MmathBot {
     private final static String HYPE_TRAIN_OFFBOARD_REPLY = "You jumped off the [**%s**](https://www.mmahypetrain.com/fighter/%s) train, **%s** left on board. \n\n " +
             "[Manage your hype](https://www.mmahypetrain.com)";
     private final static String FIGHTER_NOT_FOUND_REPLY = "Couldn't find fighter \"%s\"";
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
 
     @Value("${REDDIT_SUB}")
@@ -136,14 +135,14 @@ public class MmathBot {
 
 
                 if (reply.length() > 0) {
-                    logger.info("Replying {}", reply);
+                    logger.info("Replying" + reply);
                     redditClient.comment(comment.getId()).reply(reply);
                 }
 
 
             }
         } catch (Exception e) {
-            logger.error("Couldn't proceed to calculation of comment: [{}]", comment.getBody(), e);
+            logger.error("Couldn't proceed to calculation of comment: [" + comment.getBody() + "]", e);
         }
     }
 
@@ -154,12 +153,12 @@ public class MmathBot {
      */
     private void processMMathComment(Comment comment) {
         try {
-            logger.info("Got comment: {}", comment.getBody());
+            logger.info("Got comment:" + comment.getBody());
             Matcher match = mmathPattern.matcher(comment.getBody().trim());
             if (match.matches()) {
                 String fighter1 = match.group(1);
                 String fighter2 = match.group(2);
-                logger.info("{} vs {}", fighter1, fighter2);
+                logger.info(fighter1 + " vs " + fighter2);
 
                 Future<Optional<MmathFighter>> mmathFighter1Future = exec.submit(() -> getFirstFighterForName(fighter1));
                 Future<Optional<MmathFighter>> mmathFighter2Future = exec.submit(() -> getFirstFighterForName(fighter2));
@@ -186,8 +185,8 @@ public class MmathBot {
                             .map(f -> fighterDAO.getById(f).getName())
                             .collect(Collectors.joining(" > "));
 
-                    logger.info("result 1 vs 2: {}", f1Vsf2Result);
-                    logger.info("result 2 vs 1: {}", f2Vsf1Result);
+                    logger.info("result 1 vs 2: " + f1Vsf2Result);
+                    logger.info("result 2 vs 1: " + f2Vsf1Result);
 
                     if (f1Vsf2Result.length() == 0) {
                         f1Vsf2Result = f1.getName() + " can't beat " + f2.getName();
@@ -197,7 +196,7 @@ public class MmathBot {
                     }
 
                     String reply = String.format(MMATH_BOT_REPLY, f1.getName(), f2.getName(), f1.getIdAsHash(), f2.getIdAsHash(), f1Vsf2Result, f2Vsf1Result).replace("\n", NEW_LINE);
-                    logger.info("Replying {}", reply);
+                    logger.info("Replying " + reply);
                     redditClient.comment(comment.getId()).reply(reply);
 
                 } else {
@@ -209,7 +208,7 @@ public class MmathBot {
                     }
 
                     if (reply.length() > 0) {
-                        logger.info("Replying {}", reply);
+                        logger.info("Replying " + reply);
                         redditClient.comment(comment.getId()).reply(reply);
                     }
                     logger.info("No fighters...");
@@ -220,7 +219,7 @@ public class MmathBot {
                 logger.info("Not matching");
             }
         } catch (Exception e) {
-            logger.error("Couldn't proceed to calculation of comment: [{}]", comment.getBody(), e);
+            logger.error("Couldn't proceed to calculation of comment: [" + comment.getBody() + "]", e);
         }
     }
 

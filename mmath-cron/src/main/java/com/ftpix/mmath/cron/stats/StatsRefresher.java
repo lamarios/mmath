@@ -8,8 +8,8 @@ import com.ftpix.mmath.cron.stats.implementations.winpercentage.DecisionWinsStat
 import com.ftpix.mmath.cron.stats.implementations.winpercentage.KoWinsStats;
 import com.ftpix.mmath.cron.stats.implementations.winpercentage.SubmissionWinsStats;
 import com.ftpix.mmath.dao.mysql.FighterDAO;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -40,7 +40,7 @@ public class StatsRefresher {
     @Autowired
     private SearchRank searchRank;
 
-    protected Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
 
     @Autowired

@@ -1,14 +1,12 @@
 package com.ftpix.mmath.web;
 
-import com.ftpix.mmath.dao.mysql.FighterDAO;
-import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.web.controllers.EventsController;
 import com.ftpix.mmath.web.controllers.MmathController;
 import com.ftpix.mmath.web.controllers.StatsController;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -36,7 +33,7 @@ public class WebServer {
     private int port;
 
     private final Gson gson = GsonUtils.getGson();
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     private EventsController eventsController;
@@ -55,7 +52,7 @@ public class WebServer {
         if (System.getProperty("dev", "false").equalsIgnoreCase("true")) {
             Path path = Paths.get(".").resolve("mmath-web/src/main/resources/web/public").toAbsolutePath();
 //            path = Paths.get("/home/gz/IdeaProjects/mmath/mmath-web/src/main/resources/web/public");
-            logger.info("DEV MODE {}", path.toString());
+            logger.info("DEV MODE " + path.toString());
             Spark.externalStaticFileLocation(path.toString().replace("./", ""));
 
         } else {
@@ -137,7 +134,7 @@ public class WebServer {
 
 
     private void logRequest(Request request, Response response) {
-        logger.info("{} {} {}", request.requestMethod(), request.url(), request.queryParams());
+        logger.info(request.requestMethod() + " " + request.url() + " " + request.queryParams());
 
     }
 

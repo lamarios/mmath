@@ -19,24 +19,22 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-
 @Component
 public class WebController {
 
 
     @Autowired
-    private  Refresh refresh;
+    private Refresh refresh;
     @Autowired
-    private  GraphGenerator graphGenerator;
+    private GraphGenerator graphGenerator;
     @Autowired
-    private  StatsRefresher statsRefresher;
+    private StatsRefresher statsRefresher;
     @Value("${MQ_ADMIN:mmath-mq:8161}")
     private String mqAdminUrl;
 
     private AtomicBoolean graphRunning = new AtomicBoolean(false);
     private AtomicBoolean statsRunning = new AtomicBoolean(false);
     private AtomicBoolean sqlRunning = new AtomicBoolean(false);
-
 
 
     @PostConstruct
@@ -50,6 +48,7 @@ public class WebController {
 
     /**
      * Gets active mq queue size so we can use that endpoint to autoscale the slaves
+     *
      * @param request
      * @param response
      * @return
@@ -62,7 +61,7 @@ public class WebController {
 
         try {
             Document document = Jsoup
-                    .connect("http://"+mqAdminUrl+"/admin/xml/queues.jsp")
+                    .connect("http://" + mqAdminUrl + "/admin/xml/queues.jsp")
                     .header("Authorization", "Basic " + base64login)
                     .get();
 

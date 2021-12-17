@@ -1,15 +1,11 @@
 package com.ftpix.mmath.redditbot;
 
 import net.dean.jraw.RedditClient;
-import net.dean.jraw.http.OkHttpNetworkAdapter;
-import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.models.Comment;
 import net.dean.jraw.models.Listing;
-import net.dean.jraw.oauth.Credentials;
-import net.dean.jraw.oauth.OAuthHelper;
 import net.dean.jraw.pagination.BarebonesPaginator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,9 +22,9 @@ public class RedditBot {
     private String lastSeen;
     private Predicate<Comment> commentFilter = c -> true;
     private long sleepDelay = 10000;
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
-   private final RedditClient client;
+    private final RedditClient client;
 
     private RedditBot(RedditClient client) {
         this.client = client;
@@ -73,10 +69,11 @@ public class RedditBot {
 
     /**
      * Generate some sort of unique identifier for a comment
+     *
      * @param c
      * @return
      */
-    private String getCommentId(Comment c){
+    private String getCommentId(Comment c) {
         return c.getId();
     }
 
@@ -95,7 +92,7 @@ public class RedditBot {
                 Comment c = next.get(0);
                 lastSeen = getCommentId(c);
             }
-           logger.info("last seen -> {}", lastSeen);
+            logger.info("last seen -> " + lastSeen);
         } else {
             logger.info("getting new comments");
             List<Comment> comments = new ArrayList<>();
@@ -118,7 +115,7 @@ public class RedditBot {
             }
 
             if (comments.size() > 0) {
-                logger.info ("{} new comments to process, now filtering based on body filter", comments.size());
+                logger.info(comments.size() + " new comments to process, now filtering based on body filter");
                 //when fetching, most recent comments come first
                 lastSeen = getCommentId(comments.get(0));
                 Collections.reverse(comments);

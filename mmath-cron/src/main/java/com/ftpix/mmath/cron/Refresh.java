@@ -5,8 +5,8 @@ import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.Utils;
 import com.ftpix.sherdogparser.models.Organizations;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,7 +21,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
  */
 @Component
 public class Refresh {
-    private Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
 
     @Autowired

@@ -15,8 +15,6 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertexType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +45,7 @@ public class OrientDBDao {
     public final static String BETTER_THAN_QUERY = "select path.sherdog_url from (SELECT shortestPath( (SELECT FROM fighter WHERE sherdog_url='%s' ) , (SELECT FROM fighter WHERE sherdog_url='%s'), 'OUT', 'beat') AS path UNWIND path);";
     public static final String DELETE_ALL_EDGES = "DELETE EDGE " + EDGE_BEAT + ";";
     public static final String DELETE_ALL_FIGHTERS = "DELETE VERTEX " + VERTEX_FIGHTER + ";";
-    private Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
     @PostConstruct
     private void init(){
@@ -72,7 +70,7 @@ public class OrientDBDao {
             admin.createDatabase(dbname, "graph", "plocal");
             admin.close();
         } catch (ODatabaseException | OStorageException e) {
-            logger.warn("The schema probably already exists: {}", e.getMessage());
+            logger.warn("The schema probably already exists:", e);
         }
 
 
@@ -90,7 +88,7 @@ public class OrientDBDao {
                 OrientEdgeType edgeType = graph.createEdgeType(OrientDBDao.EDGE_BEAT);
                 edgeType.createProperty(OrientDBDao.FIGHT_ID, OType.LONG);
             } catch (OSchemaException e) {
-                logger.warn("Classes probably already exist: {}", e.getMessage());
+                logger.warn("Classes probably already exist:", e);
             }
 
             try {
@@ -98,7 +96,7 @@ public class OrientDBDao {
                 OrientVertexType vertexType = graph.createVertexType(OrientDBDao.VERTEX_FIGHTER);
                 vertexType.createProperty(OrientDBDao.SHERDOG_URL, OType.STRING);
             } catch (OSchemaException e) {
-                logger.warn("Classes probably already exist: {}", e.getMessage());
+                logger.warn("Classes probably already exist:", e);
             }
             graph.commit();
         } finally {
@@ -118,20 +116,20 @@ public class OrientDBDao {
             try {
                 graph.createKeyIndex(SHERDOG_URL, Vertex.class, new Parameter("type", "UNIQUE"), new Parameter("class", VERTEX_FIGHTER));
             } catch (OIndexException e) {
-                logger.warn("Indices probably already exist: {}", e.getMessage());
+                logger.warn("Indices probably already exist: ", e);
             }
 
             try {
                 graph.createKeyIndex(FIGHT_ID, Edge.class, new Parameter("type", "UNIQUE"), new Parameter("class", EDGE_BEAT));
             } catch (OIndexException e) {
-                logger.warn("Indices probably already exist: {}", e.getMessage());
+                logger.warn("Indices probably already exist:", e);
             }
 
             graph.commit();
 
         } catch (OIndexException e) {
             System.out.println(e.getClass());
-            logger.warn("Indices probably already exist: {}", e.getMessage());
+            logger.warn("Indices probably already exist:", e);
         } finally {
             graph.shutdown();
         }

@@ -1,10 +1,11 @@
 package com.ftpix.mmath.cron.stats;
 
-import com.ftpix.mmath.dao.mysql.*;
+import com.ftpix.mmath.dao.mysql.StatsCategoryDAO;
+import com.ftpix.mmath.dao.mysql.StatsEntryDAO;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class StatsProcessor {
-    protected Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
 
     @Autowired
@@ -24,7 +25,7 @@ public abstract class StatsProcessor {
     public void process() {
         StatsCategory cat = getStatsCategory();
 
-        logger.info("Generating stats for category {} -> {}", cat.getId(), cat.getName());
+        logger.info("Generating stats for category " + cat.getId() + " -> " + cat.getName());
         statsCategoryDAO.insert(cat);
 
         List<StatsEntry> entries = generateEntries();
@@ -32,7 +33,7 @@ public abstract class StatsProcessor {
         logger.info("Deleting old entries");
         statsEntryDAO.deleteByCategory(cat.getId());
 
-        logger.info("Inserting {} entries for category {}", entries.size(), cat.getId());
+        logger.info("Inserting " + entries.size() + " entries for category " + cat.getId());
 
         AtomicInteger rank = new AtomicInteger(0);
         entries.stream()
@@ -44,7 +45,7 @@ public abstract class StatsProcessor {
                     statsEntryDAO.insert(e);
                 });
 
-        logger.info("{} done", cat.getId());
+        logger.info(cat.getId() + " done");
     }
 
     protected abstract StatsCategory getStatsCategory();

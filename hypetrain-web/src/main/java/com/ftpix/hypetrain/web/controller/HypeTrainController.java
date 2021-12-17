@@ -7,7 +7,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ftpix.hypetrain.web.GsonTransformer;
 import com.ftpix.hypetrain.web.TrainGenerator;
-import com.ftpix.mmath.dao.mysql.*;
+import com.ftpix.mmath.dao.mysql.FighterDAO;
+import com.ftpix.mmath.dao.mysql.HypeTrainDAO;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrain;
 import com.ftpix.mmath.model.MmathFighter;
@@ -15,8 +16,8 @@ import com.ftpix.sparknnotation.annotations.*;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -68,7 +69,7 @@ public class HypeTrainController {
     private HypeTrainDAO hypeTrainDAO;
 
 
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
 
     @PostConstruct

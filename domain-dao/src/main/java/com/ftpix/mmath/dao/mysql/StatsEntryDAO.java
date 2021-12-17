@@ -4,29 +4,25 @@ import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.stats.StatsCategory;
 import com.ftpix.mmath.model.stats.StatsEntry;
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Timer;
 
-import static com.ftpix.mmath.dsl.Tables.*;
+import static com.ftpix.mmath.dsl.Tables.STATS_ENTRIES;
 
 @Component
 public class StatsEntryDAO extends DAO<StatsEntry, Long> {
     @Autowired
     private JdbcTemplate template;
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
     private final RecordMapper<Record, StatsEntry> recordMapper = r -> {
         StatsEntry s = new StatsEntry();

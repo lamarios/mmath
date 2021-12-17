@@ -1,8 +1,8 @@
 package com.ftpix.mmath.dao.mysql;
 
 import com.ftpix.mmath.model.stats.StatsCategory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 import org.jooq.impl.DSL;
@@ -10,17 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.List;
 
-import static com.ftpix.mmath.dsl.Tables.*;
+import static com.ftpix.mmath.dsl.Tables.STATS_CATEGORIES;
 
 @Component
 public class StatsCategoryDAO extends DAO<StatsCategory, String> {
     @Autowired
     private JdbcTemplate template;
-    private Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
     private final RecordMapper<Record, StatsCategory> recordMapper = r -> {
         StatsCategory c = new StatsCategory();

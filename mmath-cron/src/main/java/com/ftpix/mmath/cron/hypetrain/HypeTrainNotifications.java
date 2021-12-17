@@ -10,11 +10,10 @@ import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.FightType;
 import net.dean.jraw.RedditClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +24,7 @@ import java.util.Map;
 
 //@Component
 public class HypeTrainNotifications {
-    protected Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     private HypeTrainDAO hypeTrainDAO;
@@ -61,7 +60,7 @@ public class HypeTrainNotifications {
 
 
     private void processUser(String user) {
-        logger.info("Checking notifications for user {}", user);
+        logger.info("Checking notifications for user " + user);
 
 
         final Map<MmathFighter, MmathFight> toNotifiy = new HashMap<>();

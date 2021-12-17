@@ -60,7 +60,7 @@ public class GlassCannonStats extends StatsProcessor {
                             .collect(Collectors.toList())
                     );
 
-                    logger.info("{} fighters with only KO or TKOs", top100.size());
+                    logger.info(top100.size()+" fighters with only KO or TKOs");
 
                     List<MmathFighter> newTop100 =
                             top100.stream()

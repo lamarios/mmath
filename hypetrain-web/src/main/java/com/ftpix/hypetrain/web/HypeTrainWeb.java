@@ -2,8 +2,8 @@ package com.ftpix.hypetrain.web;
 
 import com.ftpix.hypetrain.web.controller.HypeTrainController;
 import com.ftpix.sparknnotation.Sparknotation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 @Component
 public class HypeTrainWeb {
 
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
 
     @Value("${HYPETRAIN_PORT:15679}")
     private int port;
@@ -38,7 +38,7 @@ public class HypeTrainWeb {
         if (DEV_MODE) {
             Path path = Paths.get(".").resolve("hypetrain-web/src/main/resources/web/public").toAbsolutePath();
 //            path = Paths.get("/home/gz/IdeaProjects/mmath/mmath-web/src/main/resources/web/public");
-            logger.info("DEV MODE {}", path.toString());
+            logger.info("DEV MODE "+ path.toString());
             Spark.externalStaticFileLocation(path.toString().replace("./", ""));
 
         } else {

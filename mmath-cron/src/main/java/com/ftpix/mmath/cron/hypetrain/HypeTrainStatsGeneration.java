@@ -4,10 +4,9 @@ import com.ftpix.mmath.cron.utils.BatchProcessor;
 import com.ftpix.mmath.dao.mysql.HypeTrainDAO;
 import com.ftpix.mmath.model.AggregatedHypeTrain;
 import com.ftpix.mmath.model.HypeTrainStats;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 
 @Component
 public class HypeTrainStatsGeneration {
-    protected Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
 
     @Autowired
@@ -41,7 +40,7 @@ public class HypeTrainStatsGeneration {
                             stats.setCount(s.getCount());
 
 
-                            logger.info("Inserting stats for fighter [{}] month:[{}] count [{}]", stats.getFighter(), stats.getMonth(), stats.getCount());
+                            logger.info("Inserting stats for fighter ["+stats.getFighter()+"] month:["+stats.getMonth()+"] count ["+stats.getCount()+"]");
                             return stats;
 
                         })

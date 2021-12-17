@@ -6,22 +6,18 @@ import com.ftpix.mmath.dao.mysql.*;
 import com.ftpix.mmath.model.MmathFight;
 import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.sherdogparser.models.FightResult;
-import com.orientechnologies.orient.core.id.ORecordId;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import static com.ftpix.mmath.dao.OrientDBDao.*;
 
@@ -32,7 +28,7 @@ public class GraphGenerator {
     @Autowired
     private OrientDBDao orientDb;
 
-    private Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
 
     @Autowired
@@ -90,7 +86,7 @@ public class GraphGenerator {
      */
     public void addFightToGraph(MmathFight fight, OrientGraph graph) {
 
-        logger.info("[{}] vs [{}] at event [{}]", fight.getFighter1().getSherdogUrl(), fight.getFighter2().getSherdogUrl(), fight.getEvent().getSherdogUrl());
+        logger.info("["+fight.getFighter1().getSherdogUrl()+"] vs ["+fight.getFighter2().getSherdogUrl()+"] at event ["+fight.getEvent().getSherdogUrl()+"]");
 
 
         //we check if it already exists
@@ -138,14 +134,14 @@ public class GraphGenerator {
         }
 
         if (fighter == null) {
-            logger.info("fighter [{}] doesn't have a vertex, creating it", f.getSherdogUrl());
+            logger.info("fighter ["+f.getSherdogUrl()+"] doesn't have a vertex, creating it");
             OrientVertex orientVertex = graph.addVertex(null);
             orientVertex.setProperty(SHERDOG_URL, f.getSherdogUrl());
             orientVertex.moveToClass(OrientDBDao.VERTEX_FIGHTER);
             orientVertex.save();
             fighter = orientVertex;
         } else {
-            logger.info("fighter [{}] already exists", f.getSherdogUrl());
+            logger.info("fighter ["+f.getSherdogUrl()+"] already exists");
         }
 
         return fighter;

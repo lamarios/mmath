@@ -1,13 +1,13 @@
 package com.ftpix.mmath.cron.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class BatchProcessor<T> {
-    private Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
     private final int batchSize;
     private BatchSupplier<T> supplier;
     private Consumer<List<T>> consumer;

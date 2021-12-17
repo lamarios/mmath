@@ -2,8 +2,8 @@ package com.ftpix.mmath.cacheslave.processors;
 
 import com.ftpix.sherdogparser.Sherdog;
 import com.ftpix.sherdogparser.exceptions.SherdogParserException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 
@@ -23,7 +23,7 @@ import java.util.Optional;
  */
 public abstract class Processor<T> implements MessageListener {
 
-    protected Logger logger = LogManager.getLogger();
+    protected Log logger = LogFactory.getLog(this.getClass());
 
     @Autowired
     protected JmsTemplate jmsTemplate;
@@ -52,7 +52,7 @@ public abstract class Processor<T> implements MessageListener {
 
     public void process(String id) {
 
-        logger.info("{} received:{}", this.getClass().getName(), id);
+        logger.info(this.getClass().getName()+" received: "+id);
 
         try {
             String fullUrl = Sherdog.BASE_URL + id;
@@ -62,7 +62,7 @@ public abstract class Processor<T> implements MessageListener {
             Optional<T> toParse = Optional.empty();
 
             if (opt.isPresent()) {
-                logger.info("[{}] already exists...", id);
+                logger.info("["+id+"] already exists...");
                 LocalDateTime now = LocalDateTime.now();
                 T optResult = opt.get();
 
@@ -70,7 +70,7 @@ public abstract class Processor<T> implements MessageListener {
                 long daysbetween = ChronoUnit.DAYS.between(date, now);
 
                 if (daysbetween >= RATE) {
-                    logger.info("[{}] Info is too old, need to update", id);
+                    logger.info("["+id+"] Info is too old, need to update");
                     T updated = getFromSherdog(fullUrl);
 
 
@@ -81,7 +81,7 @@ public abstract class Processor<T> implements MessageListener {
                 }
 
             } else {
-                logger.info("[{}] doesn't exist, need to get and insert", id);
+                logger.info("["+id+"] doesn't exist, need to get and insert");
 
                 T obj = getFromSherdog(fullUrl);
                 insertToDao(obj);

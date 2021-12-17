@@ -6,26 +6,24 @@ import com.ftpix.mmath.dao.mysql.FighterDAO;
 import com.ftpix.mmath.dao.mysql.OrganizationDAO;
 import com.ftpix.mmath.model.MmathEvent;
 import com.ftpix.mmath.model.MmathFight;
-import com.ftpix.mmath.model.MmathFighter;
 import com.ftpix.mmath.model.MmathOrganization;
 import com.ftpix.utils.GsonUtils;
 import com.google.gson.Gson;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Component
 public class EventsController implements Controller {
-    private Logger logger = LogManager.getLogger();
+    private Log logger = LogFactory.getLog(this.getClass());
     private final Gson gson = GsonUtils.getGson();
 
     @Autowired
