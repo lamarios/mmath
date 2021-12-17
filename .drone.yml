@@ -86,8 +86,8 @@ steps:
         - '${DRONE_TAG}'
         - latest
       repo: gonzague/mmath-crawler
-      context: ./mmath-crawler
-      dockerfile: ./mmath-crawler/Dockerfile
+      context: ./mmath-crawler-slave
+      dockerfile: ./mmath-crawler-slave/Dockerfile
     when:
       event: tag
 
@@ -101,8 +101,8 @@ steps:
       tags:
         - '${DRONE_COMMIT}'
       repo: gonzague/mmath-crawler
-      context: ./mmath-crawler
-      dockerfile: ./mmath-crawler/Dockerfile
+      context: ./mmath-crawler-slave
+      dockerfile: ./mmath-crawler-slave/Dockerfile
     when:
       event:
         exclude:
